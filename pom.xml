@@ -1,0 +1,83 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>fr.sparna.rdf.xls2rdf</groupId>
+    <artifactId>xls2rdf-pom</artifactId>
+    <version>0.8.4</version>
+    <packaging>pom</packaging>
+
+    <name>XLS2RDF root POM</name>
+    <description>All modules of XLS2RDF converter</description>
+    <url>http://www.sparna.fr/</url>
+    
+    <organization>
+        <name>Sparna</name>
+        <url>http://labs.sparna.fr/skos-play/convert</url>
+    </organization>    
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Java : assuming Java 11 -->
+        <java.version>11</java.version>
+        <!-- RDF4J : assuming latest 2.x version -->
+        <rdf4j.version>2.5.4</rdf4j.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Logging: SLF4J -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.5</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>1.7.5</version>
+            </dependency>
+
+            <!-- Testing: JUnit -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.7</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- RDF4J -->
+            <dependency>
+              <groupId>org.eclipse.rdf4j</groupId>
+              <artifactId>rdf4j-runtime</artifactId>
+              <version>${rdf4j.version}</version>
+              <exclusions>
+                    <exclusion>
+                        <groupId>org.eclipse.rdf4j</groupId>
+                        <artifactId>rdf4j-rio-trix</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <modules>
+        <module>xls2rdf-lib</module>
+        <module>xls2rdf-app</module>
+    </modules>
+
+</project>
