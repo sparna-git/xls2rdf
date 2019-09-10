@@ -26,10 +26,10 @@ public class RdfizableSheet {
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 	
 	protected Sheet sheet;
-	protected Xls2SkosConverter converter;
+	protected Xls2RdfConverter converter;
 	protected int titleRowIndex;
 
-	public RdfizableSheet(Sheet sheet, Xls2SkosConverter converter) {
+	public RdfizableSheet(Sheet sheet, Xls2RdfConverter converter) {
 		super();
 		this.sheet = sheet;
 		this.converter = converter;

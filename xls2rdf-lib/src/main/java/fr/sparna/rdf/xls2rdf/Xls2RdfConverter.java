@@ -50,7 +50,7 @@ import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
 
 
 
-public class Xls2SkosConverter {
+public class Xls2RdfConverter {
 	
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -118,7 +118,7 @@ public class Xls2SkosConverter {
 	
 	
 	
-	public Xls2SkosConverter(ModelWriterIfc modelWriter, String lang) {
+	public Xls2RdfConverter(ModelWriterIfc modelWriter, String lang) {
 		
 		this.globalRepository.initialize();
 		this.modelWriter = modelWriter;
@@ -170,7 +170,7 @@ public class Xls2SkosConverter {
 			Workbook workbook = WorkbookFactory.create(input);
 			return processWorkbook(workbook);
 		} catch (Exception e) {
-			throw Xls2SkosException.rethrow(e);
+			throw Xls2RdfException.rethrow(e);
 		}			
 	}
 	
@@ -184,7 +184,7 @@ public class Xls2SkosConverter {
 			Workbook workbook = WorkbookFactory.create(input);
 			return processWorkbook(workbook);
 		} catch (Exception e) {
-			throw Xls2SkosException.rethrow(e);
+			throw Xls2RdfException.rethrow(e);
 		}			
 	}
 	
@@ -231,7 +231,7 @@ public class Xls2SkosConverter {
 			modelWriter.endWorkbook();
 			
 		} catch (Exception e) {
-			throw Xls2SkosException.rethrow(e);
+			throw Xls2RdfException.rethrow(e);
 		}
 		
 		return models;
@@ -500,7 +500,7 @@ public class Xls2SkosConverter {
 				}			
 			});
 		} catch (Exception e) {
-			throw Xls2SkosException.rethrow(e);
+			throw Xls2RdfException.rethrow(e);
 		}
 		
 		return m;
@@ -540,7 +540,7 @@ public class Xls2SkosConverter {
 					String lookupColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN);
 					short lookupColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, lookupColumnRef);
 					if(lookupColumnIndex == -1) {
-						throw new Xls2SkosException("Unable to find lookupColumn reference '"+lookupColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
+						throw new Xls2RdfException("Unable to find lookupColumn reference '"+lookupColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 					}
 					
 					// now find the subject at which the lookupColumn property is attached
@@ -550,7 +550,7 @@ public class Xls2SkosConverter {
 						String subjectColumnRef = lookupColumnHeader.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
 						lookupSubjectColumn = ColumnHeader.idRefToColumnIndex(columnHeaders, subjectColumnRef);
 						if(lookupSubjectColumn == -1) {
-							throw new Xls2SkosException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+lookupColumnHeader.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+", while processing lookupColumn in header "+header.getOriginalValue());
+							throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+lookupColumnHeader.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+", while processing lookupColumn in header "+header.getOriginalValue());
 						}
 					}
 					
@@ -622,7 +622,7 @@ public class Xls2SkosConverter {
 					String subjectColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
 					int subjectColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, subjectColumnRef);
 					if(subjectColumnIndex == -1) {
-						throw new Xls2SkosException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
+						throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 					}
 					
 					String currentSubject = getCellValue(row.getCell(subjectColumnIndex));
@@ -636,7 +636,7 @@ public class Xls2SkosConverter {
 							e.printStackTrace(new PrintStream(baos));
 							String stacktraceString = new String(baos.toByteArray());
 							String stacktraceStringBegin = (stacktraceString.length() > 256)?stacktraceString.substring(0, 256):stacktraceString;
-							throw new Xls2SkosException(e, "Cannot set subject URI in cell "+subjectColumnRef+(row.getRowNum()+1)+", value is '"+ currentSubject +"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
+							throw new Xls2RdfException(e, "Cannot set subject URI in cell "+subjectColumnRef+(row.getRowNum()+1)+", value is '"+ currentSubject +"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
 						}
 					} else {
 						log.warn("Unable to set a new current subject from cell '"+CellReference.convertNumToColString(colIndex)+(row.getRowNum()+1)+"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
@@ -657,7 +657,7 @@ public class Xls2SkosConverter {
 						e.printStackTrace(new PrintStream(baos));
 						String stacktraceString = new String(baos.toByteArray());
 						String stacktraceStringBegin = (stacktraceString.length() > 256)?stacktraceString.substring(0, 256):stacktraceString;
-						throw new Xls2SkosException(e, "Convert exception while processing value '"+value+"', cell "+CellReference.convertNumToColString(colIndex)+(row.getRowNum()+1)+" (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
+						throw new Xls2RdfException(e, "Convert exception while processing value '"+value+"', cell "+CellReference.convertNumToColString(colIndex)+(row.getRowNum()+1)+" (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
 					}
 				}
 				
@@ -780,7 +780,7 @@ public class Xls2SkosConverter {
 		writer.setSaveGraphFile(true);
 		writer.setGraphSuffix("/graph");
 		
-		Xls2SkosConverter me = new Xls2SkosConverter(writer, "fr");
+		Xls2RdfConverter me = new Xls2RdfConverter(writer, "fr");
 		me.setGenerateXl(false);
 		me.setGenerateXlDefinitions(false);
 		// me.loadAllToFile(new File("/home/thomas/sparna/00-Clients/Sparna/20-Repositories/sparna/fr.sparna/rdf/skos/xls2skos/src/test/resources/test-excel-saved-from-libreoffice.xlsx"));
@@ -796,7 +796,7 @@ public class Xls2SkosConverter {
 			String lang
 	) throws Exception {
 		OutputStreamModelWriter modelWriter = new OutputStreamModelWriter(output);
-		Xls2SkosConverter converter = new Xls2SkosConverter(modelWriter, lang);
+		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter, lang);
 		converter.setGenerateXl(false);
 		converter.setGenerateXlDefinitions(false);
 		converter.processInputStream(input);

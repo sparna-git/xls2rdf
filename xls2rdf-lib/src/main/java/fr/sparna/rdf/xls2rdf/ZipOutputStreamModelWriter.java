@@ -93,7 +93,7 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 			}
 			
 		} catch(Exception e) {
-			throw Xls2SkosException.rethrow(e);
+			throw Xls2RdfException.rethrow(e);
 		}
 	}
 	

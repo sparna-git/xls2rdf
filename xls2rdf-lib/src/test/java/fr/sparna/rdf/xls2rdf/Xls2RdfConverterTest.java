@@ -15,7 +15,7 @@ import junit.framework.TestSuite;
  *
  */
 @RunWith(AllTests.class)
-public class Xls2SkosConverterTest {
+public class Xls2RdfConverterTest {
 	
     public static TestSuite suite() {
         TestSuite ts = new TestSuite();
@@ -25,7 +25,7 @@ public class Xls2SkosConverterTest {
         Collections.sort(sortedList);
         for (File aDir : sortedList) {
         	if(aDir.isDirectory()) {
-        		ts.addTest(new Xls2SkosConverterTestExecution(aDir));
+        		ts.addTest(new Xls2RdfConverterTestExecution(aDir));
         	}
 		}
         

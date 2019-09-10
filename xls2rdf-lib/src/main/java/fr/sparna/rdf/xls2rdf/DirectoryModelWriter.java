@@ -107,7 +107,7 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 					IOUtils.write(graph, new FileOutputStream(graphFile));
 				}
 			} catch(Exception e) {
-				throw Xls2SkosException.rethrow(e);
+				throw Xls2RdfException.rethrow(e);
 			}			
 		}
 

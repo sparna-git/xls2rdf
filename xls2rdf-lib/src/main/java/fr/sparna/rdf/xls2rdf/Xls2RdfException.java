@@ -3,36 +3,36 @@ package fr.sparna.rdf.xls2rdf;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.helpers.MessageFormatter;
 
-public class Xls2SkosException extends RuntimeException {
+public class Xls2RdfException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
 	public static void when(boolean test) {
 		if (test) {
-			throw new Xls2SkosException("Assertion failed");
+			throw new Xls2RdfException("Assertion failed");
 		}
 	}
 
 	public static void when(boolean test, String message) {
 		if (test) {
-			throw new Xls2SkosException(message);
+			throw new Xls2RdfException(message);
 		}
 	}
 
 	public static void when(boolean test, String message, Object... parameters) {
 		if (test) {
-			throw new Xls2SkosException(message, parameters);
+			throw new Xls2RdfException(message, parameters);
 		}
 	}
 
-	public static Xls2SkosException rethrow(Throwable exception) {
+	public static Xls2RdfException rethrow(Throwable exception) {
 		if (exception instanceof Error) {
 			throw (Error) exception;
 		}
 		if (exception instanceof RuntimeException) {
 			throw (RuntimeException) exception;
 		}
-		throw new Xls2SkosException(exception);
+		throw new Xls2RdfException(exception);
 	}
 
 	public static <T> T failIfNotInstance(Object object, Class<T> clazz, String message, Object... parameters) {
@@ -53,22 +53,22 @@ public class Xls2SkosException extends RuntimeException {
 		return value;
 	}
 
-	public Xls2SkosException() {
+	public Xls2RdfException() {
 	}
 
-	public Xls2SkosException(String message) {
+	public Xls2RdfException(String message) {
 		super(message);
 	}
 
-	public Xls2SkosException(Throwable cause, String message, Object... parameters) {
+	public Xls2RdfException(Throwable cause, String message, Object... parameters) {
 		super(MessageFormatter.arrayFormat(message, parameters).getMessage(), cause);
 	}
 
-	public Xls2SkosException(String message, Object... parameters) {
+	public Xls2RdfException(String message, Object... parameters) {
 		super(MessageFormatter.arrayFormat(message, parameters).getMessage());
 	}
 
-	public Xls2SkosException(Throwable cause) {
+	public Xls2RdfException(Throwable cause) {
 		super(cause);
 	}
 }

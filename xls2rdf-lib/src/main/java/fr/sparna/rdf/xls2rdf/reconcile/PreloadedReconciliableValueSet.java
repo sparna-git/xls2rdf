@@ -19,7 +19,7 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.Xls2SkosException;
+import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 
 public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc {
 
@@ -104,7 +104,7 @@ public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc 
 				// no reconciliation result for this value
 				String message = "Unable to reconcile value '"+ initialValue +"' on type/scheme <"+ reconcileType +">";
 				if(this.failOnNoMatch) {
-					throw new Xls2SkosException(message);
+					throw new Xls2RdfException(message);
 				} else {
 					log.error(message);
 				}

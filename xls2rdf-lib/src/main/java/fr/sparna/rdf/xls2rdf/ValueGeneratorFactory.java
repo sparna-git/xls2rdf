@@ -66,7 +66,7 @@ public final class ValueGeneratorFactory {
 			
 			// can be null if we expected an IRI but we had a literal
 			if(iri == null) {
-				throw new Xls2SkosException("Expected a URI but got '"+value.trim()+"'");
+				throw new Xls2RdfException("Expected a URI but got '"+value.trim()+"'");
 			}
 			
 			model.add(subject, property, iri);
@@ -302,7 +302,7 @@ public final class ValueGeneratorFactory {
 	public static ValueGeneratorIfc failIfFilledIn(String property) {
 		return (model, subject, value, language) -> {
 			if (StringUtils.isBlank(value)) return null;
-			throw new Xls2SkosException("Property not supported {} if filled in - {} - {}", property, subject, value);
+			throw new Xls2RdfException("Property not supported {} if filled in - {} - {}", property, subject, value);
 		};
 	}
 

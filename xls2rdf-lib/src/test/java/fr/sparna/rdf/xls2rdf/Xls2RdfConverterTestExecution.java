@@ -26,7 +26,7 @@ import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import fr.sparna.rdf.xls2rdf.RepositoryModelWriter;
-import fr.sparna.rdf.xls2rdf.Xls2SkosConverter;
+import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestResult;
@@ -36,19 +36,19 @@ import junit.framework.TestResult;
  * @author thomas
  *
  */
-public class Xls2SkosConverterTestExecution implements Test {
+public class Xls2RdfConverterTestExecution implements Test {
 
 	protected File testFolder;
-	protected Xls2SkosConverter converter;
+	protected Xls2RdfConverter converter;
 	private Repository outputRepository;
 	
-	public Xls2SkosConverterTestExecution(File testFolder) {
+	public Xls2RdfConverterTestExecution(File testFolder) {
 		super();
 		this.testFolder = testFolder;
 		this.outputRepository = new SailRepository(new MemoryStore());
 		this.outputRepository.initialize();
 		
-		this.converter = new Xls2SkosConverter(new RepositoryModelWriter(outputRepository), "fr");
+		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository), "fr");
 		this.converter.setGenerateXl(false);
 		this.converter.setGenerateXlDefinitions(false);
 	}

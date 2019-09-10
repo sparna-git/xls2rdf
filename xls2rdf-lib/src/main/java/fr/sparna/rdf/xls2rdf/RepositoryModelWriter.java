@@ -29,7 +29,7 @@ public class RepositoryModelWriter implements ModelWriterIfc {
 				c.add(model, SimpleValueFactory.getInstance().createIRI(graph));
 			}
 		} catch(Exception e) {
-			throw Xls2SkosException.rethrow(e);
+			throw Xls2RdfException.rethrow(e);
 		}
 	}
 	

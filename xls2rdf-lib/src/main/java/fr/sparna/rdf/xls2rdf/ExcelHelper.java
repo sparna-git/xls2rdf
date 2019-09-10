@@ -39,7 +39,7 @@ public class ExcelHelper {
             // Re-run based on the formula type
             return getCellValue(cell.getCachedFormulaResultTypeEnum(), cell);
         } else {
-        	throw new Xls2SkosException("Cell type unknown or unsupported ({}) at Sheet '{}', row {}, column {}", type.name(), cell.getSheet().getSheetName(), cell.getRowIndex(), cell.getColumnIndex());
+        	throw new Xls2RdfException("Cell type unknown or unsupported ({}) at Sheet '{}', row {}, column {}", type.name(), cell.getSheet().getSheetName(), cell.getRowIndex(), cell.getColumnIndex());
         }
 	}
 	
