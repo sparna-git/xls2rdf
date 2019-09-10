@@ -60,11 +60,6 @@ public class Xls2RdfConverter {
 	protected String lang;
 	
 	/**
-	 * Name of sheets to ignore when generating SKOS
-	 */
-	protected List<String> sheetsToIgnore = new ArrayList<String>();
-	
-	/**
 	 * Whether to automatically generates SKOS-XL labels
 	 */
 	protected boolean generateXl = true;
@@ -208,15 +203,6 @@ public class Xls2RdfConverter {
 			
 			// for every sheet...
 			for (Sheet sheet : workbook) {
-
-				// if the sheet should not be ignored...
-				if (Arrays.stream(sheetsToIgnore.toArray(new String[] {})).filter(
-						name -> sheet.getSheetName().equalsIgnoreCase(name)
-					).findAny().isPresent()
-				) {
-					log.debug("Skipping sheet: " + sheet.getSheetName());
-					continue;
-				}
 
 				// process the sheet, possibly returning null
 				// if load(sheet) returns null, the sheet was ignored
@@ -709,14 +695,6 @@ public class Xls2RdfConverter {
 			this.currentSubject = this.rowMainResource;
 		}
 
-	}
-
-	public List<String> getSheetsToIgnore() {
-		return sheetsToIgnore;
-	}
-
-	public void setSheetsToIgnore(List<String> sheetsToIgnore) {
-		this.sheetsToIgnore = sheetsToIgnore;
 	}
 
 	public String getLang() {
