@@ -8,12 +8,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.Cell;
@@ -23,26 +22,17 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.OWL;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.model.vocabulary.SKOS;
-import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.BasicConfigurator;
 import ch.qos.logback.classic.LoggerContext;
-import fr.sparna.rdf.xls2rdf.reconcile.DummyReconcileService;
 import fr.sparna.rdf.xls2rdf.reconcile.DynamicReconciliableValueSet;
 import fr.sparna.rdf.xls2rdf.reconcile.PreloadedReconciliableValueSet;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
@@ -58,16 +48,6 @@ public class Xls2RdfConverter {
 	 * Language used to generate the literals
 	 */
 	protected String lang;
-	
-	/**
-	 * Whether to automatically generates SKOS-XL labels
-	 */
-	protected boolean generateXl = true;
-	
-	/**
-	 * Whether to automatically reify definitions (for Vocbench)
-	 */
-	protected boolean generateXlDefinitions = true;
 	
 	/**
 	 * Object capable of serializing the resulting models
@@ -105,53 +85,23 @@ public class Xls2RdfConverter {
 	private transient Repository supportRepository = null;
 	
 	/**
-	 * Whether to apply post processings on the RDF produced from the sheets
+	 * List of post-processors to be applied to generated RDF data. If null or empty, no post-processing will happen
 	 */
-	private boolean applyPostProcessings = true;
+	private List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();
 	
+	/**
+	 * Result of reconciliation
+	 */
 	private transient Map<Short, ReconciliableValueSetIfc> reconcileColumnsValues = new HashMap<Short, ReconciliableValueSetIfc>();
 	
 	
 	
 	public Xls2RdfConverter(ModelWriterIfc modelWriter, String lang) {
 		
-		this.globalRepository.initialize();
+		this.globalRepository.init();
 		this.modelWriter = modelWriter;
 		this.lang = lang;
-		
-//		// inScheme for additionnal inScheme information, if needed
-//		valueGenerators.put("skos:inScheme", 		ValueGeneratorFactory.split(ValueGeneratorFactory.resource(SKOS.IN_SCHEME, prefixManager), ","));
-//		// labels
-//		valueGenerators.put("skos:prefLabel", 		ValueGeneratorFactory.langLiteral(SKOS.PREF_LABEL));
-//		valueGenerators.put("skos:altLabel", 		ValueGeneratorFactory.langLiteral(SKOS.ALT_LABEL));
-//		valueGenerators.put("skos:hiddenLabel", 	ValueGeneratorFactory.langLiteral(SKOS.HIDDEN_LABEL));
-//		// notes
-//		valueGenerators.put("skos:definition", 		ValueGeneratorFactory.langLiteral(SKOS.DEFINITION));		
-//		valueGenerators.put("skos:editorialNote", 	ValueGeneratorFactory.langLiteral(SKOS.EDITORIAL_NOTE));
-//		valueGenerators.put("skos:historyNote", 	ValueGeneratorFactory.langLiteral(SKOS.HISTORY_NOTE));
-//		valueGenerators.put("skos:scopeNote", 		ValueGeneratorFactory.langLiteral(SKOS.SCOPE_NOTE));
-//		valueGenerators.put("skos:changeNote", 		ValueGeneratorFactory.langLiteral(SKOS.CHANGE_NOTE));
-//		valueGenerators.put("skos:example", 		ValueGeneratorFactory.langLiteral(SKOS.EXAMPLE));
-//		// notation
-//		valueGenerators.put("skos:notation", 		ValueGeneratorFactory.plainLiteral(SKOS.NOTATION));
-//		// semantic relations
-//		valueGenerators.put("skos:broader", 		ValueGeneratorFactory.split(ValueGeneratorFactory.resource(SKOS.BROADER, prefixManager), ","));
-//		valueGenerators.put("skos:narrower", 		ValueGeneratorFactory.split(ValueGeneratorFactory.resource(SKOS.NARROWER, prefixManager), ","));
-//		valueGenerators.put("skos:related", 		ValueGeneratorFactory.split(ValueGeneratorFactory.resource(SKOS.RELATED, prefixManager), ","));
-//		// mapping relations		
-//		valueGenerators.put("skos:exactMatch", 		ValueGeneratorFactory.split(ValueGeneratorFactory.resource(SKOS.EXACT_MATCH, prefixManager), ","));
-//		valueGenerators.put("skos:closeMatch", 		ValueGeneratorFactory.split(ValueGeneratorFactory.resource(SKOS.CLOSE_MATCH, prefixManager), ","));
-//		valueGenerators.put("skos:relatedMatch", 	ValueGeneratorFactory.split(ValueGeneratorFactory.resource(SKOS.RELATED_MATCH, prefixManager), ","));
-//		valueGenerators.put("skos:broadMatch", 		ValueGeneratorFactory.split(ValueGeneratorFactory.resource(SKOS.BROAD_MATCH, prefixManager), ","));
-//		valueGenerators.put("skos:narrowMatch", 	ValueGeneratorFactory.split(ValueGeneratorFactory.resource(SKOS.RELATED_MATCH, prefixManager), ","));
-//
-//		// other concepts metadata
-//		valueGenerators.put("euvoc:status", 		ValueGeneratorFactory.split(ValueGeneratorFactory.resource(SimpleValueFactory.getInstance().createIRI("http://publications.europa.eu/ontology/euvoc#status"), prefixManager), ","));
-//		// a source can be a literal or a URI
-//		valueGenerators.put("dct:source", 			ValueGeneratorFactory.split(ValueGeneratorFactory.resourceOrLiteral(new ColumnHeaderParser(prefixManager).parse("dct:source", (short)-1), prefixManager), ","));
-//		// dct metadata for the ConceptScheme
-//		valueGenerators.put("dct:title", 			ValueGeneratorFactory.langLiteral(DCTERMS.TITLE));
-//		valueGenerators.put("dct:description", 		ValueGeneratorFactory.langLiteral(DCTERMS.DESCRIPTION));
+
 	}
 
 	/**
@@ -353,17 +303,13 @@ public class Xls2RdfConverter {
 		}
 		
 		
-		if(this.applyPostProcessings) {
+		if(this.postProcessors != null && this.postProcessors.size() > 0) {
 			log.info("Applying SKOS post-processings on the result");
-			// post-process the model to add inverses, hasTopConcepts, etc.
-			postProcess(model, csResource);		
-			
-			// Turn the model to SKOS-XL
-			if(this.generateXl || this.generateXlDefinitions) {
-				xlify(model);
+			for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
+				aProcessor.afterSheet(model, csResource);
 			}
 		} else {
-			log.info("Skipping SKOS post-processings");
+			log.info("No post-processings to apply");
 		}
 		
 		// writes the resulting Model
@@ -375,123 +321,6 @@ public class Xls2RdfConverter {
 		return model;
 	}
 	
-	private void postProcess(Model model, Resource csResource) {
-		// add the inverse broaders and narrowers
-		model.filter(null, SKOS.BROADER, null).forEach(
-				s -> {
-					model.add(((Resource)s.getObject()), SKOS.NARROWER, s.getSubject());
-				}
-		);
-		model.filter(null, SKOS.NARROWER, null).forEach(
-				s -> {
-					model.add(((Resource)s.getObject()), SKOS.BROADER, s.getSubject());
-				}
-		);
-		
-		if(!model.filter(csResource, RDF.TYPE, SKOS.COLLECTION).isEmpty()) {
-			// if the header object was explicitely typed as skos:Collection, then add skos:members to every included skos:Concept
-			model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
-					s -> { model.add(csResource, SKOS.MEMBER, ((Resource)s.getSubject())); }
-			);
-		} else if(
-				!model.filter(csResource, RDF.TYPE, OWL.CLASS).isEmpty()
-				||
-				!model.filter(csResource, RDF.TYPE, RDFS.CLASS).isEmpty()
-		) {
-			// for each resource without an explicit rdf:type, declare it of the type specified in the header
-			model.subjects().stream().filter(s -> model.filter(s, RDF.TYPE, null).isEmpty()).forEach(s -> {
-				model.add(s, RDF.TYPE, csResource);
-			});
-		}
-		else {
-			// no explicit type given in header : we suppose this is a ConceptScheme and apply SKOS post processings
-			
-			// add a skos:inScheme to every skos:Concept or skos:Collection or skos:OrderedCollection that was created
-			model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
-					s -> { model.add(((Resource)s.getSubject()), SKOS.IN_SCHEME, csResource); }
-			);
-			model.filter(null, RDF.TYPE, SKOS.COLLECTION).forEach(
-					s -> { model.add(((Resource)s.getSubject()), SKOS.IN_SCHEME, csResource); }
-			);
-			model.filter(null, RDF.TYPE, SKOS.ORDERED_COLLECTION).forEach(
-					s -> { model.add(((Resource)s.getSubject()), SKOS.IN_SCHEME, csResource); }
-			);	
-			
-			// if at least one skos:Concept was generated, 
-			// or if no entry was generated at all, declare the URI in B1 as a ConceptScheme
-			if(
-					!model.filter(null, RDF.TYPE, SKOS.CONCEPT).isEmpty()
-					||
-					model.filter(null, RDF.TYPE, null).isEmpty()
-			) {
-				model.add(csResource, RDF.TYPE, SKOS.CONCEPT_SCHEME);
-			}
-			
-			// add skos:topConceptOf and skos:hasTopConcept for each skos:Concept without broader/narrower
-			model.filter(null, RDF.TYPE, SKOS.CONCEPT).subjects().forEach(
-					concept -> {
-						if(
-								model.filter(concept, SKOS.BROADER, null).isEmpty()
-								&&
-								model.filter(null, SKOS.NARROWER, concept).isEmpty()
-						) {
-							model.add(csResource, SKOS.HAS_TOP_CONCEPT, concept);
-							model.add(concept, SKOS.TOP_CONCEPT_OF, csResource);
-						}
-					}
-			);
-		}		
-	}
-	
-	private Model xlify(Model m) {
-		log.debug("Xlifying Model...");
-		Repository r = new SailRepository(new MemoryStore());
-		r.initialize();
-		
-		try(RepositoryConnection c = r.getConnection()) {
-			c.add(m);
-			if(this.generateXl) {
-				final List<String> SKOS2SKOSXL_URI_RULESET = Arrays.asList(new String[] { 
-						"skos2skosxl/S55-S56-S57-URIs.ru"
-				});			
-				
-				for (String aString : SKOS2SKOSXL_URI_RULESET) {
-					// Load SPARQL query definition
-			        InputStream src = this.getClass().getResourceAsStream(aString);		        
-			        String sparql =  IOUtils.toString(src);					
-					Update u = c.prepareUpdate(sparql);
-					u.execute();
-				}
-			}
-			
-			if(this.generateXlDefinitions) {
-				final List<String> SKOS2SKOSXL_NOTES_URI_RULESET = Arrays.asList(new String[] { 
-						"skos2skosxl/S16-URIs.ru"
-				});
-				
-				for (String aString : SKOS2SKOSXL_NOTES_URI_RULESET) {
-					// Load SPARQL query definition
-			        InputStream src = this.getClass().getResourceAsStream(aString);	
-			        String sparql =  IOUtils.toString(src);
-					Update u = c.prepareUpdate(sparql);
-					u.execute();
-				}
-			}
-			
-			// re-export to a new Model
-			m.clear();
-			c.export(new AbstractRDFHandler() {
-				public void handleStatement(Statement st) throws RDFHandlerException {
-					m.add(st);
-				}			
-			});
-		} catch (Exception e) {
-			throw Xls2RdfException.rethrow(e);
-		}
-		
-		return m;
-		
-	}
 
 	private Resource handleRow(Model model, List<ColumnHeader> columnHeaders, PrefixManager prefixManager, Row row) {
 		RowBuilder rowBuilder = null;
@@ -654,8 +483,12 @@ public class Xls2RdfConverter {
 		
 		// if, after row processing, no rdf:type was generated, then we consider the row to be a skos:Concept
 		// this allows to generate something else that skos:Concept
-		if(this.applyPostProcessings && rowBuilder != null && rowBuilder.rowMainResource != null && !model.contains(rowBuilder.rowMainResource, RDF.TYPE, null)) {
-			model.add(rowBuilder.rowMainResource, RDF.TYPE, SKOS.CONCEPT);
+		if(rowBuilder != null && rowBuilder.rowMainResource != null) {
+			if(this.postProcessors != null && this.postProcessors.size() > 0) {
+				for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
+					aProcessor.afterRow(model, rowBuilder.rowMainResource);
+				}
+			}
 		}
 		
 		return null == rowBuilder ? null : rowBuilder.rowMainResource;
@@ -696,7 +529,7 @@ public class Xls2RdfConverter {
 		}
 
 	}
-
+	
 	public String getLang() {
 		return lang;
 	}
@@ -705,36 +538,20 @@ public class Xls2RdfConverter {
 		this.lang = lang;
 	}
 
-	public boolean isGenerateXl() {
-		return generateXl;
-	}
-
-	public void setGenerateXl(boolean generateXl) {
-		this.generateXl = generateXl;
-	}
-
-	public boolean isGenerateXlDefinitions() {
-		return generateXlDefinitions;
-	}
-
-	public void setGenerateXlDefinitions(boolean generateXlDefinitions) {
-		this.generateXlDefinitions = generateXlDefinitions;
-	}
-
 	public List<String> getConvertedVocabularyIdentifiers() {
 		return convertedVocabularyIdentifiers;
-	}
-
-	public boolean isApplyPostProcessings() {
-		return applyPostProcessings;
-	}
-
-	public void setApplyPostProcessings(boolean applyPostProcessings) {
-		this.applyPostProcessings = applyPostProcessings;
 	}
 	
 	public void setSupportRepository(Repository supportRepository) {
 		this.supportRepository = supportRepository;
+	}
+
+	public List<Xls2RdfPostProcessorIfc> getPostProcessors() {
+		return postProcessors;
+	}
+
+	public void setPostProcessors(List<Xls2RdfPostProcessorIfc> postProcessors) {
+		this.postProcessors = postProcessors;
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -759,8 +576,8 @@ public class Xls2RdfConverter {
 		writer.setGraphSuffix("/graph");
 		
 		Xls2RdfConverter me = new Xls2RdfConverter(writer, "fr");
-		me.setGenerateXl(false);
-		me.setGenerateXlDefinitions(false);
+		me.setPostProcessors(Collections.singletonList(new SkosPostProcessor()));
+		
 		// me.loadAllToFile(new File("/home/thomas/sparna/00-Clients/Sparna/20-Repositories/sparna/fr.sparna/rdf/skos/xls2skos/src/test/resources/test-excel-saved-from-libreoffice.xlsx"));
 		// me.loadAllToFile(new File("/home/thomas/sparna/00-Clients/Sparna/20-Repositories/sparna/fr.sparna/rdf/skos/xls2skos/src/test/resources/test-libreoffice.ods"));
 		me.processFile(new File("/home/thomas/sparna/00-Clients/Luxembourg/02-Migration/controlled-vocabularies-xls2skos/jolux-controlled-voc-travail-20161026-recup.xlsx"));
@@ -775,8 +592,7 @@ public class Xls2RdfConverter {
 	) throws Exception {
 		OutputStreamModelWriter modelWriter = new OutputStreamModelWriter(output);
 		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter, lang);
-		converter.setGenerateXl(false);
-		converter.setGenerateXlDefinitions(false);
+		converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor()));
 		converter.processInputStream(input);
 	}
 	

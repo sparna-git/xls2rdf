@@ -2,31 +2,21 @@ package fr.sparna.rdf.xls2rdf;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
+import java.util.Collections;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
-import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.config.RepositoryFactory;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.repository.util.Repositories;
 import org.eclipse.rdf4j.repository.util.RepositoryUtil;
 import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
-import fr.sparna.rdf.xls2rdf.RepositoryModelWriter;
-import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestResult;
@@ -46,11 +36,10 @@ public class Xls2RdfConverterTestExecution implements Test {
 		super();
 		this.testFolder = testFolder;
 		this.outputRepository = new SailRepository(new MemoryStore());
-		this.outputRepository.initialize();
+		this.outputRepository.init();
 		
 		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository), "fr");
-		this.converter.setGenerateXl(false);
-		this.converter.setGenerateXlDefinitions(false);
+		this.converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor()));
 	}
 
 	@Override
