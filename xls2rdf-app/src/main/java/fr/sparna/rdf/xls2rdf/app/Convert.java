@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import fr.sparna.rdf.xls2rdf.ModelWriterFactory;
 import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
-import fr.sparna.rdf.xls2rdf.Xls2SkosConverter;
+import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
 
 public class Convert implements CliCommandIfc {
 
@@ -79,7 +79,7 @@ public class Convert implements CliCommandIfc {
 		}
 		
 		log.debug("Will use ModelWriter : "+modelWriter.getClass().getName());
-		Xls2SkosConverter converter = new Xls2SkosConverter(modelWriter, a.getLang());
+		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter, a.getLang());
 		converter.setGenerateXl(a.isXlify());
 		converter.setGenerateXlDefinitions(a.isXlifyDefinitions());
 		converter.setApplyPostProcessings(!a.isNoPostProcessings());
