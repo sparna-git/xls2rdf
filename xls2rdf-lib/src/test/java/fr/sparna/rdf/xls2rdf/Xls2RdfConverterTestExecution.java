@@ -2,10 +2,13 @@ package fr.sparna.rdf.xls2rdf;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -114,8 +117,8 @@ public class Xls2RdfConverterTestExecution implements Test {
 		// if(!Models.isomorphic(expectedModel, outputModel)) {			
 		if(!RepositoryUtil.equals(outputRepositoryToCompare, expectedRepository)) {
 			result.addFailure(this, new AssertionFailedError("Test failed on "+this.testFolder+":"
-					+ "\nStatements in output not in expected:\n"+RepositoryUtil.difference(outputRepositoryToCompare, expectedRepository)
-					+ "\nStatements in expected missing in output:\n"+RepositoryUtil.difference(expectedRepository, outputRepositoryToCompare)
+					+ "\nStatements in output not in expected:\n"+prettyPrint(RepositoryUtil.difference(outputRepositoryToCompare, expectedRepository))
+					+ "\nStatements in expected missing in output:\n"+prettyPrint(RepositoryUtil.difference(expectedRepository, outputRepositoryToCompare))
 			));
 		}
 		
@@ -127,6 +130,15 @@ public class Xls2RdfConverterTestExecution implements Test {
 		return testFolder.getName();
 	}
 	
-	
+	private static String prettyPrint(Collection<? extends Statement> statements) {
+		StringBuffer sb = new StringBuffer();
+		
+		for (Iterator iterator = statements.iterator(); iterator.hasNext();) {
+			Statement statement = (Statement) iterator.next();
+			sb.append(statement.toString()+"\n");
+		}
+		
+		return sb.toString();
+	}
 
 }

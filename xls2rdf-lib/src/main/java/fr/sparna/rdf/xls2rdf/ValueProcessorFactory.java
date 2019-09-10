@@ -15,8 +15,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellReference;
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -37,27 +39,40 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
 
-public final class ValueGeneratorFactory {
+public final class ValueProcessorFactory {
 	
-	private static Logger log = LoggerFactory.getLogger(ValueGeneratorFactory.class.getName());
+	private static Logger log = LoggerFactory.getLogger(ValueProcessorFactory.class.getName());
 	
-	public static ValueGeneratorIfc split(ValueGeneratorIfc delegate, String separator) {
-		return (model, subject, value, language) -> {
+	/**
+	 * Message listener for messages that need to be send to the outside world
+	 */
+	private Xls2RdfMessageListenerIfc messageListener = new LogXls2RdfMessageListener();
+	
+	public ValueProcessorFactory(Xls2RdfMessageListenerIfc messageListener) {
+		super();
+		this.messageListener = messageListener;
+	}
+
+	public ValueProcessorIfc split(ValueProcessorIfc delegate, String separator) {
+		return (model, subject, value, cell, language) -> {
+			
 			if (StringUtils.isBlank(value)) {
 				return null;
 			}
 
 			Arrays.stream(StringUtils.split(value, separator)).forEach(
-				aValue -> delegate.addValue(model, subject, aValue.trim(), language)
+				aValue -> delegate.processValue(model, subject, aValue.trim(), cell, language)
 			);
 			return null;
 		};
 	}
 	
-	public static ValueGeneratorIfc resource(IRI property, PrefixManager prefixManager) {
-		return (model, subject, value, language) -> {
+	public ValueProcessorIfc resource(IRI property, PrefixManager prefixManager) {
+		return (model, subject, value, cell, language) -> {
+			
 			if (StringUtils.isBlank(value)) {
 				return null;
 			}
@@ -74,8 +89,8 @@ public final class ValueGeneratorFactory {
 		};
 	}
 	
-	public static ValueGeneratorIfc lookup(ColumnHeader header, Sheet sheet, short lookupColumn, short uriColumn, PrefixManager prefixManager) {
-		return (model, subject, value, language) -> {
+	public ValueProcessorIfc lookup(ColumnHeader header, Sheet sheet, short lookupColumn, short uriColumn, PrefixManager prefixManager) {
+		return (model, subject, value, cell, language) -> {
 			String lookupValue = value;
 			
 			if(lookupValue.equals("")) {
@@ -83,10 +98,9 @@ public final class ValueGeneratorFactory {
 			}
 			
 			Row foundRow = ExcelHelper.columnLookup(lookupValue, sheet, lookupColumn);
-			if(foundRow != null) {
-				String iriCellValue = getCellValue(foundRow.getCell(uriColumn));				
-				ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager);
-				return g.addValue(model, subject, iriCellValue, language);				
+			if(foundRow != null) {				
+				ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager, messageListener);
+				return g.processValue(model, subject, getCellValue(foundRow.getCell(uriColumn)), cell, language);				
 			} else {
 				// throw Exception if a reference was not found
 				log.error("Unable to find value '"+lookupValue+"' in column of index "+lookupColumn+", while trying to generate property "+header.getProperty());
@@ -98,8 +112,8 @@ public final class ValueGeneratorFactory {
 		};
 	}
 	
-	public static ValueGeneratorIfc reconcile(ColumnHeader header, PrefixManager prefixManager, ReconciliableValueSetIfc reconciledValues) {
-		return (model, subject, value, language) -> {
+	public ValueProcessorIfc reconcile(ColumnHeader header, PrefixManager prefixManager, ReconciliableValueSetIfc reconciledValues) {
+		return (model, subject, value, cell, language) -> {
 			String lookupValue = value.trim();
 			
 			if(lookupValue.equals("")) {
@@ -108,8 +122,8 @@ public final class ValueGeneratorFactory {
 			
 			IRI result = reconciledValues.getReconciledValue(value);
 			if(result != null) {
-				ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager);
-				return g.addValue(model, subject, result.toString(), language);						
+				ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager, messageListener);
+				return g.processValue(model, subject, result.toString(), cell, language);
 			} else {
 				log.error("Unable to find value '"+lookupValue+"'@"+language+" in reconciled values");
 			}
@@ -157,8 +171,8 @@ public final class ValueGeneratorFactory {
 	}
 
 	@Deprecated
-	public static ValueGeneratorIfc reconcileLocal(ColumnHeader header, PrefixManager prefixManager, IRI reconcileOn, Repository supportRepository) {
-		return (model, subject, value, language) -> {
+	public ValueProcessorIfc reconcileLocal(ColumnHeader header, PrefixManager prefixManager, IRI reconcileOn, Repository supportRepository) {
+		return (model, subject, value, cell, language) -> {
 			String lookupValue = value.trim();
 			
 			if(lookupValue.equals("")) {
@@ -185,8 +199,8 @@ public final class ValueGeneratorFactory {
 				}
 				
 				if(filteredStatements.size() == 1) {
-					ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager);
-					return g.addValue(model, subject, filteredStatements.get(0).getSubject().toString(), language);		
+					ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager, messageListener);
+					return g.processValue(model, subject, filteredStatements.get(0).getSubject().toString(), cell, language);		
 				} else if(filteredStatements.size() > 1) {
 					log.error("Found multiple values for '"+lookupValue+"' in type/scheme '"+reconcileOn+"' : "+filteredStatements.stream().map(s -> s.getSubject().toString()).collect(Collectors.joining(", ")));
 				} else {
@@ -198,13 +212,13 @@ public final class ValueGeneratorFactory {
 		};
 	}
 	
-	public static ValueGeneratorIfc resourceOrLiteral(ColumnHeader header, PrefixManager prefixManager) {
-		ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager);
+	public ValueProcessorIfc resourceOrLiteral(ColumnHeader header, PrefixManager prefixManager) {
+		ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager, messageListener);
 		return g;
 	}
 
-	public static ValueGeneratorIfc turtleParsing(IRI property, PrefixManager prefixManager) {
-		return (model, subject, value, language) -> {
+	public ValueProcessorIfc turtleParsing(IRI property, PrefixManager prefixManager) {
+		return (model, subject, value, cell, language) -> {
 			// create a small piece of Tutle by concatenating...
 			StringBuffer turtle = new StringBuffer();
 			// ... the prefixes				
@@ -233,16 +247,16 @@ public final class ValueGeneratorFactory {
 				// if anything goes wrong, default to creating a literal
 				log.error("Error in parsing Turtle :\n"+turtle);
 				e.printStackTrace();
-				langOrPlainLiteral(property).addValue(model, subject, value, language);
+				langOrPlainLiteral(property).processValue(model, subject, value, cell, language);
 			}
 			
 			return null;
 		};
 	}
 	
-	public static ValueGeneratorIfc dateLiteral(IRI property) {
-		return (model, subject, value, language) -> {
-
+	public ValueProcessorIfc dateLiteral(IRI property) {
+		return (model, subject, value, cell, language) -> {
+			
 			if (StringUtils.isBlank(value)) return null;
 
 			Literal literal = null; 
@@ -259,24 +273,24 @@ public final class ValueGeneratorFactory {
 		};
 	}
 
-	public static ValueGeneratorIfc langLiteral(IRI property) {
-		return (model, subject, value, language) -> {
+	public ValueProcessorIfc langLiteral(IRI property) {
+		return (model, subject, value, cell, language) -> {
 			Literal literal = SimpleValueFactory.getInstance().createLiteral(value.trim(), language);
 			model.add(subject, property, literal);
 			return literal;
 		};
 	}
 
-	public static ValueGeneratorIfc plainLiteral(IRI property) {
-		return (model, subject, value, language) -> {
+	public ValueProcessorIfc plainLiteral(IRI property) {
+		return (model, subject, value, cell, language) -> {
 			Literal literal = SimpleValueFactory.getInstance().createLiteral(value.trim());
 			model.add(subject, property, literal);
 			return literal;
 		};
 	}
 	
-	public static ValueGeneratorIfc langOrPlainLiteral(IRI property) {
-		return (model, subject, value, language) -> {
+	public ValueProcessorIfc langOrPlainLiteral(IRI property) {
+		return (model, subject, value, cell, language) -> {
 			Literal literal;
 			if(language != null) {
 				literal = SimpleValueFactory.getInstance().createLiteral(value.trim(), language);
@@ -288,8 +302,8 @@ public final class ValueGeneratorFactory {
 		};
 	}
 
-	public static ValueGeneratorIfc skosXlLabel(IRI xlLabelProperty, PrefixManager prefixManager) {
-		return (model, subject, value, language) -> {
+	public ValueProcessorIfc skosXlLabel(IRI xlLabelProperty, PrefixManager prefixManager) {
+		return (model, subject, value, cell, language) -> {
 			// String labelUri = ConceptSchemeFromExcel.fixUri(value);
 			String labelUri = prefixManager.uri(value, true);
 			IRI labelResource = SimpleValueFactory.getInstance().createIRI(labelUri);
@@ -299,26 +313,21 @@ public final class ValueGeneratorFactory {
 		};
 	}
 
-	public static ValueGeneratorIfc failIfFilledIn(String property) {
-		return (model, subject, value, language) -> {
-			if (StringUtils.isBlank(value)) return null;
-			throw new Xls2RdfException("Property not supported {} if filled in - {} - {}", property, subject, value);
-		};
-	}
-
-	public static class ResourceOrLiteralValueGenerator implements ValueGeneratorIfc {
+	public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 
 		protected ColumnHeader header;
 		protected PrefixManager prefixManager;
+		protected Xls2RdfMessageListenerIfc messageListener;
 		
-		public ResourceOrLiteralValueGenerator(ColumnHeader header, PrefixManager prefixManager) {
+		public ResourceOrLiteralValueGenerator(ColumnHeader header, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
 			super();
 			this.header = header;
 			this.prefixManager = prefixManager;
+			this.messageListener = messageListener;
 		}
 
 		@Override
-		public Value addValue(Model model, Resource subject, String value, String language) {
+		public Value processValue(Model model, Resource subject, String value, Cell cell, String language) {
 			if (StringUtils.isBlank(value)) {
 				return null;
 			}
@@ -338,14 +347,13 @@ public final class ValueGeneratorFactory {
 					model.add(subject, header.getProperty(), SimpleValueFactory.getInstance().createIRI(prefixManager.uri(value.trim(), false)));
 				} else {
 					model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(value.trim(), false)), header.getProperty(),subject);
-				}				
-			
+				}			
 			} else if(value.startsWith("(") && value.endsWith(")")) {
 				// handle rdf:list
-				turtleParsing(header.getProperty(), prefixManager).addValue(model, subject, value, language);	
+				turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);	
 			} else if(datatype == null && value.startsWith("[") && value.endsWith("]")) {
 				// handle blank nodes
-				turtleParsing(header.getProperty(), prefixManager).addValue(model, subject, value, language);
+				turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
 			} else {
 				// if the value is surrounded with quotes, remove them, they were here to escape a URI to be considered as a literal
 				String unescapedValue = (value.startsWith("\"") && value.endsWith("\""))?value.substring(1, value.length()-1):value;
@@ -353,6 +361,7 @@ public final class ValueGeneratorFactory {
 				// consider it like a literal
 				if(datatype != null) {
 					Literal l = null;
+					
 					if(datatype.stringValue().equals(XMLSchema.DATE.stringValue())) {
 						try {
 							Date d = ExcelHelper.asCalendar(unescapedValue.trim()).getTime();
@@ -361,8 +370,15 @@ public final class ValueGeneratorFactory {
 									XMLSchema.DATE
 							);
 						} catch (Exception e) {
-							// date parsing failed in the case the cell has a string format - then simply default to a typed literal creation
-							l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.trim(), datatype);
+							// date parsing failed in the case the cell has a string format
+							// test if string value has proper string format
+							if(
+									unescapedValue.trim().matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]")
+							) {
+								l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.trim(), datatype);
+							} else {
+								this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse date format for value '"+ value +"'");
+							}
 						}
 					} else if(datatype.stringValue().equals(XMLSchema.DATETIME.stringValue())) {
 						try {
@@ -373,16 +389,36 @@ public final class ValueGeneratorFactory {
 							}
 						} catch (Exception e) {
 							// date parsing failed in the case the cell has a string format - then simply default to a typed literal creation
-							l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.trim(), datatype);
+							
+							// test if string value has proper string format
+							if(
+									unescapedValue.trim().matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]")
+							) {
+								l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.trim(), datatype);
+							} else {
+								this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse datetime format for value '"+ value +"'");
+							}
 						}
+					} else if(datatype.stringValue().equals(XMLSchema.BOOLEAN.stringValue())) {
+						List<String> ALLOWED_BOOLEAN_VALUES = Arrays.asList(new String[] { "true", "false" });
 						
-					} else {
+						if(
+								!ALLOWED_BOOLEAN_VALUES.contains(unescapedValue.toLowerCase())
+						) {
+							this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse boolean format for value '"+ value +"'");
+						} else {
+							l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.toLowerCase(), datatype);
+						}
+					}
+					else {
 						l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.trim(), datatype);
 					}
 					
-					model.add(subject, header.getProperty(), l);
+					if(l != null) {
+						model.add(subject, header.getProperty(), l);
+					}
 				} else {
-					langOrPlainLiteral(header.getProperty()).addValue(model, subject, value, language);
+					langOrPlainLiteral(header.getProperty()).processValue(model, subject, value, cell, language);
 				}
 			}
 			

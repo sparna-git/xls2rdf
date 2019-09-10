@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellReference;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
@@ -60,11 +60,6 @@ public class Xls2RdfConverter {
 	private final List<String> convertedVocabularyIdentifiers = new ArrayList<String>();
 	
 	/**
-	 * Internal list of value generators
-	 */
-	protected final Map<String, ValueGeneratorIfc> valueGenerators = new HashMap<>();
-	
-	/**
 	 * The prefixes declared in the file along with utility classes and default prefixes
 	 */
 	protected PrefixManager prefixManager = new PrefixManager();
@@ -90,18 +85,26 @@ public class Xls2RdfConverter {
 	private List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();
 	
 	/**
+	 * Whether to strictly check if format of cells are correct
+	 */
+	private boolean strictFormat = false;
+	
+	/**
+	 * Message listener for messages that need to be send to the outside world
+	 */
+	private Xls2RdfMessageListenerIfc messageListener = new LogXls2RdfMessageListener();
+	
+	/**
 	 * Result of reconciliation
 	 */
 	private transient Map<Short, ReconciliableValueSetIfc> reconcileColumnsValues = new HashMap<Short, ReconciliableValueSetIfc>();
 	
 	
 	
-	public Xls2RdfConverter(ModelWriterIfc modelWriter, String lang) {
-		
+	public Xls2RdfConverter(ModelWriterIfc modelWriter, String lang) {		
 		this.globalRepository.init();
 		this.modelWriter = modelWriter;
 		this.lang = lang;
-
 	}
 
 	/**
@@ -218,36 +221,35 @@ public class Xls2RdfConverter {
 		
 		// read the properties on the header by reading the top rows
 		ColumnHeaderParser headerParser = new ColumnHeaderParser(prefixManager);
-		for (int rowIndex = 1; rowIndex <= headerRowIndex; rowIndex++) {
+		for (int rowIndex = 1; rowIndex < headerRowIndex; rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
 				String key = getCellValue(sheet.getRow(rowIndex).getCell(0));
-				String value = getCellValue(sheet.getRow(rowIndex).getCell(1));
+				Cell cell = sheet.getRow(rowIndex).getCell(1);
+				String value = getCellValue(cell);
 				
 				ColumnHeader header = headerParser.parse(key, (short)-1);
 				if(
 						header != null
 						&&
+						header.getProperty() != null
+						&&
 						StringUtils.isNotBlank(value)
 				) {
-					ValueGeneratorIfc valueGenerator = null;
-					if(valueGenerators.containsKey(header.getDeclaredProperty())) {
-						valueGenerator = valueGenerators.get(header.getDeclaredProperty());
-					} else if(header.getProperty() != null) {
-						valueGenerator = ValueGeneratorFactory.resourceOrLiteral(
-								header,
-								prefixManager
-						);
-					}
+					ValueProcessorFactory processorFactory = new ValueProcessorFactory(messageListener);
 					
-					if(valueGenerator != null) {
-						log.debug("Adding value on header object \""+value+"\"@"+header.getLanguage().orElse(this.lang));
-						valueGenerator.addValue(
-								model,
-								csResource,
-								value,
-								header.getLanguage().orElse(this.lang)
-						);
-					}
+					ValueProcessorIfc cellProcessor = processorFactory.resourceOrLiteral(
+							header,
+							prefixManager
+					);
+					
+					log.debug("Adding value on header object \""+value+"\" with lang "+header.getLanguage().orElse(this.lang));
+					cellProcessor.processValue(
+							model,
+							csResource,
+							value,
+							cell,
+							header.getLanguage().orElse(this.lang)
+					);
 				}
 			}
 		}		
@@ -327,12 +329,12 @@ public class Xls2RdfConverter {
 		for (int colIndex = 0; colIndex < columnHeaders.size(); colIndex++) {
 			ColumnHeader header = columnHeaders.get(colIndex);
 			
-			Cell c = row.getCell(colIndex);			
-			String value = getCellValue(c);
+			Cell cell = row.getCell(colIndex);			
+			String value = getCellValue(cell);
 			// if it is the first column...
 			if (null == rowBuilder) {
 				// if the value of the first column is empty, or is striked through, skip the whole row
-				if (StringUtils.isBlank(value) || this.workbook.getFontAt(c.getCellStyle().getFontIndex()).getStrikeout()) {
+				if (StringUtils.isBlank(value) || this.workbook.getFontAt(cell.getCellStyle().getFontIndex()).getStrikeout()) {
 					return null;
 				}
 				// create the RowBuilder with the URI in the first column
@@ -341,144 +343,148 @@ public class Xls2RdfConverter {
 				continue;
 			}
 			
+			if (StringUtils.isBlank(value)) {
+				continue;
+			}
+			
 			// process the cell for each subsequent columns after the first one
-			if (StringUtils.isNotBlank(value)) {
-				if(this.workbook.getFontAt(c.getCellStyle().getFontIndex()).getStrikeout()) {
-					// skip the cell if it is striked out
-					continue;
+			if(this.workbook.getFontAt(cell.getCellStyle().getFontIndex()).getStrikeout()) {
+				// skip the cell if it is striked out
+				continue;
+			}
+			
+			ValueProcessorFactory processorFactory = new ValueProcessorFactory(this.messageListener);
+			ValueProcessorIfc cellProcessor = null;
+			
+			if(header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN) != null) {
+				// finds the index of the column corresponding to lookupColumn reference
+				String lookupColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN);
+				short lookupColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, lookupColumnRef);
+				if(lookupColumnIndex == -1) {
+					throw new Xls2RdfException("Unable to find lookupColumn reference '"+lookupColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 				
-				ValueGeneratorIfc valueGenerator = valueGenerators.get(header.getDeclaredProperty());
-				
-				if(header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN) != null) {
-					// finds the index of the column corresponding to lookupColumn reference
-					String lookupColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN);
-					short lookupColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, lookupColumnRef);
-					if(lookupColumnIndex == -1) {
-						throw new Xls2RdfException("Unable to find lookupColumn reference '"+lookupColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
-					}
-					
-					// now find the subject at which the lookupColumn property is attached
-					ColumnHeader lookupColumnHeader = ColumnHeader.findByColumnIndex(columnHeaders, lookupColumnIndex);
-					short lookupSubjectColumn = 0;
-					if(header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN) != null) {
-						String subjectColumnRef = lookupColumnHeader.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
-						lookupSubjectColumn = ColumnHeader.idRefToColumnIndex(columnHeaders, subjectColumnRef);
-						if(lookupSubjectColumn == -1) {
-							throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+lookupColumnHeader.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+", while processing lookupColumn in header "+header.getOriginalValue());
-						}
-					}
-					
-					valueGenerator = ValueGeneratorFactory.lookup(
-							header,
-							row.getSheet(),
-							lookupColumnIndex,
-							lookupSubjectColumn,
-							prefixManager
-					);
-				}
-				
-				else if(header.getParameters().get(ColumnHeader.PARAMETER_RECONCILE) != null) {
-					String reconcileParameterValue = header.getParameters().get(ColumnHeader.PARAMETER_RECONCILE);					
-					
-					if(reconcileParameterValue.equals("local")) {						
-						valueGenerator = ValueGeneratorFactory.reconcile(
-								header,
-								prefixManager,
-								this.reconcileColumnsValues.get(header.getColumnIndex())
-						);
-					} else if(reconcileParameterValue.equals("external") && this.supportRepository != null) {						
-						valueGenerator = ValueGeneratorFactory.reconcile(
-								header,
-								prefixManager,
-								this.reconcileColumnsValues.get(header.getColumnIndex())
-						);
-					}
-					
-				}
-				
-				// if this is not one of the known processor, but the property is known, then defaults to a generic processor
-				// also defaults to a generic processor if a custom datatype is declared on the property
-				else if(
-						(
-								valueGenerator == null
-								||
-								header.getDatatype().isPresent()
-								||
-								(header.getParameters() != null && !header.getParameters().isEmpty())
-						)
-						&&
-						header.getProperty() != null
-				) {
-					valueGenerator = ValueGeneratorFactory.resourceOrLiteral(
-							header,
-							prefixManager
-					);
-				}
-				
-				if(header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR) != null) {
-					valueGenerator = ValueGeneratorFactory.split(valueGenerator, header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR));
-					// use a default comma separator for cells that contain URI references
-				} else if(
-					// if it is a true column wih a declared property...
-					header.getProperty() != null
-					&&
-					!header.getDatatype().isPresent()
-					&&
-					!header.getLanguage().isPresent()
-					&&
-					(value.startsWith("http") || prefixManager.usesKnownPrefix(value.trim()))
-				) {
-					valueGenerator = ValueGeneratorFactory.split(valueGenerator, ",");
-				}
-				
-				// determine the subject of the triple, be default it is the value of the first column but can be overidden
+				// now find the subject at which the lookupColumn property is attached
+				ColumnHeader lookupColumnHeader = ColumnHeader.findByColumnIndex(columnHeaders, lookupColumnIndex);
+				short lookupSubjectColumn = 0;
 				if(header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN) != null) {
-					String subjectColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
-					int subjectColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, subjectColumnRef);
-					if(subjectColumnIndex == -1) {
-						throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
-					}
-					
-					String currentSubject = getCellValue(row.getCell(subjectColumnIndex));
-					
-					if(currentSubject != null) {
-						try {
-							rowBuilder.setCurrentSubject(SimpleValueFactory.getInstance().createIRI(currentSubject));
-						} catch (Exception e) {
-							e.printStackTrace();
-							ByteArrayOutputStream baos = new ByteArrayOutputStream();
-							e.printStackTrace(new PrintStream(baos));
-							String stacktraceString = new String(baos.toByteArray());
-							String stacktraceStringBegin = (stacktraceString.length() > 256)?stacktraceString.substring(0, 256):stacktraceString;
-							throw new Xls2RdfException(e, "Cannot set subject URI in cell "+subjectColumnRef+(row.getRowNum()+1)+", value is '"+ currentSubject +"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
-						}
-					} else {
-						log.warn("Unable to set a new current subject from cell '"+CellReference.convertNumToColString(colIndex)+(row.getRowNum()+1)+"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
+					String subjectColumnRef = lookupColumnHeader.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
+					lookupSubjectColumn = ColumnHeader.idRefToColumnIndex(columnHeaders, subjectColumnRef);
+					if(lookupSubjectColumn == -1) {
+						throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+lookupColumnHeader.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+", while processing lookupColumn in header "+header.getOriginalValue());
 					}
 				}
 				
-				// if a value generator was successfully generated, then process the value
-				if(valueGenerator != null) {
+				cellProcessor = processorFactory.lookup(
+						header,
+						row.getSheet(),
+						lookupColumnIndex,
+						lookupSubjectColumn,
+						prefixManager
+				);
+			}
+			
+			else if(header.getParameters().get(ColumnHeader.PARAMETER_RECONCILE) != null) {
+				String reconcileParameterValue = header.getParameters().get(ColumnHeader.PARAMETER_RECONCILE);					
+				
+				if(reconcileParameterValue.equals("local")) {						
+					cellProcessor = processorFactory.reconcile(
+							header,
+							prefixManager,
+							this.reconcileColumnsValues.get(header.getColumnIndex())
+					);
+				} else if(reconcileParameterValue.equals("external") && this.supportRepository != null) {						
+					cellProcessor = processorFactory.reconcile(
+							header,
+							prefixManager,
+							this.reconcileColumnsValues.get(header.getColumnIndex())
+					);
+				}
+				
+			}
+			
+			// if this is not one of the known processor, but the property is known, then defaults to a generic processor
+			// also defaults to a generic processor if a custom datatype is declared on the property
+			else if(
+					(
+							cellProcessor == null
+							||
+							header.getDatatype().isPresent()
+							||
+							(header.getParameters() != null && !header.getParameters().isEmpty())
+					)
+					&&
+					header.getProperty() != null
+			) {
+				cellProcessor = processorFactory.resourceOrLiteral(
+						header,
+						prefixManager
+				);
+			}
+			
+			if(header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR) != null) {
+				cellProcessor = processorFactory.split(cellProcessor, header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR));
+				// use a default comma separator for cells that contain URI references
+			} else if(
+				// if it is a true column wih a declared property...
+				header.getProperty() != null
+				&&
+				!header.getDatatype().isPresent()
+				&&
+				!header.getLanguage().isPresent()
+				&&
+				(value.startsWith("http") || prefixManager.usesKnownPrefix(value.trim()))
+			) {
+				cellProcessor = processorFactory.split(cellProcessor, ",");
+			}
+			
+			// determine the subject of the triple, be default it is the value of the first column but can be overidden
+			if(header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN) != null) {
+				String subjectColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
+				int subjectColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, subjectColumnRef);
+				if(subjectColumnIndex == -1) {
+					throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
+				}
+				
+				String currentSubject = getCellValue(row.getCell(subjectColumnIndex));
+				
+				if(currentSubject != null) {
 					try {
-						rowBuilder.processCell(
-								valueGenerator,
-								value,
-								header.getLanguage().orElse(this.lang)
-						);
+						rowBuilder.setCurrentSubject(SimpleValueFactory.getInstance().createIRI(currentSubject));
 					} catch (Exception e) {
 						e.printStackTrace();
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 						e.printStackTrace(new PrintStream(baos));
 						String stacktraceString = new String(baos.toByteArray());
 						String stacktraceStringBegin = (stacktraceString.length() > 256)?stacktraceString.substring(0, 256):stacktraceString;
-						throw new Xls2RdfException(e, "Convert exception while processing value '"+value+"', cell "+CellReference.convertNumToColString(colIndex)+(row.getRowNum()+1)+" (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
+						throw new Xls2RdfException(e, "Cannot set subject URI in cell "+subjectColumnRef+(row.getRowNum()+1)+", value is '"+ currentSubject +"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
 					}
+				} else {
+					log.warn("Unable to set a new current subject from cell '"+new CellReference(colIndex, row.getRowNum()+1).formatAsString()+"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
-				
-				// reset the current subject after that
-				rowBuilder.resetCurrentSubject();
 			}
+			
+			// if a value generator was successfully generated, then process the value
+			if(cellProcessor != null) {
+				try {
+					rowBuilder.processCell(
+							cellProcessor,
+							value,
+							cell,
+							header.getLanguage().orElse(this.lang)
+					);
+				} catch (Exception e) {
+					e.printStackTrace();
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					e.printStackTrace(new PrintStream(baos));
+					String stacktraceString = new String(baos.toByteArray());
+					String stacktraceStringBegin = (stacktraceString.length() > 256)?stacktraceString.substring(0, 256):stacktraceString;
+					throw new Xls2RdfException(e, "Convert exception while processing value '"+value+"', cell "+new CellReference(colIndex, row.getRowNum()+1).formatAsString()+" (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
+				}
+			}
+			
+			// reset the current subject after that
+			rowBuilder.resetCurrentSubject();
 		}
 		
 		// if, after row processing, no rdf:type was generated, then we consider the row to be a skos:Concept
@@ -498,10 +504,6 @@ public class Xls2RdfConverter {
 		private final Model model;
 		private Resource rowMainResource;
 		private Resource currentSubject;
-
-		public RowBuilder(Model model) {
-			this(model, null);
-		}
 		
 		public RowBuilder(Model model, String uri) {
 			this.model = model;
@@ -512,11 +514,11 @@ public class Xls2RdfConverter {
 			}
 		}
 
-		public void processCell(ValueGeneratorIfc valueGenerator, String value, String language) {
+		public void processCell(ValueProcessorIfc valueGenerator, String value, Cell cell, String language) {
 			// if the column is unknown, ignore it
 			// if no current subject was found, cannot add any value
 			if(valueGenerator != null && this.currentSubject != null) {				
-				valueGenerator.addValue(model, currentSubject, value, language);
+				valueGenerator.processValue(model, currentSubject, value, cell, language);
 			}
 		}
 
@@ -552,6 +554,22 @@ public class Xls2RdfConverter {
 
 	public void setPostProcessors(List<Xls2RdfPostProcessorIfc> postProcessors) {
 		this.postProcessors = postProcessors;
+	}
+	
+	public boolean isStrictFormat() {
+		return strictFormat;
+	}
+
+	public void setStrictFormat(boolean strictFormat) {
+		this.strictFormat = strictFormat;
+	}
+
+	public Xls2RdfMessageListenerIfc getMessageListener() {
+		return messageListener;
+	}
+
+	public void setMessageListener(Xls2RdfMessageListenerIfc messageListener) {
+		this.messageListener = messageListener;
 	}
 
 	public static void main(String[] args) throws Exception {

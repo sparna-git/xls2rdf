@@ -24,7 +24,7 @@ public class ExcelHelper {
 		if (type == CellType.BLANK || type == CellType.ERROR) {
 			return "";
 		} else if (type == CellType.STRING) {
-			return cell.getStringCellValue();
+			return cell.getStringCellValue().trim();
         } else if (type == CellType.NUMERIC) {
         	double d = cell.getNumericCellValue();
 			if((d % 1) == 0) {
