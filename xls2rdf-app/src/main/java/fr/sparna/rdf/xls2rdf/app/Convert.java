@@ -8,16 +8,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.RDFParserRegistry;
 import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import fr.sparna.rdf.xls2rdf.ModelWriterFactory;
 import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
+import fr.sparna.rdf.xls2rdf.Xls2RdfConverterFactory;
 
 public class Convert implements CliCommandIfc {
 
@@ -79,13 +77,12 @@ public class Convert implements CliCommandIfc {
 		}
 		
 		log.debug("Will use ModelWriter : "+modelWriter.getClass().getName());
-		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter, a.getLang());
-		converter.setGenerateXl(a.isXlify());
-		converter.setGenerateXlDefinitions(a.isXlifyDefinitions());
-		converter.setApplyPostProcessings(!a.isNoPostProcessings());
+		Xls2RdfConverterFactory converterFactory = new Xls2RdfConverterFactory(!a.isNoPostProcessings(), a.isXlify(), a.isXlifyDefinitions());
+		
+		Xls2RdfConverter converter = converterFactory.newConverter(modelWriter, a.getLang());
 		
 		Repository supportRepository = new SailRepository(new MemoryStore());
-		supportRepository.initialize();
+		supportRepository.init();
 		
 		try(RepositoryConnection connection = supportRepository.getConnection()) {
 			if(a.getExternalData() != null) {			
