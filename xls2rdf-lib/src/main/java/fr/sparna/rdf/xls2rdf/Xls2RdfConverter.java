@@ -206,6 +206,9 @@ public class Xls2RdfConverter {
 		// read the prefixes
 		this.prefixManager.register(rdfizableSheet.readPrefixes());
 
+		// init the sheet (after prefixes are read)
+		rdfizableSheet.init();
+		
 		// read the concept scheme or graph URI
 		String csUri = prefixManager.uri(rdfizableSheet.getSchemeOrGraph(), true);
 		
@@ -225,6 +228,16 @@ public class Xls2RdfConverter {
 			headerRowIndex = sheet.getLastRowNum();
 		}
 		
+		// validate the sheet
+		if(this.propertyValidator != null) {
+			log.info("Will validate sheet "+sheet.getSheetName());
+			boolean valid = rdfizableSheet.validateHeaders(this.propertyValidator, messageListener);
+			if(!valid) {
+				log.error("Sheet "+sheet.getSheetName()+" is invalid, skipping sheet processing");
+				return model;
+			}
+		}
+		
 		// read the properties on the header by reading the top rows
 		ColumnHeaderParser headerParser = new ColumnHeaderParser(prefixManager);
 		for (int rowIndex = 1; rowIndex < headerRowIndex; rowIndex++) {
@@ -242,6 +255,9 @@ public class Xls2RdfConverter {
 						&&
 						StringUtils.isNotBlank(value)
 				) {
+					// validate the header
+					
+					
 					ValueProcessorFactory processorFactory = new ValueProcessorFactory(messageListener);
 					
 					// always use a default processor
@@ -264,12 +280,7 @@ public class Xls2RdfConverter {
 
 		if(rdfizableSheet.hasDataSection()) {
 			// read the column names from the header row
-			List<ColumnHeader> columnNames = rdfizableSheet.getColumnHeaders(headerRowIndex);
-			
-			// validate headers
-			if(!validateHeaders(columnNames)) {
-				log.error("Some headers appear to be invalid, skipping sheet processing");
-			}
+			List<ColumnHeader> columnNames = rdfizableSheet.getColumnHeaders();
 			
 			log.debug("Converting data with these column headers: ");
 			for (ColumnHeader columnHeader : columnNames) {
@@ -333,36 +344,6 @@ public class Xls2RdfConverter {
 		// stores the idenifier of generated vocabulary
 		convertedVocabularyIdentifiers.add(csUri);
 		return model;
-	}
-	
-
-	private boolean validateHeaders(List<ColumnHeader> columnNames) {
-		// if no validator, always valid
-		if(this.propertyValidator == null) {
-			return true;
-		}
-		
-		boolean allValid = true;
-		for (ColumnHeader columnHeader : columnNames) {
-			if(columnHeader.getProperty() != null) {
-				log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
-				boolean valid = this.propertyValidator.isValid(columnHeader.getProperty());
-				if(!valid) {
-					String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+new CellReference(columnHeader.getHeaderCell()).formatAsString();
-					log.error(message);
-					this.messageListener.onMessage(
-							MessageCode.INVALID_PROPERTY,
-							new CellReference(columnHeader.getHeaderCell()).formatAsString(),
-							message
-					);
-					allValid = false;
-				} else {
-					log.debug("Property "+columnHeader.getProperty()+" is valid.");
-				}
-			}
-		}
-		
-		return allValid;
 	}
 
 	private Resource handleRow(Model model, List<ColumnHeader> columnHeaders, PrefixManager prefixManager, Row row) {

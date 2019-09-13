@@ -13,8 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
 
 /**
  * A Sheet in a Workbook that can be turned into RDF.
@@ -28,12 +31,22 @@ public class RdfizableSheet {
 	protected Sheet sheet;
 	protected Xls2RdfConverter converter;
 	protected int titleRowIndex;
+	protected List<ColumnHeader> columnHeaders;
 
-	public RdfizableSheet(Sheet sheet, Xls2RdfConverter converter) {
+	public RdfizableSheet(
+			Sheet sheet,
+			Xls2RdfConverter converter
+	) {
 		super();
 		this.sheet = sheet;
 		this.converter = converter;
+	}
+	
+	public void init() {
 		this.titleRowIndex = this.computeTitleRowIndex();
+		if(hasDataSection()) {
+			this.columnHeaders = this.computeColumnHeaders(this.titleRowIndex);
+		}
 	}
 	
 	/**
@@ -78,6 +91,10 @@ public class RdfizableSheet {
 	
 	public int getTitleRowIndex() {
 		return titleRowIndex;
+	}
+	
+	public List<ColumnHeader> getColumnHeaders() {
+		return columnHeaders;
 	}
 
 	/**
@@ -163,7 +180,7 @@ public class RdfizableSheet {
 	 * @param rowNumber the index of the row containing the column headers
 	 * @return
 	 */
-	public List<ColumnHeader> getColumnHeaders(int rowNumber) {
+	protected List<ColumnHeader> computeColumnHeaders(int rowNumber) {
 		List<ColumnHeader> columnNames = new ArrayList<>();
 		Row row = this.sheet.getRow(rowNumber);
 		
@@ -183,9 +200,36 @@ public class RdfizableSheet {
 		return columnNames;
 	}
 	
+	protected List<ColumnHeader> getHeaderColumnHeaders() {
+		List<ColumnHeader> headerColumnHeaders = new ArrayList<>();
+		
+		ColumnHeaderParser headerParser = new ColumnHeaderParser(converter.prefixManager);
+		for (int rowIndex = 1; rowIndex < this.getTitleRowIndex(); rowIndex++) {
+			if(sheet.getRow(rowIndex) != null) {
+				String key = getCellValue(sheet.getRow(rowIndex).getCell(0));
+				Cell cell = sheet.getRow(rowIndex).getCell(1);
+				String value = getCellValue(cell);
+				
+				// parse the property
+				ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
+				if(
+						header != null
+						&&
+						header.getProperty() != null
+						&&
+						StringUtils.isNotBlank(value)
+				) {
+					headerColumnHeaders.add(header);
+				}
+			}
+		}
+		
+		return headerColumnHeaders;
+	}
+	
 	/**
 	 * Reads the prefixes declared in the sheet. The prefixes are read in the top 20 rows, when column A contains "PREFIX" or "@prefix" (ignoring case).
-	 * @return the map of prefices
+	 * @return the map of prefixes
 	 */
 	public Map<String, String> readPrefixes() {
 		Map<String, String> prefixes = new HashMap<String, String>();
@@ -213,5 +257,53 @@ public class RdfizableSheet {
 		}
 		
 		return prefixes;
+	}
+
+	public boolean validateHeaders(Xls2RdfPropertyValidatorIfc propertyValidator, Xls2RdfMessageListenerIfc messageListener) {		
+		boolean allValid = true;
+		
+		// validate also header headers
+		for (ColumnHeader columnHeader : this.getHeaderColumnHeaders()) {
+			if(columnHeader.getProperty() != null) {
+				log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
+				boolean valid = propertyValidator.isValid(columnHeader.getProperty());
+				if(!valid) {
+					String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+new CellReference(columnHeader.getHeaderCell()).formatAsString();
+					log.error(message);
+					messageListener.onMessage(
+							MessageCode.INVALID_PROPERTY,
+							new CellReference(columnHeader.getHeaderCell()).formatAsString(),
+							message
+					);
+					allValid = false;
+				} else {
+					log.debug("Property "+columnHeader.getProperty()+" is valid.");
+				}
+			}
+		}
+		
+		if(this.columnHeaders != null) {
+			for (ColumnHeader columnHeader : this.columnHeaders) {
+				if(columnHeader.getProperty() != null) {
+					log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
+					boolean valid = propertyValidator.isValid(columnHeader.getProperty());
+					if(!valid) {
+						String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+new CellReference(columnHeader.getHeaderCell()).formatAsString();
+						log.error(message);
+						messageListener.onMessage(
+								MessageCode.INVALID_PROPERTY,
+								new CellReference(columnHeader.getHeaderCell()).formatAsString(),
+								message
+						);
+						allValid = false;
+					} else {
+						log.debug("Property "+columnHeader.getProperty()+" is valid.");
+					}
+				}
+			}
+		}
+		
+		
+		return allValid;
 	}
 }

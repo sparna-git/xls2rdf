@@ -6,5 +6,4 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix test: <http://labs.sparna.fr/skos-play/convert/test/> .
 
-<http://labs.sparna.fr/skos-play/convert/test> a skos:ConceptScheme ;
-	.
+# expecting an empty file because of invalid property

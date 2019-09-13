@@ -47,7 +47,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 		this.converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor()));
 		
 		// to test for invalid properties
-		this.converter.setPropertyValidator(new SimplePropertyListValidator(Collections.singletonList(
+		this.converter.setPropertyValidator(new SimpleInvalidPropertyListValidator(Collections.singletonList(
 				SimpleValueFactory.getInstance().createIRI("http://labs.sparna.fr/skos-play/convert/invalidProperty")
 		)));
 	}
