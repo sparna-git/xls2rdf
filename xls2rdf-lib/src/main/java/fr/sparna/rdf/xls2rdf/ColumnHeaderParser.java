@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.slf4j.Logger;
@@ -22,12 +23,8 @@ public class ColumnHeaderParser {
 		super();
 		this.prefixManager = prefixManager;
 	}
-	
-	public ColumnHeader parse(String value) {
-		return parse(value, (short)-1);
-	}
 
-	public ColumnHeader parse(String value, short columnIndex) {
+	public ColumnHeader parse(String value, Cell cell) {
 		if(value == null || value.equals("")) {
 			return null;
 		}
@@ -56,7 +53,7 @@ public class ColumnHeaderParser {
 			}
 		}
 				
-		h.setColumnIndex(columnIndex);
+		h.setHeaderCell(cell);
 		
 		return h;
 	}

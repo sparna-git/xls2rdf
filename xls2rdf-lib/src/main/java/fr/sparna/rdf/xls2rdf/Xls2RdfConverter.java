@@ -33,8 +33,10 @@ import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.BasicConfigurator;
 import ch.qos.logback.classic.LoggerContext;
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
 import fr.sparna.rdf.xls2rdf.reconcile.DynamicReconciliableValueSet;
 import fr.sparna.rdf.xls2rdf.reconcile.PreloadedReconciliableValueSet;
+import fr.sparna.rdf.xls2rdf.reconcile.ReconcileServiceIfc;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
 import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
 
@@ -75,9 +77,9 @@ public class Xls2RdfConverter {
 	private transient Repository globalRepository = new SailRepository(new MemoryStore());
 	
 	/**
-	 * Supporting Repository containing external data on which to reconcile values
+	 * Reconciliation service on which to reconcile external values
 	 */
-	private transient Repository supportRepository = null;
+	private ReconcileServiceIfc reconcileService;
 	
 	/**
 	 * List of post-processors to be applied to generated RDF data. If null or empty, no post-processing will happen
@@ -97,8 +99,12 @@ public class Xls2RdfConverter {
 	/**
 	 * Result of reconciliation
 	 */
-	private transient Map<Short, ReconciliableValueSetIfc> reconcileColumnsValues = new HashMap<Short, ReconciliableValueSetIfc>();
+	private transient Map<Integer, ReconciliableValueSetIfc> reconcileColumnsValues = new HashMap<Integer, ReconciliableValueSetIfc>();
 	
+	/**
+	 * Validator capable of telling if a property is valid or not
+	 */
+	private Xls2RdfPropertyValidatorIfc propertyValidator;
 	
 	
 	public Xls2RdfConverter(ModelWriterIfc modelWriter, String lang) {		
@@ -210,10 +216,10 @@ public class Xls2RdfConverter {
 		
 		Resource csResource = svf.createIRI(csUri);	
 		
-		// read the title row index
+		// find the title row index
 		int headerRowIndex = rdfizableSheet.getTitleRowIndex();
 		log.debug("Found title row at index "+headerRowIndex);
-		// si la ligne d'entete n'a pas été trouvée, on ne génère que le ConceptScheme
+		// si la ligne d'entete n'a pas été trouvée, on ne génère que la ressource d'entête
 		if(headerRowIndex == 1) {
 			log.info("Could not find header row index in sheet "+sheet.getSheetName()+", will parse header object until end of sheet (last rowNum = "+ sheet.getLastRowNum() +")");
 			headerRowIndex = sheet.getLastRowNum();
@@ -227,7 +233,8 @@ public class Xls2RdfConverter {
 				Cell cell = sheet.getRow(rowIndex).getCell(1);
 				String value = getCellValue(cell);
 				
-				ColumnHeader header = headerParser.parse(key, (short)-1);
+				// parse the property
+				ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
 				if(
 						header != null
 						&&
@@ -237,6 +244,7 @@ public class Xls2RdfConverter {
 				) {
 					ValueProcessorFactory processorFactory = new ValueProcessorFactory(messageListener);
 					
+					// always use a default processor
 					ValueProcessorIfc cellProcessor = processorFactory.resourceOrLiteral(
 							header,
 							prefixManager
@@ -258,6 +266,11 @@ public class Xls2RdfConverter {
 			// read the column names from the header row
 			List<ColumnHeader> columnNames = rdfizableSheet.getColumnHeaders(headerRowIndex);
 			
+			// validate headers
+			if(!validateHeaders(columnNames)) {
+				log.error("Some headers appear to be invalid, skipping sheet processing");
+			}
+			
 			log.debug("Converting data with these column headers: ");
 			for (ColumnHeader columnHeader : columnNames) {
 				log.debug(columnHeader.toString());
@@ -265,19 +278,18 @@ public class Xls2RdfConverter {
 			
 			// reconcile columns that need to be reconciled, and store result
 			for (ColumnHeader columnHeader : columnNames) {
-				if(columnHeader.isReconcileExternal()) {
-					SparqlReconcileService reconcileService = new SparqlReconcileService(this.supportRepository);
+				if(columnHeader.isReconcileExternal() && this.reconcileService != null) {
 					
 					PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
 							reconcileService,
 							true
 					);
 					reconciliableValueSet.initReconciledValues(
-							PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnHeader.getColumnIndex(), headerRowIndex),
+							PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnHeader.getHeaderCell().getColumnIndex(), headerRowIndex),
 							columnHeader.getReconcileOn()
 					);
 					
-					this.reconcileColumnsValues.put(columnHeader.getColumnIndex(), reconciliableValueSet);
+					this.reconcileColumnsValues.put(columnHeader.getHeaderCell().getColumnIndex(), reconciliableValueSet);
 					
 				} else if (columnHeader.isReconcileLocal()) {
 					SparqlReconcileService reconcileService = new SparqlReconcileService(this.globalRepository);
@@ -288,11 +300,11 @@ public class Xls2RdfConverter {
 							true
 					);
 
-					this.reconcileColumnsValues.put(columnHeader.getColumnIndex(), reconciliableValueSet);
+					this.reconcileColumnsValues.put(columnHeader.getHeaderCell().getColumnIndex(), reconciliableValueSet);
 				} 
 			}
 			
-			// read the rows after the header and process each row
+			// read the rows after the header line and process each row
 			for (int rowIndex = (headerRowIndex + 1); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 				Row r = sheet.getRow(rowIndex);
 				if(r != null) {
@@ -323,6 +335,35 @@ public class Xls2RdfConverter {
 		return model;
 	}
 	
+
+	private boolean validateHeaders(List<ColumnHeader> columnNames) {
+		// if no validator, always valid
+		if(this.propertyValidator == null) {
+			return true;
+		}
+		
+		boolean allValid = true;
+		for (ColumnHeader columnHeader : columnNames) {
+			if(columnHeader.getProperty() != null) {
+				log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
+				boolean valid = this.propertyValidator.isValid(columnHeader.getProperty());
+				if(!valid) {
+					String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+new CellReference(columnHeader.getHeaderCell()).formatAsString();
+					log.error(message);
+					this.messageListener.onMessage(
+							MessageCode.INVALID_PROPERTY,
+							new CellReference(columnHeader.getHeaderCell()).formatAsString(),
+							message
+					);
+					allValid = false;
+				} else {
+					log.debug("Property "+columnHeader.getProperty()+" is valid.");
+				}
+			}
+		}
+		
+		return allValid;
+	}
 
 	private Resource handleRow(Model model, List<ColumnHeader> columnHeaders, PrefixManager prefixManager, Row row) {
 		RowBuilder rowBuilder = null;
@@ -359,14 +400,14 @@ public class Xls2RdfConverter {
 			if(header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN) != null) {
 				// finds the index of the column corresponding to lookupColumn reference
 				String lookupColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN);
-				short lookupColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, lookupColumnRef);
+				int lookupColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, lookupColumnRef);
 				if(lookupColumnIndex == -1) {
 					throw new Xls2RdfException("Unable to find lookupColumn reference '"+lookupColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 				
 				// now find the subject at which the lookupColumn property is attached
 				ColumnHeader lookupColumnHeader = ColumnHeader.findByColumnIndex(columnHeaders, lookupColumnIndex);
-				short lookupSubjectColumn = 0;
+				int lookupSubjectColumn = 0;
 				if(header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN) != null) {
 					String subjectColumnRef = lookupColumnHeader.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
 					lookupSubjectColumn = ColumnHeader.idRefToColumnIndex(columnHeaders, subjectColumnRef);
@@ -391,13 +432,13 @@ public class Xls2RdfConverter {
 					cellProcessor = processorFactory.reconcile(
 							header,
 							prefixManager,
-							this.reconcileColumnsValues.get(header.getColumnIndex())
+							this.reconcileColumnsValues.get(header.getHeaderCell().getColumnIndex())
 					);
-				} else if(reconcileParameterValue.equals("external") && this.supportRepository != null) {						
+				} else if(reconcileParameterValue.equals("external") && this.reconcileService != null) {						
 					cellProcessor = processorFactory.reconcile(
 							header,
 							prefixManager,
-							this.reconcileColumnsValues.get(header.getColumnIndex())
+							this.reconcileColumnsValues.get(header.getHeaderCell().getColumnIndex())
 					);
 				}
 				
@@ -543,10 +584,6 @@ public class Xls2RdfConverter {
 	public List<String> getConvertedVocabularyIdentifiers() {
 		return convertedVocabularyIdentifiers;
 	}
-	
-	public void setSupportRepository(Repository supportRepository) {
-		this.supportRepository = supportRepository;
-	}
 
 	public List<Xls2RdfPostProcessorIfc> getPostProcessors() {
 		return postProcessors;
@@ -570,6 +607,18 @@ public class Xls2RdfConverter {
 
 	public void setMessageListener(Xls2RdfMessageListenerIfc messageListener) {
 		this.messageListener = messageListener;
+	}
+
+	public Xls2RdfPropertyValidatorIfc getPropertyValidator() {
+		return propertyValidator;
+	}
+
+	public void setPropertyValidator(Xls2RdfPropertyValidatorIfc propertyValidator) {
+		this.propertyValidator = propertyValidator;
+	}
+
+	public void setReconcileService(ReconcileServiceIfc reconcileService) {
+		this.reconcileService = reconcileService;
 	}
 
 	public static void main(String[] args) throws Exception {

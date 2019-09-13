@@ -89,7 +89,7 @@ public final class ValueProcessorFactory {
 		};
 	}
 	
-	public ValueProcessorIfc lookup(ColumnHeader header, Sheet sheet, short lookupColumn, short uriColumn, PrefixManager prefixManager) {
+	public ValueProcessorIfc lookup(ColumnHeader header, Sheet sheet, int lookupColumn, int uriColumn, PrefixManager prefixManager) {
 		return (model, subject, value, cell, language) -> {
 			String lookupValue = value;
 			

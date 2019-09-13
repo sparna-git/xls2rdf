@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.usermodel.Cell;
 import org.eclipse.rdf4j.model.IRI;
 
 import fr.sparna.rdf.xls2rdf.ColumnHeader.RECONCILE_VALUES;
@@ -61,9 +62,9 @@ public class ColumnHeader {
 	 */
 	private IRI reconcileOn;
 	/**
-	 * The actual Excel column index corresponding to this header
+	 * The actual cell in which the header was originally declared, from which we can get the column index
 	 */
-	private short columnIndex;
+	private Cell headerCell;
 	
 	public ColumnHeader(String originalValue) {
 		this.originalValue = originalValue;
@@ -128,13 +129,13 @@ public class ColumnHeader {
 	public void setId(String id) {
 		this.id = id;
 	}
-
-	public short getColumnIndex() {
-		return columnIndex;
+	
+	public Cell getHeaderCell() {
+		return headerCell;
 	}
 
-	public void setColumnIndex(short columnIndex) {
-		this.columnIndex = columnIndex;
+	public void setHeaderCell(Cell headerCell) {
+		this.headerCell = headerCell;
 	}
 
 	public IRI getReconcileOn() {
@@ -161,10 +162,10 @@ public class ColumnHeader {
 	 * @param idRef
 	 * @return
 	 */
-	public static short idRefToColumnIndex(List<ColumnHeader> headers, String idRef) {
+	public static int idRefToColumnIndex(List<ColumnHeader> headers, String idRef) {
 		for (ColumnHeader header : headers) {
 			if(header.getId() != null && header.getId().equals(idRef)) {
-				return header.getColumnIndex();
+				return header.getHeaderCell().getColumnIndex();
 			}
 		}
 		
@@ -188,14 +189,14 @@ public class ColumnHeader {
 	 * @param idOrPropertyRef the ID or property reference to search
 	 * @return
 	 */
-	public static short idRefOrPropertyRefToColumnIndex(List<ColumnHeader> headers, String idOrPropertyRef) {
+	public static int idRefOrPropertyRefToColumnIndex(List<ColumnHeader> headers, String idOrPropertyRef) {
 		for (ColumnHeader header : headers) {
 			if(
 					(header.getId() != null && header.getId().equals(idOrPropertyRef))
 					||
 					(header.getDeclaredProperty() != null && header.getDeclaredProperty().equals(idOrPropertyRef))
 			) {
-				return header.getColumnIndex();
+				return header.getHeaderCell().getColumnIndex();
 			}
 		}
 		
@@ -212,7 +213,7 @@ public class ColumnHeader {
 	
 	public static ColumnHeader findByColumnIndex(List<ColumnHeader> headers, int columnIndex) {
 		for (ColumnHeader header : headers) {
-			if(header.getColumnIndex() == columnIndex) {
+			if(header.getHeaderCell().getColumnIndex() == columnIndex) {
 				return header;
 			}
 		}
@@ -224,8 +225,11 @@ public class ColumnHeader {
 	public String toString() {
 		return "ColumnHeader [originalValue=" + originalValue + ", language=" + language + ", datatype=" + datatype
 				+ ", property=" + property + ", declaredProperty=" + declaredProperty + ", inverse=" + inverse
-				+ ", parameters=" + parameters + ", id=" + id + ", columnIndex=" + columnIndex + "]";
+				+ ", parameters=" + parameters + ", id=" + id + ", reconcileOn=" + reconcileOn + ", headerCell="
+				+ headerCell + "]";
 	}
+
+
 
 	
 	

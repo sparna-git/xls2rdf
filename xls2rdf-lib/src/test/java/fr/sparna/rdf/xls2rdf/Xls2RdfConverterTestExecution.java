@@ -10,6 +10,7 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
@@ -20,6 +21,7 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
+import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestResult;
@@ -43,6 +45,11 @@ public class Xls2RdfConverterTestExecution implements Test {
 		
 		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository), "fr");
 		this.converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor()));
+		
+		// to test for invalid properties
+		this.converter.setPropertyValidator(new SimplePropertyListValidator(Collections.singletonList(
+				SimpleValueFactory.getInstance().createIRI("http://labs.sparna.fr/skos-play/convert/invalidProperty")
+		)));
 	}
 
 	@Override
@@ -75,7 +82,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 				result.addError(this, e);
 				throw new IllegalArgumentException("Problem with external.ttl in unit test "+this.testFolder.getName(), e);
 			}
-			this.converter.setSupportRepository(externalRepository);
+			this.converter.setReconcileService(new SparqlReconcileService(externalRepository));
 		}
 		
 		// convert

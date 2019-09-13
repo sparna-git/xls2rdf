@@ -26,14 +26,14 @@ public class ColumnHeaderParserTest {
 	@Test
 	public void test1() {
 		String TEST = "http://www.w3.org/2004/02/skos/core#prefLabel";
-		ColumnHeader header = this.parser.parse(TEST);
+		ColumnHeader header = this.parser.parse(TEST, null);
 		Assert.assertTrue(header.getDeclaredProperty().equals(SKOS.PREF_LABEL.toString()));
 	}
 	
 	@Test
 	public void test2() {
 		String TEST = "skos:prefLabel";
-		ColumnHeader header = this.parser.parse(TEST);
+		ColumnHeader header = this.parser.parse(TEST, null);
 		Assert.assertTrue(header.getDeclaredProperty().equals(TEST));
 		Assert.assertTrue(header.getProperty().toString().equals(SKOS.PREF_LABEL.toString()));
 	}
@@ -41,7 +41,7 @@ public class ColumnHeaderParserTest {
 	@Test
 	public void test3() {
 		String TEST = "skos:prefLabel@en";
-		ColumnHeader header = this.parser.parse(TEST);
+		ColumnHeader header = this.parser.parse(TEST, null);
 		// System.out.println(header);
 		Assert.assertTrue(header.getDeclaredProperty().equals("skos:prefLabel"));
 		Assert.assertTrue(header.getProperty().toString().equals(SKOS.PREF_LABEL.toString()));
@@ -51,7 +51,7 @@ public class ColumnHeaderParserTest {
 	@Test
 	public void test4() {
 		String TEST = "skos:prefLabel^^xsd:date";
-		ColumnHeader header = this.parser.parse(TEST);
+		ColumnHeader header = this.parser.parse(TEST, null);
 		// System.out.println(header);
 		Assert.assertTrue(header.getDeclaredProperty().equals("skos:prefLabel"));
 		Assert.assertTrue(header.getProperty().toString().equals(SKOS.PREF_LABEL.toString()));
@@ -61,7 +61,7 @@ public class ColumnHeaderParserTest {
 	@Test
 	public void test5() {
 		String TEST = "skos:prefLabel^^<http://www.w3.org/2001/XMLSchema#date>";
-		ColumnHeader header = this.parser.parse(TEST);
+		ColumnHeader header = this.parser.parse(TEST, null);
 		// System.out.println(header);
 		Assert.assertTrue(header.getDeclaredProperty().equals("skos:prefLabel"));
 		Assert.assertTrue(header.getProperty().toString().equals(SKOS.PREF_LABEL.toString()));
@@ -71,7 +71,7 @@ public class ColumnHeaderParserTest {
 	@Test
 	public void test6() {
 		String TEST = "http://www.w3.org/2004/02/skos/core#prefLabel^^<http://www.w3.org/2001/XMLSchema#date>";
-		ColumnHeader header = this.parser.parse(TEST);
+		ColumnHeader header = this.parser.parse(TEST, null);
 		// System.out.println(header);
 		Assert.assertTrue(header.getDeclaredProperty().equals("http://www.w3.org/2004/02/skos/core#prefLabel"));
 		Assert.assertTrue(header.getProperty().toString().equals(SKOS.PREF_LABEL.toString()));
@@ -82,7 +82,7 @@ public class ColumnHeaderParserTest {
 	@Test
 	public void test10() {
 		String TEST = "skos:prefLabel(separator=\",\")";
-		ColumnHeader header = this.parser.parse(TEST);
+		ColumnHeader header = this.parser.parse(TEST, null);
 		// System.out.println(header);
 		Assert.assertTrue(header.getDeclaredProperty().equals("skos:prefLabel"));
 		Assert.assertTrue(header.getProperty().toString().equals(SKOS.PREF_LABEL.toString()));
@@ -94,7 +94,7 @@ public class ColumnHeaderParserTest {
 	@Test
 	public void test11() {
 		String TEST = "skos:prefLabel@en(separator=\",\")";
-		ColumnHeader header = this.parser.parse(TEST);
+		ColumnHeader header = this.parser.parse(TEST, null);
 		// System.out.println(header);
 		Assert.assertTrue(header.getDeclaredProperty().equals("skos:prefLabel"));
 		Assert.assertTrue(header.getProperty().toString().equals(SKOS.PREF_LABEL.toString()));
@@ -106,7 +106,7 @@ public class ColumnHeaderParserTest {
 	@Test
 	public void test12() {
 		String TEST = "skos:prefLabel^^xsd:date(separator=\",\")";
-		ColumnHeader header = this.parser.parse(TEST);
+		ColumnHeader header = this.parser.parse(TEST, null);
 		// System.out.println(header);
 		Assert.assertTrue(header.getDeclaredProperty().equals("skos:prefLabel"));
 		Assert.assertTrue(header.getProperty().toString().equals(SKOS.PREF_LABEL.toString()));

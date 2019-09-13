@@ -96,7 +96,8 @@ public class RdfizableSheet {
 			// we start to check on the second column to avoid detecting a column header in ConceptScheme metadata
 			for (short colIndex = 1; colIndex < 10; colIndex++) {
 				try {
-					ColumnHeader header = headerParser.parse(getCellValue(sheet.getRow(rowIndex).getCell(colIndex)), colIndex);
+					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
+					ColumnHeader header = headerParser.parse(getCellValue(c), c);
 					if(header.getProperty() != null) {
 						log.info("Found proper property in header : "+header.getProperty().toString());
 						numFound++;
@@ -123,7 +124,8 @@ public class RdfizableSheet {
 				if(sheet.getRow(rowIndex) != null) {
 					ColumnHeader headerA = null;
 					try {
-						headerA = headerParser.parse(getCellValue(sheet.getRow(rowIndex).getCell(0)), (short)0);
+						Cell c = sheet.getRow(rowIndex).getCell(0);
+						headerA = headerParser.parse(getCellValue(sheet.getRow(rowIndex).getCell(0)), c);
 					} catch (Exception e) {
 						// we prevent anything to go wrong in the parsing at this stage, since the parsing
 						// tests cells for which we are unsure of the format.
@@ -175,7 +177,7 @@ public class RdfizableSheet {
 				if (StringUtils.isBlank(columnName)) {
 					break;
 				}
-				columnNames.add(headerParser.parse(columnName, i));
+				columnNames.add(headerParser.parse(columnName, cell));
 			}
 		}
 		return columnNames;

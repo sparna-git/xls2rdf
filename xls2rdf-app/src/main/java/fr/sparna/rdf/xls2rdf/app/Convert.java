@@ -23,6 +23,7 @@ import fr.sparna.rdf.xls2rdf.ModelWriterFactory;
 import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverterFactory;
+import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
 
 public class Convert implements CliCommandIfc {
 
@@ -100,7 +101,7 @@ public class Convert implements CliCommandIfc {
 			}
 		}
 		
-		converter.setSupportRepository(supportRepository);
+		converter.setReconcileService(new SparqlReconcileService(supportRepository));
 		
 		if(a.getInput().isFile()) {
 			try(InputStream in = new FileInputStream(a.getInput())) {			

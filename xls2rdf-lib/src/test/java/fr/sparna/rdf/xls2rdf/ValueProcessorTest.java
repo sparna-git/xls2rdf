@@ -58,14 +58,14 @@ public class ValueProcessorTest {
 	
 	@Test
 	public void resourceOrLiteralTest() {
-		ValueProcessorIfc vg = factory.resourceOrLiteral(this.parser.parse("skos:prefLabel^^xsd:string"), prefixManager);		
+		ValueProcessorIfc vg = factory.resourceOrLiteral(this.parser.parse("skos:prefLabel^^xsd:string", null), prefixManager);		
 		vg.processValue(model, subject, "sparna", null, "fr");
 		Assert.assertTrue(model.contains(subject, SKOS.PREF_LABEL, vf.createLiteral("sparna", XMLSchema.STRING)));
 	}
 	
 	@Test
 	public void overwriteLangTest() {
-		ValueProcessorIfc vg = factory.resourceOrLiteral(this.parser.parse("skos:prefLabel@en"), prefixManager);		
+		ValueProcessorIfc vg = factory.resourceOrLiteral(this.parser.parse("skos:prefLabel@en", null), prefixManager);		
 		vg.processValue(model, subject, "sparna", null, "fr");
 		Assert.assertTrue(model.contains(subject, SKOS.PREF_LABEL, vf.createLiteral("sparna", "fr")));
 	}
@@ -73,7 +73,7 @@ public class ValueProcessorTest {
 	@Test
 	public void splitLangLiteralTest() {
 		ValueProcessorIfc vg = factory.split(
-				factory.resourceOrLiteral(this.parser.parse("skos:altLabel"), prefixManager),
+				factory.resourceOrLiteral(this.parser.parse("skos:altLabel", null), prefixManager),
 				","
 		);
 		vg.processValue(model, subject, "sparna, SPARNA", null, "fr");
@@ -84,7 +84,7 @@ public class ValueProcessorTest {
 	@Test
 	public void splitDatatypeLiteralTest() {
 		ValueProcessorIfc vg = factory.split(
-				factory.resourceOrLiteral(this.parser.parse("skos:altLabel^^xsd:string"), prefixManager),
+				factory.resourceOrLiteral(this.parser.parse("skos:altLabel^^xsd:string", null), prefixManager),
 				","
 		);
 		vg.processValue(model, subject, "sparna, SPARNA", null, "fr");
@@ -95,7 +95,7 @@ public class ValueProcessorTest {
 	@Test
 	public void splitFullUriTest() {
 		ValueProcessorIfc vg = factory.split(
-				factory.resourceOrLiteral(this.parser.parse("skos:exactMatch"), prefixManager),
+				factory.resourceOrLiteral(this.parser.parse("skos:exactMatch", null), prefixManager),
 				","
 		);
 		vg.processValue(model, subject, "http://blog.sparna.fr, http://SPARNA.fr", null, "fr");
@@ -106,7 +106,7 @@ public class ValueProcessorTest {
 	@Test
 	public void splitPrefixedUriTest() {
 		ValueProcessorIfc vg = factory.split(
-				factory.resourceOrLiteral(this.parser.parse("skos:exactMatch"), prefixManager),
+				factory.resourceOrLiteral(this.parser.parse("skos:exactMatch", null), prefixManager),
 				","
 		);
 		vg.processValue(model, subject, "skos:notation, skos:prefLabel", null, "fr");
