@@ -5,7 +5,6 @@ public interface Xls2RdfMessageListenerIfc {
 	enum MessageCode {
 		INVALID_PROPERTY,
 		WRONG_FORMAT,
-		UNABLE_TO_LOOKUP_VALUE,
 		UNABLE_TO_RECONCILE_VALUE,
 	}
 	

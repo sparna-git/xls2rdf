@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
 
 public class DynamicReconciliableValueSet implements ReconciliableValueSetIfc {
 
@@ -18,6 +20,7 @@ public class DynamicReconciliableValueSet implements ReconciliableValueSetIfc {
 	private transient ReconcileServiceIfc reconcileService;
 	private IRI reconcileType;
 	private boolean failOnNoMatch = true;
+	private Xls2RdfMessageListenerIfc messageListener;
 	
 	private Map<String, IRI> reconciledValues;
 	
@@ -25,12 +28,14 @@ public class DynamicReconciliableValueSet implements ReconciliableValueSetIfc {
 	public DynamicReconciliableValueSet(
 			ReconcileServiceIfc reconcileService,
 			IRI reconcileType,
-			boolean failOnNoMatch
+			boolean failOnNoMatch,
+			Xls2RdfMessageListenerIfc messageListener
 	) {
 		this.reconcileService = reconcileService;
 		this.failOnNoMatch = failOnNoMatch;
 		this.reconcileType = reconcileType;
-		this.reconciledValues = new HashMap<String, IRI>();	
+		this.messageListener = messageListener;
+		this.reconciledValues = new HashMap<String, IRI>();
 	}
 	
 	/* (non-Javadoc)
@@ -70,6 +75,7 @@ public class DynamicReconciliableValueSet implements ReconciliableValueSetIfc {
 				if(this.failOnNoMatch) {
 					throw new Xls2RdfException(message);
 				} else {
+					this.messageListener.onMessage(MessageCode.UNABLE_TO_RECONCILE_VALUE, "??", message);
 					log.error(message);
 				}
 			} else {

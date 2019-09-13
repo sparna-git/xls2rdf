@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.BasicConfigurator;
 import ch.qos.logback.classic.LoggerContext;
-import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
 import fr.sparna.rdf.xls2rdf.reconcile.DynamicReconciliableValueSet;
 import fr.sparna.rdf.xls2rdf.reconcile.PreloadedReconciliableValueSet;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconcileServiceIfc;
@@ -254,9 +253,7 @@ public class Xls2RdfConverter {
 						header.getProperty() != null
 						&&
 						StringUtils.isNotBlank(value)
-				) {
-					// validate the header
-					
+				) {				
 					
 					ValueProcessorFactory processorFactory = new ValueProcessorFactory(messageListener);
 					
@@ -289,15 +286,15 @@ public class Xls2RdfConverter {
 			
 			// reconcile columns that need to be reconciled, and store result
 			for (ColumnHeader columnHeader : columnNames) {
-				if(columnHeader.isReconcileExternal() && this.reconcileService != null) {
-					
+				if(columnHeader.isReconcileExternal() && this.reconcileService != null) {					
 					PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
 							reconcileService,
 							true
 					);
 					reconciliableValueSet.initReconciledValues(
 							PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnHeader.getHeaderCell().getColumnIndex(), headerRowIndex),
-							columnHeader.getReconcileOn()
+							columnHeader.getReconcileOn(),
+							this.messageListener
 					);
 					
 					this.reconcileColumnsValues.put(columnHeader.getHeaderCell().getColumnIndex(), reconciliableValueSet);
@@ -308,7 +305,8 @@ public class Xls2RdfConverter {
 					DynamicReconciliableValueSet reconciliableValueSet = new DynamicReconciliableValueSet(
 							reconcileService,
 							columnHeader.getReconcileOn(),
-							true
+							true,
+							this.messageListener
 					);
 
 					this.reconcileColumnsValues.put(columnHeader.getHeaderCell().getColumnIndex(), reconciliableValueSet);

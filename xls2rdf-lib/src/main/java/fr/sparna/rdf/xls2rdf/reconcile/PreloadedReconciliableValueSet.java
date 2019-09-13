@@ -5,10 +5,9 @@ import static fr.sparna.rdf.xls2rdf.ExcelHelper.getCellValue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -20,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
 
 public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc {
 
@@ -50,37 +51,47 @@ public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc 
 		return this.reconciledValues.get(value);
 	}
 	
-	public static List<String> extractDistinctValues(Sheet sheet, int columnIndex, int headerRowIndex) {
+	public static Map<String, List<String>> extractDistinctValues(Sheet sheet, int columnIndex, int headerRowIndex) {
 		
-		Set<String> result = new HashSet<String>();
+		Map<String, List<String>> result = new HashMap<String, List<String>>();
 		for (int rowIndex = (headerRowIndex + 1); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 			Row row = sheet.getRow(rowIndex);
 			Cell cell = row.getCell(columnIndex);			
 			String value = getCellValue(cell);
 			
-			result.add(value.trim());
+			if(!result.containsKey(value)) {
+				List<String> cells = new ArrayList<String>();
+				cells.add(new CellReference(cell).formatAsString());
+				result.put(value, cells);
+			} else {
+				result.get(value).add(new CellReference(cell).formatAsString());
+			}
+			
 		}
 		
 		log.debug("Extracted "+result.size()+" distinct values from column "+CellReference.convertNumToColString(columnIndex));
-		return new ArrayList<String>(result);
-		
+		return result;
 	}
 	
-	public void initReconciledValues(List<String> values, IRI reconcileType) {
-		log.debug("Reconciling "+values.size()+" values against type "+ reconcileType +" ...");
+	public void initReconciledValues(Map<String, List<String>> valuesWithCells, IRI reconcileType, Xls2RdfMessageListenerIfc messageListener) {
+		log.debug("Reconciling "+valuesWithCells.size()+" values against type "+ reconcileType +" ...");
+		
+		// extract list of values
+		List<String> values = new ArrayList<String>(valuesWithCells.keySet());
+		
 		// iterate
 		int currentOffset = 0;
 		while((currentOffset + BATCH_SIZE) < values.size()) {
 			List<String> batch = values.subList(currentOffset, currentOffset + BATCH_SIZE);
-			this.reconciledValues.putAll(reconcileBatch(batch, reconcileType));
+			this.reconciledValues.putAll(reconcileBatch(batch, reconcileType, messageListener, valuesWithCells));
 			currentOffset += BATCH_SIZE;
 		}
 		// process last part
 		List<String> batch = values.subList(currentOffset, values.size());
-		this.reconciledValues.putAll(reconcileBatch(batch, reconcileType));
+		this.reconciledValues.putAll(reconcileBatch(batch, reconcileType, messageListener, valuesWithCells));
 	}
 	
-	private Map<String, IRI> reconcileBatch(List<String> values, IRI reconcileType) {
+	private Map<String, IRI> reconcileBatch(List<String> values, IRI reconcileType, Xls2RdfMessageListenerIfc messageListener, Map<String, List<String>> cellReferences) {
 		
 		// build the queries Map
 		Map<String, ReconcileQueryIfc> queries = new HashMap<String, ReconcileQueryIfc>();
@@ -107,6 +118,7 @@ public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc 
 					throw new Xls2RdfException(message);
 				} else {
 					log.error(message);
+					messageListener.onMessage(MessageCode.UNABLE_TO_RECONCILE_VALUE, cellReferences.get(initialValue).stream().collect(Collectors.joining(", ")), message);
 				}
 			} else {
 				// pick the first one, assuming only one result for now
