@@ -1,6 +1,7 @@
 package fr.sparna.rdf.xls2rdf;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -14,13 +15,15 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 	@Override
 	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources) {
 		
-		rowResources.stream().forEach(rowResource -> {
-			// if, after row processing, no rdf:type was generated, then we consider the row to be a skos:Concept
-			// this allows to generate something else that skos:Concept
-			if(!model.contains(rowResource, RDF.TYPE, null)) {
-				model.add(rowResource, RDF.TYPE, SKOS.CONCEPT);
-			}
-		});
+		if(!new ClassTest(model).test(mainResource)) {
+			rowResources.stream().forEach(rowResource -> {
+				// if, after row processing, no rdf:type was generated, then we consider the row to be a skos:Concept
+				// this allows to generate something else that skos:Concept
+				if(!model.contains(rowResource, RDF.TYPE, null)) {
+					model.add(rowResource, RDF.TYPE, SKOS.CONCEPT);
+				}
+			});
+		}
 		
 		// add the inverse broaders and narrowers
 		model.filter(null, SKOS.BROADER, null).forEach(
@@ -39,14 +42,10 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 			model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
 					s -> { model.add(mainResource, SKOS.MEMBER, ((Resource)s.getSubject())); }
 			);
-		} else if(
-				!model.filter(mainResource, RDF.TYPE, OWL.CLASS).isEmpty()
-				||
-				!model.filter(mainResource, RDF.TYPE, RDFS.CLASS).isEmpty()
-		) {
+		} else if(new ClassTest(model).test(mainResource)) {
 			// for each resource without an explicit rdf:type, declare it of the type specified in the header
-			model.subjects().stream().filter(s -> model.filter(s, RDF.TYPE, null).isEmpty()).forEach(s -> {
-				model.add(s, RDF.TYPE, mainResource);
+			rowResources.stream().filter(r -> model.filter(r, RDF.TYPE, null).isEmpty()).forEach(r -> {
+				model.add(r, RDF.TYPE, mainResource);
 			});
 		}
 		else {
@@ -86,6 +85,25 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 						}
 					}
 			);
+		}
+	}
+	
+	private class ClassTest implements Predicate<Resource> {
+		
+		protected Model model;
+
+		public ClassTest(Model model) {
+			super();
+			this.model = model;
+		}
+
+		@Override
+		public boolean test(Resource resource) {
+			return 				
+					model.contains(resource, RDF.TYPE, OWL.CLASS)
+					||
+					model.contains(resource, RDF.TYPE, RDFS.CLASS)
+			;
 		}
 	}
 	
