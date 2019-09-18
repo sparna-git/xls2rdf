@@ -1,5 +1,7 @@
 package fr.sparna.rdf.xls2rdf;
 
+import java.util.List;
+
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
@@ -9,19 +11,17 @@ import org.eclipse.rdf4j.model.vocabulary.SKOS;
 
 public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 
-	
-	
 	@Override
-	public void afterRow(Model model, Resource rowResource) {
-		// if, after row processing, no rdf:type was generated, then we consider the row to be a skos:Concept
-		// this allows to generate something else that skos:Concept
-		if(!model.contains(rowResource, RDF.TYPE, null)) {
-			model.add(rowResource, RDF.TYPE, SKOS.CONCEPT);
-		}
-	}
-
-	@Override
-	public void afterSheet(Model model, Resource mainResource) {
+	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources) {
+		
+		rowResources.stream().forEach(rowResource -> {
+			// if, after row processing, no rdf:type was generated, then we consider the row to be a skos:Concept
+			// this allows to generate something else that skos:Concept
+			if(!model.contains(rowResource, RDF.TYPE, null)) {
+				model.add(rowResource, RDF.TYPE, SKOS.CONCEPT);
+			}
+		});
+		
 		// add the inverse broaders and narrowers
 		model.filter(null, SKOS.BROADER, null).forEach(
 				s -> {

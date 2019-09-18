@@ -275,6 +275,7 @@ public class Xls2RdfConverter {
 			}
 		}		
 
+		List<Resource> rowResources = new ArrayList<>();
 		if(rdfizableSheet.hasDataSection()) {
 			// read the column names from the header row
 			List<ColumnHeader> columnNames = rdfizableSheet.getColumnHeaders();
@@ -317,7 +318,10 @@ public class Xls2RdfConverter {
 			for (int rowIndex = (headerRowIndex + 1); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 				Row r = sheet.getRow(rowIndex);
 				if(r != null) {
-					handleRow(model, columnNames, prefixManager, r);
+					Resource rowResource = handleRow(model, csResource, columnNames, prefixManager, r);
+					if(rowResource != null) {
+						rowResources.add(rowResource);
+					}
 				}
 			}
 			
@@ -329,7 +333,7 @@ public class Xls2RdfConverter {
 		if(this.postProcessors != null && this.postProcessors.size() > 0) {
 			log.info("Applying SKOS post-processings on the result");
 			for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
-				aProcessor.afterSheet(model, csResource);
+				aProcessor.afterSheet(model, csResource, rowResources);
 			}
 		} else {
 			log.info("No post-processings to apply");
@@ -344,7 +348,7 @@ public class Xls2RdfConverter {
 		return model;
 	}
 
-	private Resource handleRow(Model model, List<ColumnHeader> columnHeaders, PrefixManager prefixManager, Row row) {
+	private Resource handleRow(Model model, Resource headerResource, List<ColumnHeader> columnHeaders, PrefixManager prefixManager, Row row) {
 		RowBuilder rowBuilder = null;
 		for (int colIndex = 0; colIndex < columnHeaders.size(); colIndex++) {
 			ColumnHeader header = columnHeaders.get(colIndex);
@@ -505,16 +509,6 @@ public class Xls2RdfConverter {
 			
 			// reset the current subject after that
 			rowBuilder.resetCurrentSubject();
-		}
-		
-		// if, after row processing, no rdf:type was generated, then we consider the row to be a skos:Concept
-		// this allows to generate something else that skos:Concept
-		if(rowBuilder != null && rowBuilder.rowMainResource != null) {
-			if(this.postProcessors != null && this.postProcessors.size() > 0) {
-				for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
-					aProcessor.afterRow(model, rowBuilder.rowMainResource);
-				}
-			}
 		}
 		
 		return null == rowBuilder ? null : rowBuilder.rowMainResource;
