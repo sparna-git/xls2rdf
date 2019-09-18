@@ -9,11 +9,16 @@ import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 
+	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+	
 	@Override
 	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources) {
+		log.debug("Postprocessing : "+this.getClass().getSimpleName());
 		
 		if(!new ClassTest(model).test(mainResource)) {
 			rowResources.stream().forEach(rowResource -> {
