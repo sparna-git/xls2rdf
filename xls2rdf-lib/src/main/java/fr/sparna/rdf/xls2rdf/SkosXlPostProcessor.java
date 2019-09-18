@@ -40,7 +40,8 @@ public class SkosXlPostProcessor implements Xls2RdfPostProcessorIfc {
 
 	@Override
 	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources) {
-		log.debug("Xlifying Model...");
+		log.debug("Postprocessing : "+this.getClass().getSimpleName());
+		
 		Repository r = new SailRepository(new MemoryStore());
 		r.init();
 		

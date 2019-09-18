@@ -6,9 +6,13 @@ import java.util.function.Predicate;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DynamicRdfTypePostProcessor implements Xls2RdfPostProcessorIfc {
 
+	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+	
 	protected Predicate<Resource> classTest;
 	
 	/**
@@ -21,10 +25,11 @@ public class DynamicRdfTypePostProcessor implements Xls2RdfPostProcessorIfc {
 
 	@Override
 	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources) {
+		log.debug("Postprocessing : "+this.getClass().getSimpleName());
 		if(this.classTest.test(mainResource)) {
 			rowResources.stream().forEach(rowResource -> {
 				if(
-						!model.contains(rowResource, RDF.TYPE, null)					
+						model.filter(rowResource, RDF.TYPE, null).isEmpty()					
 				) {
 					model.add(rowResource, RDF.TYPE, mainResource);
 				}
