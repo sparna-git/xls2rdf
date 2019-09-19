@@ -329,7 +329,7 @@ public final class ValueProcessorFactory {
 
 		@Override
 		public Value processValue(Model model, Resource subject, String value, Cell cell, String language) {
-			if (StringUtils.isBlank(value)) {
+			if (StringUtils.isBlank(value.trim())) {
 				return null;
 			}
 			
