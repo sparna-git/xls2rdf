@@ -334,13 +334,14 @@ public final class ValueProcessorFactory {
 			}
 			
 			IRI datatype = header.getDatatype().orElse(null);
+			String headerLanguage = header.getLanguage().orElse(null);
 
 			// if the value starts with http, or uses a known namespace, then try to parse it as a resource
 			// only if no datatype or language have been explicitely specified, in which case this will default to a literal
 			if(
 					datatype == null
 					&&
-					!header.getLanguage().isPresent()
+					headerLanguage == null
 					&&
 					(value.startsWith("http") || prefixManager.usesKnownPrefix(value.trim()))
 			) {
@@ -349,10 +350,10 @@ public final class ValueProcessorFactory {
 				} else {
 					model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(value.trim(), false)), header.getProperty(),subject);
 				}			
-			} else if(value.startsWith("(") && value.endsWith(")")) {
+			} else if(datatype == null && headerLanguage == null && value.startsWith("(") && value.endsWith(")")) {
 				// handle rdf:list
 				turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);	
-			} else if(datatype == null && value.startsWith("[") && value.endsWith("]")) {
+			} else if(datatype == null && headerLanguage == null && value.startsWith("[") && value.endsWith("]")) {
 				// handle blank nodes
 				turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
 			} else {
