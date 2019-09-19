@@ -3,6 +3,7 @@ package fr.sparna.rdf.xls2rdf;
 import static fr.sparna.rdf.xls2rdf.ExcelHelper.getCellValue;
 
 import java.io.StringReader;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -376,8 +377,24 @@ public final class ValueProcessorFactory {
 									unescapedValue.trim().matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]")
 							) {
 								l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.trim(), datatype);
-							} else {
-								this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse date format for value '"+ value +"'");
+							} 
+							
+							// let's be smart and try to match french-formatted dates as well
+							if(
+									unescapedValue.trim().matches("[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]")
+							) {
+								try {
+									SimpleDateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
+									SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+									l = SimpleValueFactory.getInstance().createLiteral(sdf2.format(sdf1.parse(unescapedValue.trim())), datatype);
+								} catch (ParseException e1) {
+									e1.printStackTrace();
+									this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse date format for value '"+ value +"'. Is the cell formatted as a date ?");
+								}
+							} 
+							
+							if (l == null){
+								this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse date format for value '"+ value +"'. Is the cell formatted as a date ?");
 							}
 						}
 					} else if(datatype.stringValue().equals(XMLSchema.DATETIME.stringValue())) {
@@ -389,14 +406,16 @@ public final class ValueProcessorFactory {
 							}
 						} catch (Exception e) {
 							// date parsing failed in the case the cell has a string format - then simply default to a typed literal creation
-							
+
 							// test if string value has proper string format
 							if(
 									unescapedValue.trim().matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]")
 							) {
 								l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.trim(), datatype);
-							} else {
-								this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse datetime format for value '"+ value +"'");
+							} 
+							
+							if (l == null) {
+								this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse datetime format for value '"+ value +"'. Is the cell forma");
 							}
 						}
 					} else if(datatype.stringValue().equals(XMLSchema.BOOLEAN.stringValue())) {
