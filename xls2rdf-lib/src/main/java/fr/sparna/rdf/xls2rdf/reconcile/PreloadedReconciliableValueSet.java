@@ -52,21 +52,25 @@ public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc 
 	}
 	
 	public static Map<String, List<String>> extractDistinctValues(Sheet sheet, int columnIndex, int headerRowIndex) {
+		log.debug("Extracting distinct values from column index "+CellReference.convertNumToColString(columnIndex)+".");
 		
 		Map<String, List<String>> result = new HashMap<String, List<String>>();
 		for (int rowIndex = (headerRowIndex + 1); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 			Row row = sheet.getRow(rowIndex);
-			Cell cell = row.getCell(columnIndex);			
-			String value = getCellValue(cell);
-			
-			if(!result.containsKey(value)) {
-				List<String> cells = new ArrayList<String>();
-				cells.add(new CellReference(cell).formatAsString());
-				result.put(value, cells);
-			} else {
-				result.get(value).add(new CellReference(cell).formatAsString());
+			if(row != null) {
+				Cell cell = row.getCell(columnIndex);
+				
+				if(cell != null) {
+					String value = getCellValue(cell);			
+					if(!result.containsKey(value)) {
+						List<String> cells = new ArrayList<String>();
+						cells.add(new CellReference(cell).formatAsString());
+						result.put(value, cells);
+					} else {
+						result.get(value).add(new CellReference(cell).formatAsString());
+					}
+				}
 			}
-			
 		}
 		
 		log.debug("Extracted "+result.size()+" distinct values from column "+CellReference.convertNumToColString(columnIndex));
@@ -81,14 +85,13 @@ public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc 
 		
 		// iterate
 		int currentOffset = 0;
-		while((currentOffset + BATCH_SIZE) < values.size()) {
-			List<String> batch = values.subList(currentOffset, currentOffset + BATCH_SIZE);
+		while(currentOffset < values.size()) {
+			int finalOffset = java.lang.Math.min(currentOffset + BATCH_SIZE, values.size());
+			log.debug("Processing batch from "+currentOffset+" to "+finalOffset+"...");
+			List<String> batch = values.subList(currentOffset, finalOffset);
 			this.reconciledValues.putAll(reconcileBatch(batch, reconcileType, messageListener, valuesWithCells));
 			currentOffset += BATCH_SIZE;
 		}
-		// process last part
-		List<String> batch = values.subList(currentOffset, values.size());
-		this.reconciledValues.putAll(reconcileBatch(batch, reconcileType, messageListener, valuesWithCells));
 	}
 	
 	private Map<String, IRI> reconcileBatch(List<String> values, IRI reconcileType, Xls2RdfMessageListenerIfc messageListener, Map<String, List<String>> cellReferences) {
@@ -114,10 +117,10 @@ public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc 
 			if(anEntry.getValue().getMatches() == null || anEntry.getValue().getMatches().size() == 0) {
 				// no reconciliation result for this value
 				String message = "Unable to reconcile value '"+ initialValue +"' on type/scheme <"+ reconcileType +">";
-				if(this.failOnNoMatch) {
+				log.error(message);
+				if(this.failOnNoMatch) {					
 					throw new Xls2RdfException(message);
 				} else {
-					log.error(message);
 					messageListener.onMessage(MessageCode.UNABLE_TO_RECONCILE_VALUE, cellReferences.get(initialValue).stream().collect(Collectors.joining(", ")), message);
 				}
 			} else {
