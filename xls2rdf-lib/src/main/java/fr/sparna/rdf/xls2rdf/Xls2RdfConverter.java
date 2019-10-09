@@ -105,6 +105,11 @@ public class Xls2RdfConverter {
 	 */
 	private Xls2RdfPropertyValidatorIfc propertyValidator;
 	
+	/**
+	 * Triggers an Exception if a reconcile fails
+	 */
+	private boolean failIfNoReconcile = false;
+	
 	
 	public Xls2RdfConverter(ModelWriterIfc modelWriter, String lang) {		
 		this.globalRepository.init();
@@ -290,7 +295,7 @@ public class Xls2RdfConverter {
 				if(columnHeader.isReconcileExternal() && this.reconcileService != null) {					
 					PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
 							reconcileService,
-							true
+							this.failIfNoReconcile
 					);
 					reconciliableValueSet.initReconciledValues(
 							PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnHeader.getHeaderCell().getColumnIndex(), headerRowIndex),
@@ -306,7 +311,7 @@ public class Xls2RdfConverter {
 					DynamicReconciliableValueSet reconciliableValueSet = new DynamicReconciliableValueSet(
 							reconcileService,
 							columnHeader.getReconcileOn(),
-							true,
+							this.failIfNoReconcile,
 							this.messageListener
 					);
 
@@ -484,7 +489,7 @@ public class Xls2RdfConverter {
 						throw new Xls2RdfException(e, "Cannot set subject URI in cell "+subjectColumnRef+(row.getRowNum()+1)+", value is '"+ currentSubject +"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
 					}
 				} else {
-					log.warn("Unable to set a new current subject from cell '"+new CellReference(colIndex, row.getRowNum()+1).formatAsString()+"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
+					log.warn("Unable to set a new current subject from cell '"+new CellReference(row.getRowNum()+1, colIndex).formatAsString()+"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 			}
 			
@@ -503,7 +508,7 @@ public class Xls2RdfConverter {
 					e.printStackTrace(new PrintStream(baos));
 					String stacktraceString = new String(baos.toByteArray());
 					String stacktraceStringBegin = (stacktraceString.length() > 256)?stacktraceString.substring(0, 256):stacktraceString;
-					throw new Xls2RdfException(e, "Convert exception while processing value '"+value+"', cell "+new CellReference(colIndex, row.getRowNum()+1).formatAsString()+" (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
+					throw new Xls2RdfException(e, "Convert exception while processing value '"+value+"', cell "+new CellReference(row.getRowNum()+1, colIndex).formatAsString()+" (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
 				}
 			}
 			
@@ -592,6 +597,14 @@ public class Xls2RdfConverter {
 
 	public void setReconcileService(ReconcileServiceIfc reconcileService) {
 		this.reconcileService = reconcileService;
+	}
+
+	public boolean isFailIfNoReconcile() {
+		return failIfNoReconcile;
+	}
+
+	public void setFailIfNoReconcile(boolean failIfNoReconcile) {
+		this.failIfNoReconcile = failIfNoReconcile;
 	}
 
 	public static void main(String[] args) throws Exception {

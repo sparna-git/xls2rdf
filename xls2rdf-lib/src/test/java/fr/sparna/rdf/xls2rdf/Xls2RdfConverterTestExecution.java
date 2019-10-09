@@ -45,6 +45,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 		
 		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository), "fr");
 		this.converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor()));
+		this.converter.setFailIfNoReconcile(false);
 		
 		// to test for invalid properties
 		this.converter.setPropertyValidator(new SimpleInvalidPropertyListValidator(Collections.singletonList(

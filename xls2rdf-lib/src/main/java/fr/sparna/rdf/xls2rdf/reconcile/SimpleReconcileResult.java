@@ -6,8 +6,11 @@ import java.util.List;
 public class SimpleReconcileResult implements ReconcileResultIfc {
 
 	private List<ReconcileMatchIfc> matches;
-	
-	
+
+	public SimpleReconcileResult() {
+		super();
+	}
+
 	public SimpleReconcileResult(String id, String name, String type) {
 		this(Collections.singletonList(new SimpleReconcileMatch(id, name, type)));
 	}
