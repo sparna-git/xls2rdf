@@ -1,6 +1,7 @@
 package fr.sparna.rdf.xls2rdf.reconcile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.rdf4j.query.AbstractTupleQueryResultHandler;
@@ -55,6 +56,17 @@ public class SparqlReconcileService implements ReconcileServiceIfc {
 				log.trace("Executing reconcile SPARQL : "+finalSparql);
 				TupleQuery query = c.prepareTupleQuery(finalSparql);
 				query.evaluate(new AbstractTupleQueryResultHandler() {
+					
+					@Override
+					public void startQueryResult(List<String> bindingNames) throws TupleQueryResultHandlerException {
+						// always put an empty result for every query
+						// that can be overwritten if there is a match
+						// there must be one result in the output for every sent query
+						result.put(
+								anEntry.getKey(),
+								new SimpleReconcileResult()
+						);
+					}
 
 					@Override
 					public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
