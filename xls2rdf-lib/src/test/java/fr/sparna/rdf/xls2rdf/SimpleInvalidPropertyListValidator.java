@@ -1,10 +1,11 @@
 package fr.sparna.rdf.xls2rdf;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.eclipse.rdf4j.model.IRI;
 
-public class SimpleInvalidPropertyListValidator implements Xls2RdfPropertyValidatorIfc {
+public class SimpleInvalidPropertyListValidator implements Predicate<IRI> {
 
 	protected List<IRI> invalidProperties;
 	
@@ -14,7 +15,7 @@ public class SimpleInvalidPropertyListValidator implements Xls2RdfPropertyValida
 	}
 
 	@Override
-	public boolean isValid(IRI propertyIRI) {
+	public boolean test(IRI propertyIRI) {
 		return !this.invalidProperties.contains(propertyIRI);
 	}
 

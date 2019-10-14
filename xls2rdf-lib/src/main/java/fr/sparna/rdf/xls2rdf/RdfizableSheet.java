@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
+import org.eclipse.rdf4j.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -259,14 +261,14 @@ public class RdfizableSheet {
 		return prefixes;
 	}
 
-	public boolean validateHeaders(Xls2RdfPropertyValidatorIfc propertyValidator, Xls2RdfMessageListenerIfc messageListener) {		
+	public boolean validateHeaders(Predicate<IRI> propertyValidator, Xls2RdfMessageListenerIfc messageListener) {		
 		boolean allValid = true;
 		
 		// validate also header headers
 		for (ColumnHeader columnHeader : this.getHeaderColumnHeaders()) {
 			if(columnHeader.getProperty() != null) {
 				log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
-				boolean valid = propertyValidator.isValid(columnHeader.getProperty());
+				boolean valid = propertyValidator.test(columnHeader.getProperty());
 				if(!valid) {
 					String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+new CellReference(columnHeader.getHeaderCell()).formatAsString();
 					log.error(message);
@@ -286,7 +288,7 @@ public class RdfizableSheet {
 			for (ColumnHeader columnHeader : this.columnHeaders) {
 				if(columnHeader.getProperty() != null) {
 					log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
-					boolean valid = propertyValidator.isValid(columnHeader.getProperty());
+					boolean valid = propertyValidator.test(columnHeader.getProperty());
 					if(!valid) {
 						String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+new CellReference(columnHeader.getHeaderCell()).formatAsString();
 						log.error(message);

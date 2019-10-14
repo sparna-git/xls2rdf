@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -20,6 +21,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellReference;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
@@ -103,7 +105,7 @@ public class Xls2RdfConverter {
 	/**
 	 * Validator capable of telling if a property is valid or not
 	 */
-	private Xls2RdfPropertyValidatorIfc propertyValidator;
+	private Predicate<IRI> propertyValidator;
 	
 	/**
 	 * Triggers an Exception if a reconcile fails
@@ -587,11 +589,11 @@ public class Xls2RdfConverter {
 		this.messageListener = messageListener;
 	}
 
-	public Xls2RdfPropertyValidatorIfc getPropertyValidator() {
+	public Predicate<IRI> getPropertyValidator() {
 		return propertyValidator;
 	}
 
-	public void setPropertyValidator(Xls2RdfPropertyValidatorIfc propertyValidator) {
+	public void setPropertyValidator(Predicate<IRI> propertyValidator) {
 		this.propertyValidator = propertyValidator;
 	}
 
