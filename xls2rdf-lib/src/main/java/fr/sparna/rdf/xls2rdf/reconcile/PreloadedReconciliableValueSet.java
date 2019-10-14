@@ -62,12 +62,14 @@ public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc 
 				
 				if(cell != null) {
 					String value = getCellValue(cell);			
-					if(!result.containsKey(value)) {
-						List<String> cells = new ArrayList<String>();
-						cells.add(new CellReference(cell).formatAsString());
-						result.put(value, cells);
-					} else {
-						result.get(value).add(new CellReference(cell).formatAsString());
+					if(!value.equals("")) {
+						if(!result.containsKey(value)) {
+							List<String> cells = new ArrayList<String>();
+							cells.add(new CellReference(cell).formatAsString());
+							result.put(value, cells);
+						} else {
+							result.get(value).add(new CellReference(cell).formatAsString());
+						}
 					}
 				}
 			}
