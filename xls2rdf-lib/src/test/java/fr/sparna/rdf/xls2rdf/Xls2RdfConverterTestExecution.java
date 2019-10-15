@@ -2,9 +2,11 @@ package fr.sparna.rdf.xls2rdf;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -18,6 +20,7 @@ import org.eclipse.rdf4j.repository.util.RepositoryUtil;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.rio.trig.TriGWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
@@ -44,7 +47,12 @@ public class Xls2RdfConverterTestExecution implements Test {
 		this.outputRepository.init();
 		
 		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository), "fr");
-		this.converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor()));
+		
+		// init post processors
+		List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();
+		postProcessors.add(new QBPostProcessor());
+		postProcessors.add(new SkosPostProcessor());
+		this.converter.setPostProcessors(postProcessors);
 		this.converter.setFailIfNoReconcile(false);
 		
 		// to test for invalid properties
@@ -114,7 +122,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 		Model outputModel = new LinkedHashModelFactory().createEmptyModel();
 		try(RepositoryConnection connection = outputRepository.getConnection()) {
 			// print result in ttl (notes: prints all graphs)
-			connection.export(new TurtleWriter(System.out));
+			connection.export(new TriGWriter(System.out));
 			connection.export(new StatementCollector(outputModel));
 			try(RepositoryConnection connectionToCompare = outputRepositoryToCompare.getConnection()) {
 				connectionToCompare.add(outputModel, (Resource)null);

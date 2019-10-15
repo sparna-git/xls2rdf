@@ -1,0 +1,60 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:<http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix test: <http://labs.sparna.fr/skos-play/convert/test/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix odl: <http://data.observatoiredeslangues.culture.gouv.fr/> .
+
+
+  <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED>
+  	a dcat:Dataset;
+    a qb:DataSet;
+    dct:title "statistique du nombre de locuteurs de la langue francaise - données 2019"@fr;
+    dct:description "statistique du nombre de locuteurs de la langue francaise - données 2019 - source OIF"@fr;
+    dct:created "2018-01-01"^^xsd:date;
+    dct:modified "2019-05-01"^^xsd:date;
+    qb:structure <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED#definition> .
+
+  <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED#definition>
+    a qb:DataStructureDefinition ;
+    qb:component <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/composant/8>;
+	  qb:component <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/composant/9> ;
+    qb:component <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/composant/10> ;
+    .
+  
+  <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/composant/8>
+    a qb:ComponentSpecification ;
+    rdfs:label "nombre de personne ayant appris la langue à 5 ans"@fr;
+    qb:measure odl:nombrePersonne .
+  
+  <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/composant/9>
+    a qb:ComponentSpecification ;
+    rdfs:label "langue apprise"@fr;
+    qb:dimension odl:dimensionLangue;
+    qb:order 1 ;
+    .
+  
+  <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/composant/10>
+  	a qb:ComponentSpecification ;
+    rdfs:label "Interval de naissance"@fr;
+    qb:dimension odl:intervalNaissance;
+    qb:order 2 . 
+  
+  <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/observation/7>
+  	a qb:Observation;
+    qb:dataSet <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED> ;
+    odl:nombrePersonne "34"^^xsd:decimal;
+    odl:dimensionLangue <http://data.observatoiredeslangues.culture.gouv.fr/vocabulary/language/93>;
+    odl:intervalNaissance "interval1920-1925"@fr .
+  
+  <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/observation/8>
+  	a qb:Observation;
+    qb:dataSet <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED> ;
+    odl:nombrePersonne "56"^^xsd:decimal;
+    odl:dimensionLangue <http://data.observatoiredeslangues.culture.gouv.fr/vocabulary/language/93>;
+    odl:intervalNaissance "interval1926-1930"@fr .
+    
