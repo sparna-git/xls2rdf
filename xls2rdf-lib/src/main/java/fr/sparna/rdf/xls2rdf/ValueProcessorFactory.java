@@ -99,6 +99,7 @@ public final class ValueProcessorFactory {
 			}
 			
 			Row foundRow = ExcelHelper.columnLookup(lookupValue, sheet, lookupColumn);
+			
 			if(foundRow != null) {				
 				ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager, messageListener);
 				return g.processValue(model, subject, getCellValue(foundRow.getCell(uriColumn)), cell, language);				

@@ -10,4 +10,4 @@ dbpedia-fr:La_Joconde a dbpedia-owl:Artist, dbpedia-owl:Painting;
   dbpedia-owl:author dbpedia-fr:L%C3%A9onard_de_Vinci;
   schema:name "La Joconde"@fr .
 
-<dbpedia-fr:L%C3%A9onard_de_Vinci> schema:name "Léonard de Vinci"@fr .
+dbpedia-fr:L%C3%A9onard_de_Vinci schema:name "Léonard de Vinci"@fr .

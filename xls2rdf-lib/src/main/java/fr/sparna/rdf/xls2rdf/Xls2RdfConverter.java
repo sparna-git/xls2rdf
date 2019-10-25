@@ -481,7 +481,9 @@ public class Xls2RdfConverter {
 				
 				if(currentSubject != null) {
 					try {
-						rowBuilder.setCurrentSubject(SimpleValueFactory.getInstance().createIRI(currentSubject));
+						rowBuilder.setCurrentSubject(
+								prefixManager.uri(currentSubject, false)
+						);
 					} catch (Exception e) {
 						e.printStackTrace();
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -543,8 +545,8 @@ public class Xls2RdfConverter {
 			}
 		}
 
-		public void setCurrentSubject(Resource currentSubject) {
-			this.currentSubject = currentSubject;
+		public void setCurrentSubject(String currentSubject) {
+			this.currentSubject = SimpleValueFactory.getInstance().createIRI(currentSubject);
 		}
 		
 		public void resetCurrentSubject() {
