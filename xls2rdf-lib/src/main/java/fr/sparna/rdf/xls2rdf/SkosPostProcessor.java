@@ -33,12 +33,16 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 		// add the inverse broaders and narrowers
 		model.filter(null, SKOS.BROADER, null).forEach(
 				s -> {
-					model.add(((Resource)s.getObject()), SKOS.NARROWER, s.getSubject());
+					if(s.getObject() instanceof Resource) {
+						model.add(((Resource)s.getObject()), SKOS.NARROWER, s.getSubject());
+					}
 				}
 		);
 		model.filter(null, SKOS.NARROWER, null).forEach(
 				s -> {
-					model.add(((Resource)s.getObject()), SKOS.BROADER, s.getSubject());
+					if(s.getObject() instanceof Resource) {
+						model.add(((Resource)s.getObject()), SKOS.BROADER, s.getSubject());
+					}
 				}
 		);
 		
