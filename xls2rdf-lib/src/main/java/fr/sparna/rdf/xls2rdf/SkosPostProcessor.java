@@ -35,6 +35,8 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 				s -> {
 					if(s.getObject() instanceof Resource) {
 						model.add(((Resource)s.getObject()), SKOS.NARROWER, s.getSubject());
+					} else {
+						log.warn("Found a skos:broadeer with Literal value : "+s.getObject().stringValue());
 					}
 				}
 		);
@@ -42,6 +44,8 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 				s -> {
 					if(s.getObject() instanceof Resource) {
 						model.add(((Resource)s.getObject()), SKOS.BROADER, s.getSubject());
+					} else {
+						log.warn("Found a skos:narrower with Literal value : "+s.getObject().stringValue());
 					}
 				}
 		);
