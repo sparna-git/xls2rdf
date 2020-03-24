@@ -31,12 +31,13 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 		}
 		
 		// add the inverse broaders and narrowers
+		log.debug("Adding inverse skos:broader and skos:narrower");
 		model.filter(null, SKOS.BROADER, null).forEach(
 				s -> {
 					if(s.getObject() instanceof Resource) {
 						model.add(((Resource)s.getObject()), SKOS.NARROWER, s.getSubject());
 					} else {
-						log.warn("Found a skos:broadeer with Literal value : "+s.getObject().stringValue());
+						log.warn("Found a skos:broader with Literal value : '"+s.getObject().stringValue()+"'");
 					}
 				}
 		);
@@ -45,17 +46,19 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 					if(s.getObject() instanceof Resource) {
 						model.add(((Resource)s.getObject()), SKOS.BROADER, s.getSubject());
 					} else {
-						log.warn("Found a skos:narrower with Literal value : "+s.getObject().stringValue());
+						log.warn("Found a skos:narrower with Literal value : '"+s.getObject().stringValue()+"'");
 					}
 				}
 		);
 		
 		if(!model.filter(mainResource, RDF.TYPE, SKOS.COLLECTION).isEmpty()) {
+			log.debug("Adding skos:member to the main resource");
 			// if the header object was explicitely typed as skos:Collection, then add skos:members to every included skos:Concept
 			model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
 					s -> { model.add(mainResource, SKOS.MEMBER, ((Resource)s.getSubject())); }
 			);
 		} else if(new ClassTest(model).test(mainResource)) {
+			log.debug("Adding rdf:type to the main resource");
 			// for each resource without an explicit rdf:type, declare it of the type specified in the header
 			rowResources.stream().filter(r -> model.filter(r, RDF.TYPE, null).isEmpty()).forEach(r -> {
 				model.add(r, RDF.TYPE, mainResource);
@@ -65,6 +68,7 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 			// no explicit type given in header : we suppose this is a ConceptScheme and apply SKOS post processings
 			
 			// add a skos:inScheme to every skos:Concept or skos:Collection or skos:OrderedCollection that was created
+			log.debug("Adding skos:inScheme");
 			model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
 					s -> { model.add(((Resource)s.getSubject()), SKOS.IN_SCHEME, mainResource); }
 			);
@@ -77,6 +81,7 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 			
 			// if at least one skos:Concept was generated, 
 			// or if no entry was generated at all, declare the URI in B1 as a ConceptScheme
+			log.debug("Setting rdf:type skos:ConceptScheme to main resource");
 			if(
 					!model.filter(null, RDF.TYPE, SKOS.CONCEPT).isEmpty()
 					||
@@ -86,6 +91,7 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 			}
 			
 			// add skos:topConceptOf and skos:hasTopConcept for each skos:Concept without broader/narrower
+			log.debug("Adding skos:hasTopConcept / skos:topConceptOf");
 			model.filter(null, RDF.TYPE, SKOS.CONCEPT).subjects().forEach(
 					concept -> {
 						if(

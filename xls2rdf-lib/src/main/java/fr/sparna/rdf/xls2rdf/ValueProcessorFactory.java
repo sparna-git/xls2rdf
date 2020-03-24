@@ -421,14 +421,21 @@ public final class ValueProcessorFactory {
 							}
 						}
 					} else if(datatype.stringValue().equals(XMLSchema.BOOLEAN.stringValue())) {
-						List<String> ALLOWED_BOOLEAN_VALUES = Arrays.asList(new String[] { "true", "false" });
+						List<String> TRUE_VALUES = Arrays.asList(new String[] { "true", "vrai", "1" });
+						List<String> FALSE_VALUES = Arrays.asList(new String[] { "false", "faux", "0" });
 						
 						if(
-								!ALLOWED_BOOLEAN_VALUES.contains(unescapedValue.toLowerCase())
+								!TRUE_VALUES.contains(unescapedValue.toLowerCase())
+								&&
+								!FALSE_VALUES.contains(unescapedValue.toLowerCase())
 						) {
 							this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse boolean format for value '"+ value +"'");
 						} else {
-							l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.toLowerCase(), datatype);
+							if(TRUE_VALUES.contains(unescapedValue.toLowerCase())) {
+								l = SimpleValueFactory.getInstance().createLiteral("true", datatype);
+							} else {
+								l = SimpleValueFactory.getInstance().createLiteral("false", datatype);
+							}							
 						}
 					}
 					else {

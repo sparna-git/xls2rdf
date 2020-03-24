@@ -5,7 +5,7 @@
     <parent>
         <groupId>fr.sparna.rdf.xls2rdf</groupId>
         <artifactId>xls2rdf-pom</artifactId>
-        <version>2.0.1</version>
+        <version>2.0.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -13,8 +13,8 @@
     <artifactId>xls2rdf-app</artifactId>
     <!-- version inherited from parent pom -->
 
-    <name>Sparna SKOS : Excel2RDF Command Line application</name>
-    <description>Application to run Excel2RDF converter</description>
+    <name>Excel2RDF Command Line application</name>
+    <description>Application to run Excel2RDF converter and generate RDF from Excel spreadsheets</description>
 
     <organization>
         <name>Sparna</name>
@@ -121,7 +121,7 @@
         <dependency>
             <groupId>fr.sparna.rdf.xls2rdf</groupId>
             <artifactId>xls2rdf-lib</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.3</version>
         </dependency>
 
 		<dependency>

@@ -322,9 +322,13 @@ public class Xls2RdfConverter {
 			}
 			
 			// read the rows after the header line and process each row
+			log.info("Converting rows...");
 			for (int rowIndex = (headerRowIndex + 1); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 				Row r = sheet.getRow(rowIndex);
 				if(r != null) {
+					if(rowIndex % 1000 == 0) {
+						log.info("Row "+rowIndex+"...");
+					}
 					Resource rowResource = handleRow(model, csResource, columnNames, prefixManager, r);
 					if(rowResource != null) {
 						rowResources.add(rowResource);

@@ -1,6 +1,8 @@
 package fr.sparna.rdf.xls2rdf;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -8,9 +10,13 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExcelHelper {
 
+	private static Logger log = LoggerFactory.getLogger(ExcelHelper.class.getName());
+	
 	private ExcelHelper() {
 	}
 
@@ -51,17 +57,29 @@ public class ExcelHelper {
 	}
 	
 	public static Row columnLookup(String value, Sheet sheet, int columnIndex) {
+		List<Row> foundRows = new ArrayList<>();
 		for(Row r : sheet) {
 		   Cell c = r.getCell(columnIndex);
 		   if(c != null) {
 		      String cellValue = getCellValue(c);
 		      if(cellValue.trim().equals(value.trim())) {
-		    	  return r;
+		    	  foundRows.add(r);
 		      }
 		   }
 		}
 		
-		return null;
+		if(foundRows.size() == 0) {
+			// not found
+			return null;
+		} else if(foundRows.size() > 1) {
+			// found multiple times
+			throw new Xls2RdfException("Ambiguous reference : found value '"+value+"' "+foundRows.size()+" times in column index "+columnIndex+". Fix the values to garantee they are unique.");
+		} else {
+			// single value
+			return foundRows.get(0);
+		}
+		
+		
 	}
 
 
