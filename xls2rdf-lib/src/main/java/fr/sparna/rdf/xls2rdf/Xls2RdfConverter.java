@@ -231,7 +231,7 @@ public class Xls2RdfConverter {
 		// si la ligne d'entete n'a pas été trouvée, on ne génère que la ressource d'entête
 		if(headerRowIndex == 1) {
 			log.info("Could not find header row index in sheet "+sheet.getSheetName()+", will parse header object until end of sheet (last rowNum = "+ sheet.getLastRowNum() +")");
-			headerRowIndex = sheet.getLastRowNum();
+			headerRowIndex = sheet.getLastRowNum()+1;
 		}
 		
 		// validate the sheet

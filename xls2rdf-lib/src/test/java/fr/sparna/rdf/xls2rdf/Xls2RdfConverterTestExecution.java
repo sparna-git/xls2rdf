@@ -2,6 +2,9 @@ package fr.sparna.rdf.xls2rdf;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,10 +18,13 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.util.RepositoryUtil;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.rio.trig.TriGWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
@@ -106,15 +112,6 @@ public class Xls2RdfConverterTestExecution implements Test {
 //			throw new IllegalArgumentException("Problem with expected.ttl in unit test "+this.testFolder.getName(), e);
 //		}
 		
-		Repository expectedRepository = new SailRepository(new MemoryStore());
-		expectedRepository.initialize();
-		try(RepositoryConnection expectedConnection = expectedRepository.getConnection()) {
-			expectedConnection.add(Rio.parse(new FileInputStream(expected), expected.toURI().toURL().toString(), RDFFormat.TURTLE));
-		} catch (Exception e) {
-			result.addError(this, e);
-			throw new IllegalArgumentException("Problem with expected.ttl in unit test "+this.testFolder.getName(), e);
-		}
-		
 		// reput everything in flat repositories for proper comparisons without the graphs
 		Repository outputRepositoryToCompare = new SailRepository(new MemoryStore());
 		outputRepositoryToCompare.initialize();
@@ -124,19 +121,42 @@ public class Xls2RdfConverterTestExecution implements Test {
 			// print result in ttl (notes: prints all graphs)
 			connection.export(new TriGWriter(System.out));
 			connection.export(new StatementCollector(outputModel));
+			
+			try {
+				final File output = new File(this.testFolder, "output.ttl");
+				if(!output.exists()) {
+					output.createNewFile();
+				}
+				FileOutputStream out = new FileOutputStream(output);
+				connection.export(new TriGWriter(out));
+			} catch (Exception e) {
+				result.addError(this, e);
+			}
+			
 			try(RepositoryConnection connectionToCompare = outputRepositoryToCompare.getConnection()) {
 				connectionToCompare.add(outputModel, (Resource)null);
 			}
 		}
 		
-		// test if isomorphic		
-		// if(!Models.isomorphic(expectedModel, outputModel)) {			
-		if(!RepositoryUtil.equals(outputRepositoryToCompare, expectedRepository)) {
-			result.addFailure(this, new AssertionFailedError("Test failed on "+this.testFolder+":"
-					+ "\nStatements in output not in expected:\n"+prettyPrint(RepositoryUtil.difference(outputRepositoryToCompare, expectedRepository))
-					+ "\nStatements in expected missing in output:\n"+prettyPrint(RepositoryUtil.difference(expectedRepository, outputRepositoryToCompare))
-			));
-		}
+		if(expected.exists()) {
+			Repository expectedRepository = new SailRepository(new MemoryStore());
+			expectedRepository.initialize();
+			try(RepositoryConnection expectedConnection = expectedRepository.getConnection()) {
+				expectedConnection.add(Rio.parse(new FileInputStream(expected), expected.toURI().toURL().toString(), RDFFormat.TURTLE));
+			} catch (Exception e) {
+				result.addError(this, e);
+				throw new IllegalArgumentException("Problem with expected.ttl in unit test "+this.testFolder.getName(), e);
+			}
+			
+			// test if isomorphic		
+			// if(!Models.isomorphic(expectedModel, outputModel)) {			
+			if(!RepositoryUtil.equals(outputRepositoryToCompare, expectedRepository)) {
+				result.addFailure(this, new AssertionFailedError("Test failed on "+this.testFolder+":"
+						+ "\nStatements in output not in expected:\n"+prettyPrint(RepositoryUtil.difference(outputRepositoryToCompare, expectedRepository))
+						+ "\nStatements in expected missing in output:\n"+prettyPrint(RepositoryUtil.difference(expectedRepository, outputRepositoryToCompare))
+				));
+			}
+		} 
 		
 		result.endTest(this);
 	}

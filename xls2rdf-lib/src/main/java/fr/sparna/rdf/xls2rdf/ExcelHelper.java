@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +75,8 @@ public class ExcelHelper {
 			return null;
 		} else if(foundRows.size() > 1) {
 			// found multiple times
-			throw new Xls2RdfException("Ambiguous reference : found value '"+value+"' "+foundRows.size()+" times in column index "+columnIndex+". Fix the values to garantee they are unique.");
+			String references = foundRows.stream().map(r -> new CellReference(r.getRowNum(), columnIndex).formatAsString()).collect(Collectors.joining(" "));
+			throw new Xls2RdfException("Ambiguous reference : found value '"+value+"' "+foundRows.size()+" times ("+references+"). Fix the values to garantee they are unique.");
 		} else {
 			// single value
 			return foundRows.get(0);

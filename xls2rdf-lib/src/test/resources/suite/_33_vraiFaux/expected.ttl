@@ -8,6 +8,7 @@
 
 <http://labs.sparna.fr/skos-play/convert/test> a skos:ConceptScheme ;
 	skos:hasTopConcept test:concept_1;
+	skos:hasTopConcept test:concept_a;
 	.
 
 test:concept_1 a skos:Concept ;
