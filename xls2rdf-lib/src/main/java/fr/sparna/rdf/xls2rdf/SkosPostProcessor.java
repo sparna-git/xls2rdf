@@ -20,7 +20,17 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources) {
 		log.debug("Postprocessing : "+this.getClass().getSimpleName());
 		
-		if(!new ClassTest(model).test(mainResource)) {
+		boolean isMainResourceConceptScheme = true;
+		if(
+				new HasRdfTypeTest(model).test(mainResource)
+				&&
+				model.filter(mainResource, RDF.TYPE, SKOS.CONCEPT_SCHEME).isEmpty()
+		) {
+			isMainResourceConceptScheme = false;
+		}
+		
+		// if the main resource is a ConceptScheme, add skos:Concept to each entry
+		if(isMainResourceConceptScheme) {
 			rowResources.stream().forEach(rowResource -> {
 				// if, after row processing, no rdf:type was generated, then we consider the row to be a skos:Concept
 				// this allows to generate something else that skos:Concept
@@ -52,19 +62,18 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 		);
 		
 		if(!model.filter(mainResource, RDF.TYPE, SKOS.COLLECTION).isEmpty()) {
-			log.debug("Adding skos:member to the main resource");
+			log.debug("Main resource is a skos:Collection, adding skos:member to every Concept");
 			// if the header object was explicitely typed as skos:Collection, then add skos:members to every included skos:Concept
 			model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
 					s -> { model.add(mainResource, SKOS.MEMBER, ((Resource)s.getSubject())); }
 			);
-		} else if(new ClassTest(model).test(mainResource)) {
-			log.debug("Adding rdf:type to the main resource");
+		} else if(new IsClassTest(model).test(mainResource)) {
+			log.debug("Main resource is a rdfs: or owl:Class, adding rdf:type to every Concept");
 			// for each resource without an explicit rdf:type, declare it of the type specified in the header
 			rowResources.stream().filter(r -> model.filter(r, RDF.TYPE, null).isEmpty()).forEach(r -> {
 				model.add(r, RDF.TYPE, mainResource);
 			});
-		}
-		else {
+		} else if(isMainResourceConceptScheme) {
 			// no explicit type given in header : we suppose this is a ConceptScheme and apply SKOS post processings
 			
 			// add a skos:inScheme to every skos:Concept or skos:Collection or skos:OrderedCollection that was created
@@ -107,11 +116,11 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 		}
 	}
 	
-	private class ClassTest implements Predicate<Resource> {
+	private class IsClassTest implements Predicate<Resource> {
 		
 		protected Model model;
 
-		public ClassTest(Model model) {
+		public IsClassTest(Model model) {
 			super();
 			this.model = model;
 		}
@@ -122,6 +131,25 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 					model.contains(resource, RDF.TYPE, OWL.CLASS)
 					||
 					model.contains(resource, RDF.TYPE, RDFS.CLASS)
+			;
+		}
+	}
+	
+	private class HasRdfTypeTest implements Predicate<Resource> {
+		
+		protected Model model;
+
+		public HasRdfTypeTest(Model model) {
+			super();
+			this.model = model;
+		}
+
+		@Override
+		public boolean test(Resource resource) {
+			return 				
+					model.contains(resource, RDF.TYPE, null)
+					||
+					model.contains(resource, RDF.TYPE, null)
 			;
 		}
 	}
