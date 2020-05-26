@@ -1,0 +1,9 @@
+application:
+  basePath: ${PROJECT_BASE_PATH:${java.io.tmpdir}/xls2rdf-rest}
+server:
+  port: 0
+spring:
+  application:
+    name: Xls2RdfRestPublicEndpoint
+  profiles:
+    include: rest
