@@ -45,6 +45,8 @@ public class PrefixManager {
 		prefixes.put("qb", "http://purl.org/linked-data/cube#");
 		prefixes.put("euvoc", "http://publications.europa.eu/ontology/euvoc#");
 		prefixes.put("sh", "http://www.w3.org/ns/shacl#");
+		prefixes.put("isothes", "http://purl.org/iso25964/skos-thes#");
+		prefixes.put("skosthes", "http://purl.org/iso25964/skos-thes#");
 	}
 	
 	public void register(String prefix, String uri) {
