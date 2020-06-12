@@ -65,7 +65,7 @@ public final class ValueProcessorFactory {
 			}
 
 			Arrays.stream(StringUtils.split(value, separator)).forEach(
-				aValue -> delegate.processValue(model, subject, aValue.trim(), cell, language)
+				aValue -> delegate.processValue(model, subject, normalizeSpace(aValue), cell, language)
 			);
 			return null;
 		};
@@ -78,11 +78,11 @@ public final class ValueProcessorFactory {
 				return null;
 			}
 			
-			IRI iri = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(value.trim(), true));
+			IRI iri = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(normalizeSpace(value), true));
 			
 			// can be null if we expected an IRI but we had a literal
 			if(iri == null) {
-				throw new Xls2RdfException("Expected a URI but got '"+value.trim()+"'");
+				throw new Xls2RdfException("Expected a URI but got '"+normalizeSpace(value)+"'");
 			}
 			
 			model.add(subject, property, iri);
@@ -116,7 +116,7 @@ public final class ValueProcessorFactory {
 	
 	public ValueProcessorIfc reconcile(ColumnHeader header, PrefixManager prefixManager, ReconciliableValueSetIfc reconciledValues) {
 		return (model, subject, value, cell, language) -> {
-			String lookupValue = value.trim();
+			String lookupValue = normalizeSpace(value);
 			
 			if(lookupValue.equals("")) {
 				return null;
@@ -175,7 +175,7 @@ public final class ValueProcessorFactory {
 	@Deprecated
 	public ValueProcessorIfc reconcileLocal(ColumnHeader header, PrefixManager prefixManager, IRI reconcileOn, Repository supportRepository) {
 		return (model, subject, value, cell, language) -> {
-			String lookupValue = value.trim();
+			String lookupValue = normalizeSpace(value);
 			
 			if(lookupValue.equals("")) {
 				return null;
@@ -230,7 +230,7 @@ public final class ValueProcessorFactory {
 			// ... the blank node value
 			turtle.append(value);
 			// ... and a final dot if there is not one already at the end
-			if(!value.trim().endsWith(".")) {
+			if(!normalizeSpace(value).endsWith(".")) {
 				turtle.append(".");
 			}
 			
@@ -277,7 +277,7 @@ public final class ValueProcessorFactory {
 
 	public ValueProcessorIfc langLiteral(IRI property) {
 		return (model, subject, value, cell, language) -> {
-			Literal literal = SimpleValueFactory.getInstance().createLiteral(value.trim(), language);
+			Literal literal = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(value), language);
 			model.add(subject, property, literal);
 			return literal;
 		};
@@ -285,7 +285,7 @@ public final class ValueProcessorFactory {
 
 	public ValueProcessorIfc plainLiteral(IRI property) {
 		return (model, subject, value, cell, language) -> {
-			Literal literal = SimpleValueFactory.getInstance().createLiteral(value.trim());
+			Literal literal = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(value));
 			model.add(subject, property, literal);
 			return literal;
 		};
@@ -295,9 +295,9 @@ public final class ValueProcessorFactory {
 		return (model, subject, value, cell, language) -> {
 			Literal literal;
 			if(language != null) {
-				literal = SimpleValueFactory.getInstance().createLiteral(value.trim(), language);
+				literal = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(value), language);
 			} else {
-				literal = SimpleValueFactory.getInstance().createLiteral(value.trim());
+				literal = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(value));
 			}
 			model.add(subject, property, literal);
 			return literal;
@@ -330,7 +330,7 @@ public final class ValueProcessorFactory {
 
 		@Override
 		public Value processValue(Model model, Resource subject, String value, Cell cell, String language) {
-			if (StringUtils.isBlank(value.trim())) {
+			if (StringUtils.isBlank(normalizeSpace(value))) {
 				return null;
 			}
 			
@@ -344,12 +344,12 @@ public final class ValueProcessorFactory {
 					&&
 					headerLanguage == null
 					&&
-					(value.startsWith("http") || prefixManager.usesKnownPrefix(value.trim()))
+					(value.startsWith("http") || prefixManager.usesKnownPrefix(normalizeSpace(value)))
 			) {
 				if(!header.isInverse()) {
-					model.add(subject, header.getProperty(), SimpleValueFactory.getInstance().createIRI(prefixManager.uri(value.trim(), false)));
+					model.add(subject, header.getProperty(), SimpleValueFactory.getInstance().createIRI(prefixManager.uri(normalizeSpace(value), false)));
 				} else {
-					model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(value.trim(), false)), header.getProperty(),subject);
+					model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(normalizeSpace(value), false)), header.getProperty(),subject);
 				}			
 			} else if(datatype == null && headerLanguage == null && value.startsWith("(") && value.endsWith(")")) {
 				// handle rdf:list
@@ -367,7 +367,7 @@ public final class ValueProcessorFactory {
 					
 					if(datatype.stringValue().equals(XMLSchema.DATE.stringValue())) {
 						try {
-							Date d = ExcelHelper.asCalendar(unescapedValue.trim()).getTime();
+							Date d = ExcelHelper.asCalendar(normalizeSpace(unescapedValue)).getTime();
 							l = SimpleValueFactory.getInstance().createLiteral(
 									new SimpleDateFormat("yyyy-MM-dd").format(d),
 									XMLSchema.DATE
@@ -376,19 +376,19 @@ public final class ValueProcessorFactory {
 							// date parsing failed in the case the cell has a string format
 							// test if string value has proper string format
 							if(
-									unescapedValue.trim().matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]")
+									normalizeSpace(unescapedValue).matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]")
 							) {
-								l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.trim(), datatype);
+								l = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(unescapedValue), datatype);
 							} 
 							
 							// let's be smart and try to match french-formatted dates as well
 							if(
-									unescapedValue.trim().matches("[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]")
+									normalizeSpace(unescapedValue).matches("[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]")
 							) {
 								try {
 									SimpleDateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
 									SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
-									l = SimpleValueFactory.getInstance().createLiteral(sdf2.format(sdf1.parse(unescapedValue.trim())), datatype);
+									l = SimpleValueFactory.getInstance().createLiteral(sdf2.format(sdf1.parse(normalizeSpace(unescapedValue))), datatype);
 								} catch (ParseException e1) {
 									e1.printStackTrace();
 									this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse date format for value '"+ value +"'. Is the cell formatted as a date ?");
@@ -402,7 +402,7 @@ public final class ValueProcessorFactory {
 					} else if(datatype.stringValue().equals(XMLSchema.DATETIME.stringValue())) {
 						try {
 							try {
-								l = SimpleValueFactory.getInstance().createLiteral(DatatypeFactory.newInstance().newXMLGregorianCalendar((GregorianCalendar)ExcelHelper.asCalendar(unescapedValue.trim())));
+								l = SimpleValueFactory.getInstance().createLiteral(DatatypeFactory.newInstance().newXMLGregorianCalendar((GregorianCalendar)ExcelHelper.asCalendar(normalizeSpace(unescapedValue))));
 							} catch (DatatypeConfigurationException e) {
 								e.printStackTrace();
 							}
@@ -411,9 +411,9 @@ public final class ValueProcessorFactory {
 
 							// test if string value has proper string format
 							if(
-									unescapedValue.trim().matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]")
+									normalizeSpace(unescapedValue).matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]")
 							) {
-								l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.trim(), datatype);
+								l = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(unescapedValue), datatype);
 							} 
 							
 							if (l == null) {
@@ -439,7 +439,7 @@ public final class ValueProcessorFactory {
 						}
 					}
 					else {
-						l = SimpleValueFactory.getInstance().createLiteral(unescapedValue.trim(), datatype);
+						l = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(unescapedValue), datatype);
 					}
 					
 					if(l != null) {
@@ -452,6 +452,11 @@ public final class ValueProcessorFactory {
 			
 			return null;
 		};		
+	}
+	
+	public static String normalizeSpace(String s) {
+		return s.replaceAll("\\h+"," ").trim();
+		// return s.replaceAll("(^\\h*)|(\\h*$)", " ").trim();
 	}
 	
 }

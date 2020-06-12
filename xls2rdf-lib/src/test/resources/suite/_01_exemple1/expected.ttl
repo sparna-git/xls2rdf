@@ -36,7 +36,7 @@
   skos:topConceptOf <http://data.sparna.fr/vocabularies/days> .
 
 <http://data.sparna.fr/vocabularies/days#friday> a skos:Concept;
-  skos:definition "Week-end soon !"@fr;
+  skos:definition "Week-end soon !"@fr;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
   skos:notation "FRI"@fr;
   skos:prefLabel "Friday"@fr;

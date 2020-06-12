@@ -15,10 +15,13 @@
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 
 
-<http://data.observatoiredeslangues.culture.gouv.fr/dataset/organisation-dglflf> a
-  dcat:Dataset;
-dct:title "tutu"@fr;
-dct:description "toto"@fr;
-dct:created "2018-01-01"^^xsd:date;
-dct:modified "2020-05-08"^^xsd:date;
-dct:spatial <https://www.geonames.org/countries/AM/armenia> .
+<http://data.chateaudefontainebleau.fr/vocabulaires/personnes> a skos:ConceptScheme ;
+	dcterms:title "Personnes"@fr;
+	skos:hasTopConcept <http://www.fontainebleau.org/concept1>;
+	.
+
+<http://www.fontainebleau.org/concept1> a skos:Concept ;
+	skos:prefLabel "Louis XIV";
+	skos:topConceptOf <http://data.chateaudefontainebleau.fr/vocabulaires/personnes> ;
+	skos:inScheme <http://data.chateaudefontainebleau.fr/vocabulaires/personnes> ;
+	.

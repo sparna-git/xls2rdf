@@ -43,7 +43,7 @@ days:thursday a skos:Concept;
 
 days:friday a skos:Concept;
   euvoc:status concept-status:CURRENT;
-  skos:definition "Week-end soon !"@fr;
+  skos:definition "Week-end soon !"@fr;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
   skos:notation "FRI"@fr;
   skos:prefLabel "Friday"@fr;

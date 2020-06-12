@@ -29,6 +29,11 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 			isMainResourceConceptScheme = false;
 		}
 		
+		if(isMainResourceConceptScheme) {
+			log.debug("Considering main resource like a ConceptScheme.");
+		}
+		
+		
 		// if the main resource is a ConceptScheme, add skos:Concept to each entry
 		if(isMainResourceConceptScheme) {
 			rowResources.stream().forEach(rowResource -> {
