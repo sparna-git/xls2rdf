@@ -10,6 +10,7 @@ public class ModelWriterFactory {
 	protected boolean useZip = false;
 	protected boolean useGraph = false;
 	protected RDFFormat format;
+	protected boolean grouping = true;
 	
 	public ModelWriterFactory(boolean useZip, RDFFormat format) {
 		super();
@@ -30,10 +31,12 @@ public class ModelWriterFactory {
 			ZipOutputStreamModelWriter modelWriter = new ZipOutputStreamModelWriter(out);
 			modelWriter.setFormat(format);
 			modelWriter.setSaveGraphFile(useGraph);
+			modelWriter.setGrouping(this.grouping);
 			return modelWriter;
 		} else {
 			OutputStreamModelWriter modelWriter = new OutputStreamModelWriter(out);
 			modelWriter.setFormat(format);
+			modelWriter.setGrouping(this.grouping);
 			return modelWriter;
 		}
 	}
@@ -45,6 +48,7 @@ public class ModelWriterFactory {
 		DirectoryModelWriter modelWriter = new DirectoryModelWriter(directory);
 		modelWriter.setFormat(format);
 		modelWriter.setSaveGraphFile(this.useGraph);
+		modelWriter.setGrouping(this.grouping);
 		return modelWriter;
 	}
 
@@ -70,6 +74,14 @@ public class ModelWriterFactory {
 
 	public void setUseGraph(boolean useGraph) {
 		this.useGraph = useGraph;
+	}
+
+	public boolean isGrouping() {
+		return grouping;
+	}
+
+	public void setGrouping(boolean grouping) {
+		this.grouping = grouping;
 	}
 	
 }

@@ -37,6 +37,8 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 	private Map<String, Model> modelsByGraph = new HashMap<>();
 	private Map<String, Map<String, String>> prefixesByGraph = new HashMap<>();
 	
+	private boolean grouping = true;
+	
 	public DirectoryModelWriter(File outputFolder) {
 		super();
 		this.outputFolder = outputFolder;
@@ -94,8 +96,14 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 				String filename = URLEncoder.encode(graph, "UTF-8");
 				File file = new File(outputFolder, filename + "." + format.getDefaultFileExtension());
 				try (FileOutputStream fos = new FileOutputStream(file)) {
-					RDFHandler w = new BufferedGroupingRDFHandler(50000, RDFWriterRegistry.getInstance().get(format).get().getWriter(fos));
-					exportModel(model, w, prefixesByGraph.get(graph));
+					
+					RDFHandler handler;
+					if(grouping) {
+						handler = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(fos));
+					} else {
+						handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(fos);
+					}
+					exportModel(model, handler, prefixesByGraph.get(graph));
 					fos.flush();
 				}
 				catch (Exception e) {
@@ -130,6 +138,14 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 
 	public void setFormat(RDFFormat format) {
 		this.format = format;
+	}
+	
+	public boolean isGrouping() {
+		return grouping;
+	}
+
+	public void setGrouping(boolean grouping) {
+		this.grouping = grouping;
 	}
 
 }

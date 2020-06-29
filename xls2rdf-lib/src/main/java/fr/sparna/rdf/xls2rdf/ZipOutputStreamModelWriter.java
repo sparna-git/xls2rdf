@@ -35,6 +35,8 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 	private String graphSuffix = null;
 	private boolean saveGraphFile = false;
 	
+	private boolean grouping = true;
+	
 	public ZipOutputStreamModelWriter(ZipOutputStream out) {
 		super();
 		this.out = out;
@@ -80,8 +82,13 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 			out.putNextEntry(new ZipEntry(entryname));
 			
 			// writes in the entry
-			RDFHandler w = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out));
-			exportModel(model, w, prefixes);
+			RDFHandler handler;
+			if(grouping) {
+				handler = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out));
+			} else {
+				handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(out);
+			}
+			exportModel(model, handler, prefixes);
 			
 			// close the entry
 			out.closeEntry();
@@ -122,6 +129,14 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 
 	public void setSaveGraphFile(boolean saveGraphFile) {
 		this.saveGraphFile = saveGraphFile;
+	}
+
+	public boolean isGrouping() {
+		return grouping;
+	}
+
+	public void setGrouping(boolean grouping) {
+		this.grouping = grouping;
 	}
 
 	@Override

@@ -30,6 +30,8 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 	private RDFFormat format = RDFFormat.RDFXML;
 	private Repository outputRepository;
 	
+	private boolean grouping = true;
+	
 	public OutputStreamModelWriter(OutputStream out) {
 		super();
 		this.out = out;
@@ -74,7 +76,13 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 
 	@Override
 	public void endWorkbook() {
-		RDFHandler handler = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out));
+		RDFHandler handler;
+		if(grouping) {
+			handler = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out));
+		} else {
+			handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(out);
+		}
+		
 		try(RepositoryConnection c = this.outputRepository.getConnection()) {
 			c.setNamespace("skos", SKOS.NAMESPACE);
 			c.setNamespace("skosxl", SKOSXL.NAMESPACE);
@@ -97,5 +105,14 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 	public void setFormat(RDFFormat format) {
 		this.format = format;
 	}
+
+	public boolean isGrouping() {
+		return grouping;
+	}
+
+	public void setGrouping(boolean grouping) {
+		this.grouping = grouping;
+	}
+	
 
 }

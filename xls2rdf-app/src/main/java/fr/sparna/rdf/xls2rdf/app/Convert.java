@@ -65,6 +65,7 @@ public class Convert implements CliCommandIfc {
 		// determine output mode
 		boolean useZip = a.getOutput().getName().endsWith("zip");
 		ModelWriterFactory factory = new ModelWriterFactory(useZip, theFormat, a.isGenerateGraphFiles());
+		factory.setGrouping(false);
 		
 		ModelWriterIfc modelWriter = null;
 		FileOutputStream fileStream = null;
