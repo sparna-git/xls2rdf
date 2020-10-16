@@ -344,7 +344,7 @@ public final class ValueProcessorFactory {
 					&&
 					headerLanguage == null
 					&&
-					(value.startsWith("http") || prefixManager.usesKnownPrefix(normalizeSpace(value)))
+					(value.startsWith("http") || value.startsWith("mailto") || prefixManager.usesKnownPrefix(normalizeSpace(value)))
 			) {
 				if(!header.isInverse()) {
 					model.add(subject, header.getProperty(), SimpleValueFactory.getInstance().createIRI(prefixManager.uri(normalizeSpace(value), false)));
