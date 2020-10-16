@@ -1,0 +1,14 @@
+@prefix days: <http://data.sparna.fr/vocabularies/days#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+<http://data.sparna.fr/vocabularies/person> a skos:ConceptScheme;
+  skos:hasTopConcept <http://fred.com>.
+
+<http://fred.com> a skos:Concept;
+  skos:prefLabel "Fred" ;
+  skos:inScheme <http://data.sparna.fr/vocabularies/person>;
+  skos:topConceptOf <http://data.sparna.fr/vocabularies/person> ;
+  foaf:knows <mailto:thomas.francart@sparna.fr>.

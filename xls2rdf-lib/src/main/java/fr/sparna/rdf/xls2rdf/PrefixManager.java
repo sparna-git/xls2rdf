@@ -90,7 +90,7 @@ public class PrefixManager {
 	
 	public String uri(String value, boolean fixHttp) {
 		// if the value starts with http, return it directly
-		if(value.startsWith("http")) {
+		if(value.startsWith("http") || value.startsWith("mailto")) {
 			// trim the value to remove trailing whitespaces
 			return value.trim();
 		}
