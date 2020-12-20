@@ -1,19 +1,12 @@
 package fr.sparna.rdf.xls2rdf;
 
-import static fr.sparna.rdf.xls2rdf.ExcelHelper.getCellValue;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-
+import ch.qos.logback.classic.BasicConfigurator;
+import ch.qos.logback.classic.LoggerContext;
+import fr.sparna.rdf.xls2rdf.reconcile.DynamicReconciliableValueSet;
+import fr.sparna.rdf.xls2rdf.reconcile.PreloadedReconciliableValueSet;
+import fr.sparna.rdf.xls2rdf.reconcile.ReconcileServiceIfc;
+import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
+import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -33,13 +26,19 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.BasicConfigurator;
-import ch.qos.logback.classic.LoggerContext;
-import fr.sparna.rdf.xls2rdf.reconcile.DynamicReconciliableValueSet;
-import fr.sparna.rdf.xls2rdf.reconcile.PreloadedReconciliableValueSet;
-import fr.sparna.rdf.xls2rdf.reconcile.ReconcileServiceIfc;
-import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
-import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
+
+import static fr.sparna.rdf.xls2rdf.ExcelHelper.getCellValue;
 
 
 
@@ -637,7 +636,7 @@ public class Xls2RdfConverter {
 		writer.setGraphSuffix("/graph");
 		
 		Xls2RdfConverter me = new Xls2RdfConverter(writer, "fr");
-		me.setPostProcessors(Collections.singletonList(new SkosPostProcessor()));
+		me.setPostProcessors(Collections.singletonList(new SkosPostProcessor(false)));
 		
 		// me.loadAllToFile(new File("/home/thomas/sparna/00-Clients/Sparna/20-Repositories/sparna/fr.sparna/rdf/skos/xls2skos/src/test/resources/test-excel-saved-from-libreoffice.xlsx"));
 		// me.loadAllToFile(new File("/home/thomas/sparna/00-Clients/Sparna/20-Repositories/sparna/fr.sparna/rdf/skos/xls2skos/src/test/resources/test-libreoffice.ods"));
@@ -653,7 +652,7 @@ public class Xls2RdfConverter {
 	) throws Exception {
 		OutputStreamModelWriter modelWriter = new OutputStreamModelWriter(output);
 		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter, lang);
-		converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor()));
+		converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor(false)));
 		converter.processInputStream(input);
 	}
 	

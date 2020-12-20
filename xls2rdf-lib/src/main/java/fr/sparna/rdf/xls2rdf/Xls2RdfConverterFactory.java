@@ -1,24 +1,25 @@
 package fr.sparna.rdf.xls2rdf;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
 import org.eclipse.rdf4j.repository.Repository;
 
-import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Xls2RdfConverterFactory {
 
 	private boolean applyPostProcessings = true;
 	private boolean generateXl = false;
 	private boolean generateXlDefinitions = false;
+	private final boolean generateBroaderTransitive;
 	private Repository supportRepository = null;
 	
-	public Xls2RdfConverterFactory(boolean applyPostProcessings, boolean generateXl, boolean generateXlDefinitions) {
+	public Xls2RdfConverterFactory(boolean applyPostProcessings, boolean generateXl, boolean generateXlDefinitions, boolean generateBroaderTransitive) {
 		super();
 		this.applyPostProcessings = applyPostProcessings;
 		this.generateXl = generateXl;
 		this.generateXlDefinitions = generateXlDefinitions;
+		this.generateBroaderTransitive = generateBroaderTransitive;
 	}
 	
 	public Xls2RdfConverter newConverter(Repository outputRepository, String lang) {
@@ -29,7 +30,7 @@ public class Xls2RdfConverterFactory {
 		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter, lang);
 		if(this.applyPostProcessings) {
 			List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();
-			postProcessors.add(new SkosPostProcessor());
+			postProcessors.add(new SkosPostProcessor(this.generateBroaderTransitive));
 			if(this.generateXl || this.generateXlDefinitions) {
 				postProcessors.add(new SkosXlPostProcessor(generateXl, generateXlDefinitions));
 			}
