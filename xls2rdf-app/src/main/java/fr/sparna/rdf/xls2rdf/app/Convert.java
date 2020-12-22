@@ -1,12 +1,10 @@
 package fr.sparna.rdf.xls2rdf.app;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-
+import fr.sparna.rdf.xls2rdf.ModelWriterFactory;
+import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
+import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
+import fr.sparna.rdf.xls2rdf.Xls2RdfConverterFactory;
+import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -19,11 +17,12 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterFactory;
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
-import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
-import fr.sparna.rdf.xls2rdf.Xls2RdfConverterFactory;
-import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 public class Convert implements CliCommandIfc {
 
@@ -79,7 +78,7 @@ public class Convert implements CliCommandIfc {
 		}
 		
 		log.debug("Will use ModelWriter : "+modelWriter.getClass().getName());
-		Xls2RdfConverterFactory converterFactory = new Xls2RdfConverterFactory(!a.isNoPostProcessings(), a.isXlify(), a.isXlifyDefinitions());
+		Xls2RdfConverterFactory converterFactory = new Xls2RdfConverterFactory(!a.isNoPostProcessings(), a.isXlify(), a.isXlifyDefinitions(), a.isBroaderTransitiveify());
 		
 		Xls2RdfConverter converter = converterFactory.newConverter(modelWriter, a.getLang());
 		
