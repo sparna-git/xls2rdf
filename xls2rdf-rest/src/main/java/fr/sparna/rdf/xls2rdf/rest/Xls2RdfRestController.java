@@ -1,17 +1,5 @@
 package fr.sparna.rdf.xls2rdf.rest;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.slf4j.Logger;
@@ -25,6 +13,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class Xls2RdfRestController {
@@ -40,6 +40,7 @@ public class Xls2RdfRestController {
 			@RequestParam(value="url", required=true) String url,
 			@RequestParam(value="format", required=false) String format,
 			@RequestParam(value="skosxl", required=false, defaultValue = "false") boolean useSkosXl,
+			@RequestParam(value="broaderTransitive", required=false, defaultValue = "false") boolean broaderTransitive,
 			@RequestParam(value="noPostProcessings", required=false, defaultValue = "false") boolean ignorePostProc)
 					throws Exception {
 		
@@ -76,7 +77,7 @@ public class Xls2RdfRestController {
 
 					ByteArrayOutputStream responseOutputStream = new ByteArrayOutputStream();
 					try (var openedIn = in) {
-						List<String> cvIds = this.xls2RdfService.convert(openedIn, responseOutputStream, language, theFormat, useSkosXl, ignorePostProc);
+						List<String> cvIds = this.xls2RdfService.convert(openedIn, responseOutputStream, language, theFormat, useSkosXl, broaderTransitive, ignorePostProc);
 
 						Collections.sort(cvIds);
 						cvIds.stream().map(cv -> "Converted Graph: " + cv).forEach(log::info);

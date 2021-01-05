@@ -1,9 +1,9 @@
 package fr.sparna.rdf.xls2rdf.app;
 
-import java.io.File;
-
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.converters.FileConverter;
+
+import java.io.File;
 
 
 public class ArgumentsConvert {
@@ -48,6 +48,12 @@ public class ArgumentsConvert {
 			description = "XLify labels"
 	)
 	private boolean xlify = false;
+
+	@Parameter(
+			names = { "-bt", "--broaderTransitive" },
+			description = "Generate skos:broaderTransitive"
+	)
+	private boolean broaderTransitiveify = false;
 
 	@Parameter(
 			names = { "-def", "--definitions" },
@@ -121,6 +127,14 @@ public class ArgumentsConvert {
 
 	public void setXlifyDefinitions(boolean xlifyDefinitions) {
 		this.xlifyDefinitions = xlifyDefinitions;
+	}
+
+	public boolean isBroaderTransitiveify() {
+		return broaderTransitiveify;
+	}
+
+	public void setBroaderTransitiveify(boolean broaderTransitiveify) {
+		this.broaderTransitiveify = broaderTransitiveify;
 	}
 
 	public boolean isGenerateGraphFiles() {
