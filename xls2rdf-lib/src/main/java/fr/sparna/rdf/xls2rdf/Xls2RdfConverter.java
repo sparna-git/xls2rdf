@@ -112,6 +112,9 @@ public class Xls2RdfConverter {
 	 */
 	private boolean failIfNoReconcile = false;
 	
+	public Xls2RdfConverter(ModelWriterIfc modelWriter) {		
+		this(modelWriter, null);
+	}
 	
 	public Xls2RdfConverter(ModelWriterIfc modelWriter, String lang) {		
 		this.globalRepository.init();

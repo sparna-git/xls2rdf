@@ -275,14 +275,6 @@ public final class ValueProcessorFactory {
 		};
 	}
 
-	public ValueProcessorIfc langLiteral(IRI property) {
-		return (model, subject, value, cell, language) -> {
-			Literal literal = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(value), language);
-			model.add(subject, property, literal);
-			return literal;
-		};
-	}
-
 	public ValueProcessorIfc plainLiteral(IRI property) {
 		return (model, subject, value, cell, language) -> {
 			Literal literal = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(value));

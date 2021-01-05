@@ -36,7 +36,7 @@ public class Xls2RdfRestController {
 
 	@RequestMapping(value = "/convert", method = RequestMethod.GET)
 	public ResponseEntity<ByteArrayResource> convertRDF(
-			@RequestParam(value="lang", required=true) String language,
+			@RequestParam(value="lang", required=false) String language,
 			@RequestParam(value="url", required=true) String url,
 			@RequestParam(value="format", required=false) String format,
 			@RequestParam(value="skosxl", required=false, defaultValue = "false") boolean useSkosXl,

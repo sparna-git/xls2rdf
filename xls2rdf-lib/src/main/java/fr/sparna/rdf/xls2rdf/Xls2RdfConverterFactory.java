@@ -25,6 +25,11 @@ public class Xls2RdfConverterFactory {
 		return this.newConverter(new RepositoryModelWriter(outputRepository), lang);
 	}
 	
+	/**
+	 * @param modelWriter
+	 * @param lang can be null
+	 * @return
+	 */
 	public Xls2RdfConverter newConverter(ModelWriterIfc modelWriter, String lang) {
 		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter, lang);
 		if(this.applyPostProcessings) {

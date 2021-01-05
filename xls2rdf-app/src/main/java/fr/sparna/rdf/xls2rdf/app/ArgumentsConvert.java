@@ -32,8 +32,8 @@ public class ArgumentsConvert {
 	
 	@Parameter(
 			names = { "-l", "--lang" },
-			description = "Default language to use.",
-			required = true
+			description = "Default language to use for literal columns when no language is specified",
+			required = false
 	)
 	private String lang;
 	
