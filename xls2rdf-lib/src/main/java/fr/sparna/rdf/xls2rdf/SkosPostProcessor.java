@@ -171,7 +171,7 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 
       // Load SPARQL query definition
       InputStream src = this.getClass().getResourceAsStream(CALCULATE_BROADER_TRANSITIVE_SPARQL);
-      String sparql = IOUtils.toString(src, StandardCharsets.UTF_8);
+      String sparql = IOUtils.toString(src, "UTF-8"); //need to use this one, most likely due to conflict with sesame
       Update u = c.prepareUpdate(sparql);
       u.execute();
 
