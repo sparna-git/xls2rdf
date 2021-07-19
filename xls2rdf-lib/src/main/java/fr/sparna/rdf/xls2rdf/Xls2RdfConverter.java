@@ -459,11 +459,16 @@ public class Xls2RdfConverter {
 				);
 			}
 			
+			// if we requested to ignore values in parenthesis, wrap the processor into adequate processor
+			if(header.isIgnoreIfParenthesis()) {
+				cellProcessor = processorFactory.ignoreIfParenthesis(cellProcessor);
+			}
+			
 			if(header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR) != null) {
 				cellProcessor = processorFactory.split(cellProcessor, header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR));
 				// use a default comma separator for cells that contain URI references
 			} else if(
-				// if it is a true column wih a declared property...
+				// if it is a true column with a declared property...
 				header.getProperty() != null
 				&&
 				!header.getDatatype().isPresent()

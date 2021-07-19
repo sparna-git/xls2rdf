@@ -214,6 +214,21 @@ public final class ValueProcessorFactory {
 		};
 	}
 	
+	public ValueProcessorIfc ignoreIfParenthesis(ValueProcessorIfc delegate) {
+		return (model, subject, value, cell, language) -> {
+			
+			String theValue = normalizeSpace(value);
+			if (theValue.startsWith("(") && theValue.endsWith(")")) {
+				return null;
+			} else {
+				delegate.processValue(model, subject, theValue, cell, language);
+				return null;
+			}
+
+		};
+	}
+	
+	
 	public ValueProcessorIfc resourceOrLiteral(ColumnHeader header, PrefixManager prefixManager) {
 		ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager, messageListener);
 		return g;

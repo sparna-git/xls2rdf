@@ -19,6 +19,7 @@ public class ColumnHeader {
 	public static final String PARAMETER_RECONCILE = "reconcile";
 	public static final String PARAMETER_RECONCILE_ON = "reconcileOn";
 	public static final String PARAMETER_ID = "id";
+	public static final String PARAMETER_IGNORE_IF_PARENTHESIS = "ignoreIfParenthesis";
 	
 	public static enum RECONCILE_VALUES {
 		external,
@@ -152,6 +153,10 @@ public class ColumnHeader {
 	
 	public boolean isReconcileLocal() {
 		return getParameters().get(ColumnHeader.PARAMETER_RECONCILE) != null && getParameters().get(ColumnHeader.PARAMETER_RECONCILE).equals(RECONCILE_VALUES.local.name());
+	}
+
+	public boolean isIgnoreIfParenthesis() {
+		return getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF_PARENTHESIS) != null && Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF_PARENTHESIS));
 	}
 
 	/**
