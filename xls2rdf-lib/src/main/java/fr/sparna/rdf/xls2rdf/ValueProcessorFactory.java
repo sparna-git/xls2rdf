@@ -98,14 +98,14 @@ public final class ValueProcessorFactory {
 				return null;
 			}
 			
-			Row foundRow = ExcelHelper.columnLookup(lookupValue, sheet, lookupColumn);
+			Row foundRow = ExcelHelper.columnLookup(lookupValue, sheet, lookupColumn, true);
 			
 			if(foundRow != null) {				
 				ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager, messageListener);
 				return g.processValue(model, subject, getCellValue(foundRow.getCell(uriColumn)), cell, language);				
 			} else {
 				// throw Exception if a reference was not found
-				log.error("Unable to find value '"+lookupValue+"' in column of index "+lookupColumn+", while trying to generate property "+header.getProperty());
+				log.error(new CellReference(cell.getRowIndex(), cell.getColumnIndex()).formatAsString()+" Unable to find value '"+lookupValue+"' in column "+CellReference.convertNumToColString(lookupColumn)+", while trying to generate property "+header.getProperty());
 				// keep the triple as a literal with special predicate ?				
 				// throw new Xls2SkosException("Unable to find value '"+lookupValue+"' in column of index "+lookupColumn+", while trying to generate property "+property);
 			}
