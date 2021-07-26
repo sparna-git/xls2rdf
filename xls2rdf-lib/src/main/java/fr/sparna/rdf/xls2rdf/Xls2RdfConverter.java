@@ -168,11 +168,15 @@ public class Xls2RdfConverter {
 			// notify begin
 			modelWriter.beginWorkbook();
 			
+			// read all prefixes in all sheets, so that prefixes are shared across all sheets
+			for (Sheet sheet : workbook) {
+				initPrefixManager(sheet);
+			}
+			
 			// for every sheet...
 			for (Sheet sheet : workbook) {
 
-				// process the sheet, possibly returning null
-				// if load(sheet) returns null, the sheet was ignored
+				// process the sheet, possibly returning an empty Model
 				Model model = processSheet(sheet);
 				models.add(model);
 				try(RepositoryConnection connection = this.globalRepository.getConnection()) {
@@ -188,6 +192,17 @@ public class Xls2RdfConverter {
 		}
 		
 		return models;
+	}
+	
+	/**
+	 * Init the prefix manager with the prefixes declared in the Sheet
+	 * @param sheet
+	 */
+	private void initPrefixManager(Sheet sheet) {
+		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheet, this);
+		
+		// read the prefixes
+		this.prefixManager.register(rdfizableSheet.readPrefixes());
 	}
 
 	/**
@@ -211,9 +226,6 @@ public class Xls2RdfConverter {
 			log.debug("Processing sheet: " + sheet.getSheetName());
 		}
 		
-		// read the prefixes
-		this.prefixManager.register(rdfizableSheet.readPrefixes());
-
 		// init the sheet (after prefixes are read)
 		rdfizableSheet.init();
 		
