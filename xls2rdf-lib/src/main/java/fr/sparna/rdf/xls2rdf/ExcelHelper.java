@@ -58,13 +58,17 @@ public class ExcelHelper {
 		return calendar;
 	}
 	
-	public static Row columnLookup(String value, Sheet sheet, int columnIndex) {
+	public static Row columnLookup(String value, Sheet sheet, int columnIndex, boolean ignoreCase) {
 		List<Row> foundRows = new ArrayList<>();
 		for(Row r : sheet) {
 		   Cell c = r.getCell(columnIndex);
 		   if(c != null) {
 		      String cellValue = getCellValue(c);
-		      if(cellValue.trim().equals(value.trim())) {
+		      if(
+		    		(!ignoreCase && cellValue.trim().equals(value.trim()))
+		    	  	||
+		    	  	(ignoreCase && cellValue.trim().equalsIgnoreCase(value.trim()))		    	  
+		      ) {
 		    	  foundRows.add(r);
 		      }
 		   }
