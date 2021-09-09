@@ -382,8 +382,15 @@ public class Xls2RdfConverter {
 			String value = getCellValue(cell);
 			// if it is the first column...
 			if (null == rowBuilder) {
-				// if the value of the first column is empty, or is striked through, skip the whole row
-				if (StringUtils.isBlank(value) || this.workbook.getFontAt(cell.getCellStyle().getFontIndex()).getStrikeout()) {
+				// if the value of the first column is empty, or is striked through, or if it is hidden, skip the whole row
+				if (
+						StringUtils.isBlank(value)
+						||
+						this.workbook.getFontAt(cell.getCellStyle().getFontIndex()).getStrikeout()
+						||
+						row.getZeroHeight()
+						
+				) {
 					return null;
 				}
 				// create the RowBuilder with the URI in the first column
