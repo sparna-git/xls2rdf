@@ -251,6 +251,7 @@ public class RdfizableSheet {
 						}
 						String namespace = getCellValue(sheet.getRow(rowIndex).getCell(2));
 						if(StringUtils.isNotBlank(namespace)) {
+							log.info("Found prefix : "+prefix+" : <"+namespace+">");
 							prefixes.put(prefix, namespace);
 						}
 					}

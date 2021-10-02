@@ -343,7 +343,12 @@ public class Xls2RdfConverter {
 					if(rowIndex % 1000 == 0) {
 						log.info("Row "+rowIndex+"...");
 					}
-					Resource rowResource = handleRow(model, csResource, columnNames, prefixManager, r);
+					Resource rowResource;
+					try {
+						rowResource = handleRow(model, csResource, columnNames, prefixManager, r);
+					} catch (Exception e) {
+						throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName(), (Object[])null);
+					}
 					if(rowResource != null) {
 						rowResources.add(rowResource);
 					}
