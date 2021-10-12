@@ -413,9 +413,18 @@ public class Xls2RdfConverter {
 				// skip the cell if it is striked out
 				continue;
 			}
+			// test if cell should be ignored
+			if(header.getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF) != null) {
+				if(value.equals(header.getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF))) {
+					// skip cell
+					continue;
+				}
+			}
 			
 			ValueProcessorFactory processorFactory = new ValueProcessorFactory(this.messageListener);
 			ValueProcessorIfc cellProcessor = null;
+			
+			
 			
 			if(header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN) != null) {
 				// finds the index of the column corresponding to lookupColumn reference
