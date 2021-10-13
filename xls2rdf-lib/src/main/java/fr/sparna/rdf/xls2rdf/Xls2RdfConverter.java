@@ -347,7 +347,7 @@ public class Xls2RdfConverter {
 					try {
 						rowResource = handleRow(model, csResource, columnNames, prefixManager, r);
 					} catch (Exception e) {
-						throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName(), (Object[])null);
+						throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName()+" : "+e.getMessage(), (Object[])null);
 					}
 					if(rowResource != null) {
 						rowResources.add(rowResource);
