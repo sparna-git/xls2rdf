@@ -64,7 +64,7 @@ public class Convert implements CliCommandIfc {
 		// determine output mode
 		boolean useZip = a.getOutput().getName().endsWith("zip");
 		ModelWriterFactory factory = new ModelWriterFactory(useZip, theFormat, a.isGenerateGraphFiles());
-		factory.setGrouping(false);
+		factory.setGrouping(a.isPretty());
 		
 		ModelWriterIfc modelWriter = null;
 		FileOutputStream fileStream = null;
@@ -79,8 +79,6 @@ public class Convert implements CliCommandIfc {
 		
 		log.debug("Will use ModelWriter : "+modelWriter.getClass().getName());
 		Xls2RdfConverterFactory converterFactory = new Xls2RdfConverterFactory(!a.isNoPostProcessings(), a.isXlify(), a.isXlifyDefinitions(), a.isBroaderTransitiveify());
-		
-		Xls2RdfConverter converter = converterFactory.newConverter(modelWriter, a.getLang());
 		
 		Repository supportRepository = new SailRepository(new MemoryStore());
 		supportRepository.init();
@@ -101,7 +99,8 @@ public class Convert implements CliCommandIfc {
 			}
 		}
 		
-		converter.setReconcileService(new SparqlReconcileService(supportRepository));
+		converterFactory.setSupportRepository(supportRepository);
+		Xls2RdfConverter converter = converterFactory.newConverter(modelWriter, a.getLang());
 		
 		if(a.getInput().isFile()) {
 			try(InputStream in = new FileInputStream(a.getInput())) {			

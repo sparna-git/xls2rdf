@@ -81,6 +81,13 @@ public class ArgumentsConvert {
 	)
 	private File externalData;
 
+	@Parameter(
+			names = { "-p", "--pretty" },
+			description = "Prettify output by grouping statements. Default is false.",
+			required = false
+	)
+	private boolean pretty = false;
+	
 	public File getInput() {
 		return input;
 	}
@@ -167,6 +174,14 @@ public class ArgumentsConvert {
 
 	public void setExternalData(File externalData) {
 		this.externalData = externalData;
+	}
+
+	public boolean isPretty() {
+		return pretty;
+	}
+
+	public void setPretty(boolean pretty) {
+		this.pretty = pretty;
 	}
 	
 }
