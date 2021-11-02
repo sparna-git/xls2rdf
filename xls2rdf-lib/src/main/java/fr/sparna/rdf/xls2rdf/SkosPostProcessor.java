@@ -1,5 +1,10 @@
 package fr.sparna.rdf.xls2rdf;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.function.Predicate;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -17,12 +22,6 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.function.Predicate;
 
 public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
   private static final String CALCULATE_BROADER_TRANSITIVE_SPARQL = "postprocessing/broaderTransitive.ru";
@@ -217,11 +216,7 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 
     @Override
     public boolean test(Resource resource) {
-      return
-              model.contains(resource, RDF.TYPE, null)
-              ||
-              model.contains(resource, RDF.TYPE, null)
-              ;
+      return model.contains(resource, RDF.TYPE, null);
     }
   }
 

@@ -1,12 +1,17 @@
 package fr.sparna.rdf.xls2rdf;
 
-import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
-import org.eclipse.rdf4j.repository.Repository;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.rdf4j.repository.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
+
 public class Xls2RdfConverterFactory {
+	
+	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
 	private boolean applyPostProcessings = true;
 	private boolean generateXl = false;
@@ -35,14 +40,20 @@ public class Xls2RdfConverterFactory {
 		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter, lang);
 		if(this.applyPostProcessings) {
 			List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();
+			// add QB post processor
+			postProcessors.add(new QBPostProcessor());
+			// add SKOS post processor
 			postProcessors.add(new SkosPostProcessor(this.generateBroaderTransitive));
+			// if needed, add SKOS-XL post-processor
 			if(this.generateXl || this.generateXlDefinitions) {
 				postProcessors.add(new SkosXlPostProcessor(generateXl, generateXlDefinitions));
 			}
+			
 			converter.setPostProcessors(postProcessors);
 		}
 		
 		if(this.supportRepository != null) {
+			log.info("Setting a support repository that contains "+this.supportRepository.getConnection().size()+" triples");
 			converter.setReconcileService(new SparqlReconcileService(this.supportRepository));
 		}
 		

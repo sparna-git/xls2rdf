@@ -33,16 +33,16 @@ public class SparqlReconcileService implements ReconcileServiceIfc {
 				ReconcileQueryIfc aQuery = anEntry.getValue();
 				
 				String sparql = ""
-						+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
-						+ "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> "
-						+ "PREFIX foaf: <http://xmlns.com/foaf/0.1/> "
-						+ "PREFIX dct: <http://purl.org/dc/terms/> "
-						+ "PREFIX dc: <http://purl.org/dc/elements/1.1/> "
-						+ "PREFIX schema: <http://schema.org/> "
-						+ "SELECT ?x WHERE { "
-						+ " ?x rdfs:label|skos:prefLabel|skos:altLabel|skos:notation|foaf:name|dct:title|dc:title|dct:identifier|dc:identifier|schema:name ?literal ."
-						+ " FILTER(LCASE(STR(?literal)) = LCASE(\"%s\") )"
-						+ " %s "
+						+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+"\n"
+						+ "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> "+"\n"
+						+ "PREFIX foaf: <http://xmlns.com/foaf/0.1/> "+"\n"
+						+ "PREFIX dct: <http://purl.org/dc/terms/> "+"\n"
+						+ "PREFIX dc: <http://purl.org/dc/elements/1.1/> "+"\n"
+						+ "PREFIX schema: <http://schema.org/> "+"\n"
+						+ "SELECT ?x WHERE { "+"\n"
+						+ " ?x rdfs:label|skos:prefLabel|skos:altLabel|skos:notation|foaf:name|dct:title|dc:title|dct:identifier|dc:identifier|schema:name ?literal ."+"\n"
+						+ " FILTER(LCASE(STR(?literal)) = LCASE(\"%s\") )"+"\n"
+						+ " %s "+"\n"
 						+ "}"
 						;
 				
@@ -53,6 +53,7 @@ public class SparqlReconcileService implements ReconcileServiceIfc {
 				);
 				
 				log.trace("Executing reconcile SPARQL : "+finalSparql);
+				// System.out.println("Executing reconcile SPARQL : "+finalSparql);
 				TupleQuery query = c.prepareTupleQuery(finalSparql);
 				query.evaluate(new AbstractTupleQueryResultHandler() {
 					
