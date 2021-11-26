@@ -72,7 +72,7 @@ public class RdfizableSheet {
 			log.debug(sheet.getSheetName()+" : B1 is empty.");
 			return false;
 		} else {
-			String fixedUri = converter.prefixManager.uri(uri, true);
+			String fixedUri = converter.prefixManager.uri(uri, false);
 			try {
 				new URI(fixedUri);
 			} catch (URISyntaxException e) {
