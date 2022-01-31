@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -662,7 +663,7 @@ public class Xls2RdfConverter {
 		bc.configure((LoggerContext) LoggerFactory.getILoggerFactory());
 		((ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("org.eclipse.rdf4j")).setLevel(ch.qos.logback.classic.Level.INFO);
 		
-		
+		runLikeInSkosPlay(new FileInputStream(args[0]), System.out, "en");
 		// Method 1 : save each scheme to a separate directory
 //		DirectoryModelWriter writer = new DirectoryModelWriter(new File("/home/thomas/sparna/00-Clients/Luxembourg/02-Migration/controlled-vocabularies-xls2skos/cv-from-xls2skos"));
 //		writer.setSaveGraphFile(true);
@@ -672,16 +673,16 @@ public class Xls2RdfConverter {
 		// OutputStreamModelWriter ms = new OutputStreamModelWriter(new File("/home/thomas/controlled-vocabularies.ttl"));
 		
 		// Method 3 : save each scheme to a separate entry in a ZIP file.
-		ZipOutputStreamModelWriter writer = new ZipOutputStreamModelWriter(new File("/home/thomas/sparna/00-Clients/Luxembourg/02-Migration/controlled-vocabularies-xls2skos/cv-from-xls2skos.zip"));
-		writer.setSaveGraphFile(true);
-		writer.setGraphSuffix("/graph");
+		// ZipOutputStreamModelWriter writer = new ZipOutputStreamModelWriter(new File("/home/thomas/sparna/00-Clients/Luxembourg/02-Migration/controlled-vocabularies-xls2skos/cv-from-xls2skos.zip"));
+		// writer.setSaveGraphFile(true);
+		// writer.setGraphSuffix("/graph");
 		
-		Xls2RdfConverter me = new Xls2RdfConverter(writer, "fr");
-		me.setPostProcessors(Collections.singletonList(new SkosPostProcessor(false)));
+		// Xls2RdfConverter me = new Xls2RdfConverter(writer, "fr");
+		// me.setPostProcessors(Collections.singletonList(new SkosPostProcessor(false)));
 		
 		// me.loadAllToFile(new File("/home/thomas/sparna/00-Clients/Sparna/20-Repositories/sparna/fr.sparna/rdf/skos/xls2skos/src/test/resources/test-excel-saved-from-libreoffice.xlsx"));
 		// me.loadAllToFile(new File("/home/thomas/sparna/00-Clients/Sparna/20-Repositories/sparna/fr.sparna/rdf/skos/xls2skos/src/test/resources/test-libreoffice.ods"));
-		me.processFile(new File("/home/thomas/sparna/00-Clients/Luxembourg/02-Migration/controlled-vocabularies-xls2skos/jolux-controlled-voc-travail-20161026-recup.xlsx"));
+		// me.processFile(new File("/home/thomas/sparna/00-Clients/Luxembourg/02-Migration/controlled-vocabularies-xls2skos/jolux-controlled-voc-travail-20161026-recup.xlsx"));
 		// me.processFile(new File("/home/thomas/sparna/00-Clients/Luxembourg/02-Migration/jolux-controlled-voc-travail-20161012.xlsx"));
 	}
 	
