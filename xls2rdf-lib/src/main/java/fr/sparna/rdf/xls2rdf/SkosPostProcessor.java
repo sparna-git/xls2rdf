@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.rdf4j.model.Model;
@@ -111,7 +112,10 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 
       // add a skos:inScheme to every skos:Concept or skos:Collection or skos:OrderedCollection that was created
       log.debug("Adding skos:inScheme");
-      model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
+      // we are doing this to avoid some concurrent modification exception
+      List<Statement> statements = model.filter(null, RDF.TYPE, SKOS.CONCEPT).stream().collect(Collectors.toList());
+      statements.forEach(
+      // model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
               s -> {
                 model.add(((Resource) s.getSubject()), SKOS.IN_SCHEME, mainResource);
               }
