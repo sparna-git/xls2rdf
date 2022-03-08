@@ -236,8 +236,8 @@ public class RdfizableSheet {
 	public Map<String, String> readPrefixes() {
 		Map<String, String> prefixes = new HashMap<String, String>();
 		
-		// read the prefixes in the top 20 rows		
-		for (int rowIndex = 1; rowIndex <= 20; rowIndex++) {
+		// read the prefixes in the top 40 rows		
+		for (int rowIndex = 1; rowIndex <= 40; rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
 				String prefixKeyword = getCellValue(sheet.getRow(rowIndex).getCell(0));
 				// if we have the "prefix" keyword...
