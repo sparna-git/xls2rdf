@@ -77,7 +77,17 @@ public class Xls2RdfRestController {
 
 					ByteArrayOutputStream responseOutputStream = new ByteArrayOutputStream();
 					try (var openedIn = in) {
-						List<String> cvIds = this.xls2RdfService.convert(openedIn, responseOutputStream, language, theFormat, useSkosXl, broaderTransitive, ignorePostProc);
+						List<String> cvIds = this.xls2RdfService.convert(
+								openedIn,
+								responseOutputStream,
+								language,
+								theFormat,
+								useSkosXl,
+								broaderTransitive,
+								ignorePostProc,
+								//fail if no reconcile
+								false
+						);
 
 						Collections.sort(cvIds);
 						cvIds.stream().map(cv -> "Converted Graph: " + cv).forEach(log::info);

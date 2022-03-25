@@ -21,13 +21,20 @@ public class Xls2RdfService {
 					RDFFormat format,
 					boolean skosxl,
 					boolean broaderTransitive,
-					boolean ignorePostProc
+					boolean ignorePostProc,
+					boolean failIfNoReconcile
 	) {
 		ModelWriterFactory factory = new ModelWriterFactory(false, format, false);
 		
 		ModelWriterIfc modelWriter = factory.buildNewModelWriter(output);
 		
-		Xls2RdfConverterFactory converterFactory = new Xls2RdfConverterFactory(!ignorePostProc, skosxl, skosxl, broaderTransitive);
+		Xls2RdfConverterFactory converterFactory = new Xls2RdfConverterFactory(
+				!ignorePostProc,
+				skosxl,
+				skosxl,
+				broaderTransitive,
+				failIfNoReconcile
+		);
 		
 		Xls2RdfConverter converter = converterFactory.newConverter(modelWriter, lang);
 		

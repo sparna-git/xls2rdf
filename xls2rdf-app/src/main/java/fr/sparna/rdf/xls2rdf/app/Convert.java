@@ -78,7 +78,13 @@ public class Convert implements CliCommandIfc {
 		}
 		
 		log.debug("Will use ModelWriter : "+modelWriter.getClass().getName());
-		Xls2RdfConverterFactory converterFactory = new Xls2RdfConverterFactory(!a.isNoPostProcessings(), a.isXlify(), a.isXlifyDefinitions(), a.isBroaderTransitiveify());
+		Xls2RdfConverterFactory converterFactory = new Xls2RdfConverterFactory(
+				!a.isNoPostProcessings(),
+				a.isXlify(),
+				a.isXlifyDefinitions(),
+				a.isBroaderTransitiveify(),
+				a.isFailIfNoReconcile()
+		);
 		
 		Repository supportRepository = new SailRepository(new MemoryStore());
 		supportRepository.init();
