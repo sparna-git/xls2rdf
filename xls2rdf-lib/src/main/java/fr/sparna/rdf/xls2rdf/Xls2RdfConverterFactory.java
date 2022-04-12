@@ -16,7 +16,7 @@ public class Xls2RdfConverterFactory {
 	private boolean applyPostProcessings = true;
 	private boolean generateXl = false;
 	private boolean generateXlDefinitions = false;
-	private boolean failIfNoReconcile = true;
+	private boolean noFailOnReconcile = false;
 	private final boolean generateBroaderTransitive;
 	private Repository supportRepository = null;
 	
@@ -25,14 +25,14 @@ public class Xls2RdfConverterFactory {
 			boolean generateXl,
 			boolean generateXlDefinitions,
 			boolean generateBroaderTransitive,
-			boolean failIfNoReconcile
+			boolean noFailOnReconcile
 	) {
 		super();
 		this.applyPostProcessings = applyPostProcessings;
 		this.generateXl = generateXl;
 		this.generateXlDefinitions = generateXlDefinitions;
 		this.generateBroaderTransitive = generateBroaderTransitive;
-		this.failIfNoReconcile = failIfNoReconcile;
+		this.noFailOnReconcile = noFailOnReconcile;
 	}
 	
 	public Xls2RdfConverter newConverter(Repository outputRepository, String lang) {
@@ -65,7 +65,7 @@ public class Xls2RdfConverterFactory {
 			converter.setReconcileService(new SparqlReconcileService(this.supportRepository));
 		}
 		
-		converter.setFailIfNoReconcile(this.failIfNoReconcile);
+		converter.setFailIfNoReconcile(!this.noFailOnReconcile);
 		
 		return converter;
 	}
@@ -102,12 +102,12 @@ public class Xls2RdfConverterFactory {
 		this.supportRepository = supportRepository;
 	}
 
-	public boolean isFailIfNoReconcile() {
-		return failIfNoReconcile;
+	public boolean isNoFailOnReconcile() {
+		return noFailOnReconcile;
 	}
 
-	public void setFailIfNoReconcile(boolean failIfNoReconcile) {
-		this.failIfNoReconcile = failIfNoReconcile;
+	public void setNoFailOnReconcile(boolean noFailOnReconcile) {
+		this.noFailOnReconcile = noFailOnReconcile;
 	}
 	
 }

@@ -82,11 +82,11 @@ public class ArgumentsConvert {
 	private File externalData;
 	
 	@Parameter(
-			names = { "-fr", "--failIfNoReconcile" },
-			description = "Fail if a value to be reconciled is not found in the reconciled data",
+			names = { "-nrf", "--noReconcileFail" },
+			description = "Does not fait if a value to be reconciled cannot be found in the reconciled data",
 			required = false
 	)
-	private boolean failIfNoReconcile = true;
+	private boolean noReconcileFail = false;
 
 	@Parameter(
 			names = { "-p", "--pretty" },
@@ -191,12 +191,12 @@ public class ArgumentsConvert {
 		this.pretty = pretty;
 	}
 
-	public boolean isFailIfNoReconcile() {
-		return failIfNoReconcile;
+	public boolean isNoReconcileFail() {
+		return noReconcileFail;
 	}
 
-	public void setFailIfNoReconcile(boolean failIfNoReconcile) {
-		this.failIfNoReconcile = failIfNoReconcile;
+	public void setNoReconcileFail(boolean noReconcileFail) {
+		this.noReconcileFail = noReconcileFail;
 	}
 	
 }
