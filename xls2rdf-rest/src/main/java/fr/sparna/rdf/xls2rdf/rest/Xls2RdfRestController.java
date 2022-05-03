@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,7 +35,7 @@ public class Xls2RdfRestController {
 	@Autowired
 	private Xls2RdfService xls2RdfService;	
 
-	@RequestMapping(value = "/convert", method = RequestMethod.GET)
+	@RequestMapping(value = "/convert", method = RequestMethod.GET, params = {"url"})
 	public ResponseEntity<ByteArrayResource> convertRDF(
 			@RequestParam(value="lang", required=false) String language,
 			@RequestParam(value="url", required=true) String url,
@@ -100,6 +101,13 @@ public class Xls2RdfRestController {
 			throw new RuntimeException(e);
 		}
 	}
+
+	@RequestMapping(value = "/convert", method = RequestMethod.GET)
+	public ModelAndView home() {
+		return new ModelAndView("forward:/index.html");
+	}
+
+
 
 	static ResponseEntity<ByteArrayResource> transformToByteArrayResource(
 			String filename,
