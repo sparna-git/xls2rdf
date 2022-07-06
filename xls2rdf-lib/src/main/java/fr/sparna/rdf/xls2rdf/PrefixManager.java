@@ -4,10 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.DCAT;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
@@ -25,6 +22,8 @@ public class PrefixManager {
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 	
 	private Map<String, String> prefixes = new HashMap<>();
+	// prefixes explicitely declared in the file
+	private Map<String, String> explicitelyDeclaredPrefixes = new HashMap<>();
 	
 	public PrefixManager() {
 		// always add some known namespaces
@@ -50,11 +49,15 @@ public class PrefixManager {
 	}
 	
 	public void register(String prefix, String uri) {
+		// store both in all prefixes and explicitely declared prefixes
 		this.prefixes.put(prefix, uri);
+		this.explicitelyDeclaredPrefixes.put(prefix, uri);
 	}
 	
 	public void register(Map<String, String> map) {
+		// store both in all prefixes and explicitely declared prefixes
 		this.prefixes.putAll(map);
+		this.explicitelyDeclaredPrefixes.putAll(map);
 	}
 	
 	public String expand(String shortForm) {
@@ -125,6 +128,22 @@ public class PrefixManager {
 
 	public Map<String, String> getPrefixes() {
 		return prefixes;
+	}
+
+	/**
+	 * Get the prefixes to be used in the output, by taking first the prefixes explicitely declared in the file
+	 * and then, only if not already explicitely mapped, the default known prefixes.
+	 * This garantees that e.g. "dcterms" is always used in the output if explicitely declared like that.
+	 */
+	public Map<String, String> getOutputPrefixes() {
+		Map<String, String> outputPrefixes = new HashMap<>();
+		outputPrefixes.putAll(this.explicitelyDeclaredPrefixes);
+		this.prefixes.entrySet().forEach(e -> { 
+			if(!outputPrefixes.containsValue(e.getValue())) {
+				outputPrefixes.put(e.getKey(),e.getValue());
+			}
+		});
+		return outputPrefixes;
 	}
 	
 }

@@ -372,7 +372,7 @@ public class Xls2RdfConverter {
 		
 		// writes the resulting Model
 		log.debug("Saving graph of "+model.size()+" statements generated from Sheet "+sheet.getSheetName());
-		modelWriter.saveGraphModel(csUri, model, prefixManager.getPrefixes());
+		modelWriter.saveGraphModel(csUri, model, prefixManager.getOutputPrefixes());
 		
 		// stores the idenifier of generated vocabulary
 		convertedVocabularyIdentifiers.add(csUri);

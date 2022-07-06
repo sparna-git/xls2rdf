@@ -230,7 +230,7 @@ public class RdfizableSheet {
 	}
 	
 	/**
-	 * Reads the prefixes declared in the sheet. The prefixes are read in the top 20 rows, when column A contains "PREFIX" or "@prefix" (ignoring case).
+	 * Reads the prefixes declared in the sheet. The prefixes are read in the top 40 rows, when column A contains "PREFIX" or "@prefix" (ignoring case).
 	 * @return the map of prefixes
 	 */
 	public Map<String, String> readPrefixes() {

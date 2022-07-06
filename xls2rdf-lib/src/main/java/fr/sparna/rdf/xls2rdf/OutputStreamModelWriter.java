@@ -8,14 +8,12 @@ import java.util.Map;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandler;
-import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.eclipse.rdf4j.rio.helpers.BufferedGroupingRDFHandler;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
@@ -86,8 +84,6 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 		try(RepositoryConnection c = this.outputRepository.getConnection()) {
 			c.setNamespace("skos", SKOS.NAMESPACE);
 			c.setNamespace("skosxl", SKOSXL.NAMESPACE);
-			c.setNamespace("euvoc", "http://publications.europa.eu/ontology/euvoc#");
-			c.setNamespace("dcterms", DCTERMS.NAMESPACE);
 			c.export(handler);
 		}
 		
