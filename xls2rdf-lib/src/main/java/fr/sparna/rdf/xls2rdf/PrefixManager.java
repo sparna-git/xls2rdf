@@ -42,6 +42,7 @@ public class PrefixManager {
 		prefixes.put("dcat", DCAT.NAMESPACE);
 		prefixes.put("xsd", XMLSchema.NAMESPACE);
 		prefixes.put("adms", "http://www.w3.org/ns/adms#");
+		prefixes.put("doap", "http://usefulinc.com/ns/doap#");
 		prefixes.put("qb", "http://purl.org/linked-data/cube#");
 		prefixes.put("euvoc", "http://publications.europa.eu/ontology/euvoc#");
 		prefixes.put("sh", "http://www.w3.org/ns/shacl#");
