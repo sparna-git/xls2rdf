@@ -285,6 +285,14 @@ public class Xls2RdfConverter {
 							prefixManager
 					);
 					
+					// support separator option in the header
+					if(header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR) != null) {
+						cellProcessor = processorFactory.split(
+								cellProcessor,
+								header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR)
+						);
+					} 
+					
 					log.debug("Adding value on header object \""+value+"\" with lang "+header.getLanguage().orElse(this.lang));
 					cellProcessor.processValue(
 							model,
