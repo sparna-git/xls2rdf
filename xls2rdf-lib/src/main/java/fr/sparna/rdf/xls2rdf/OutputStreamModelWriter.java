@@ -68,7 +68,7 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 	@Override
 	public void beginWorkbook() {
 		this.outputRepository = new SailRepository(new MemoryStore());
-		this.outputRepository.initialize();
+		this.outputRepository.init();
 
 	}
 

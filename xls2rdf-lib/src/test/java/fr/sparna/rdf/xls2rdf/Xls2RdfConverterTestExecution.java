@@ -83,7 +83,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 		final File external = new File(this.testFolder, "external.ttl");
 		if(external.exists()) {
 			Repository externalRepository = new SailRepository(new MemoryStore());
-			externalRepository.initialize();
+			externalRepository.init();
 			try(RepositoryConnection c = externalRepository.getConnection()) {
 				c.add(Rio.parse(new FileInputStream(external), external.toURI().toURL().toString(), RDFFormat.TURTLE));
 			} catch (Exception e) {
@@ -107,7 +107,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 		
 		// reput everything in flat repositories for proper comparisons without the graphs
 		Repository outputRepositoryToCompare = new SailRepository(new MemoryStore());
-		outputRepositoryToCompare.initialize();
+		outputRepositoryToCompare.init();
 		
 		Model outputModel = new LinkedHashModelFactory().createEmptyModel();
 		try(RepositoryConnection connection = outputRepository.getConnection()) {
@@ -133,7 +133,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 		
 		if(expected.exists()) {
 			Repository expectedRepository = new SailRepository(new MemoryStore());
-			expectedRepository.initialize();
+			expectedRepository.init();
 			try(RepositoryConnection expectedConnection = expectedRepository.getConnection()) {
 				expectedConnection.add(Rio.parse(new FileInputStream(expected), expected.toURI().toURL().toString(), RDFFormat.TURTLE));
 			} catch (Exception e) {

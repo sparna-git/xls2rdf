@@ -63,7 +63,7 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 	
 	public void exportModel(Model model, RDFHandler handler, Map<String, String> prefixes) {
 		Repository r = new SailRepository(new MemoryStore());
-		r.initialize();
+		r.init();
 		try(RepositoryConnection c = r.getConnection()) {
 			// register the prefixes
 			prefixes.entrySet().forEach(e -> c.setNamespace(e.getKey(), e.getValue()));

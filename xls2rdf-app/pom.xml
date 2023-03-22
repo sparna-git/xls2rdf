@@ -5,7 +5,7 @@
     <parent>
         <groupId>fr.sparna.rdf.xls2rdf</groupId>
         <artifactId>xls2rdf-pom</artifactId>
-        <version>2.2.0</version>
+        <version>2.3.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -121,13 +121,14 @@
         <dependency>
             <groupId>fr.sparna.rdf.xls2rdf</groupId>
             <artifactId>xls2rdf-lib</artifactId>
-            <version>2.2.0</version>
+            <version>2.3.0</version>
         </dependency>
 
 		<dependency>
-			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-runtime</artifactId>
-		</dependency>
+              <groupId>org.eclipse.rdf4j</groupId>
+              <artifactId>rdf4j-storage</artifactId>
+              <type>pom</type>
+        </dependency>
 
         <!-- for command-line parsing -->
         <dependency>
