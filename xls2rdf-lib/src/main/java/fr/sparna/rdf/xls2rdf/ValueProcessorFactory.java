@@ -236,13 +236,13 @@ public final class ValueProcessorFactory {
 
 	public ValueProcessorIfc turtleParsing(IRI property, PrefixManager prefixManager) {
 		return (model, subject, value, cell, language) -> {
-			// create a small piece of Tutle by concatenating...
+			// create a small piece of Turtle by concatenating...
 			StringBuffer turtle = new StringBuffer();
 			// ... the prefixes				
 			turtle.append(prefixManager.getPrefixesTurtleHeader());
 			// ... the subject and the predicate
 			turtle.append("<"+subject.stringValue()+">"+" "+"<"+property.stringValue()+"> ");
-			// ... the blank node value
+			// ... the value (blank node or list or value with datatype or language)
 			turtle.append(value);
 			// ... and a final dot if there is not one already at the end
 			if(!normalizeSpace(value).endsWith(".")) {
@@ -341,13 +341,13 @@ public final class ValueProcessorFactory {
 				return null;
 			}
 			
-			IRI datatype = header.getDatatype().orElse(null);
+			IRI headerDatatype = header.getDatatype().orElse(null);
 			String headerLanguage = header.getLanguage().orElse(null);
 
 			// if the value starts with http, or uses a known namespace, then try to parse it as a resource
 			// only if no datatype or language have been explicitely specified, in which case this will default to a literal
 			if(
-					datatype == null
+					headerDatatype == null
 					&&
 					headerLanguage == null
 					&&
@@ -358,21 +358,33 @@ public final class ValueProcessorFactory {
 				} else {
 					model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(normalizeSpace(value), false)), header.getProperty(),subject);
 				}			
-			} else if(datatype == null && headerLanguage == null && value.startsWith("(") && value.endsWith(")")) {
+			} else if(headerDatatype == null && headerLanguage == null && value.startsWith("(") && value.endsWith(")")) {
 				// handle rdf:list
 				turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);	
-			} else if(datatype == null && headerLanguage == null && value.startsWith("[") && value.endsWith("]")) {
+			} else if(headerDatatype == null && headerLanguage == null && value.startsWith("[") && value.endsWith("]")) {
 				// handle blank nodes
+				turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
+			} else if(
+					value.startsWith("\"")
+					&&
+					(
+							value.contains("\"^^")
+							||
+							value.contains("\"@")
+					)
+			) {
+				// handle cells that explicitly indicate a datatype or a language
+				// in that case it has precedence over the ones indicated in the header
 				turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
 			} else {
 				// if the value is surrounded with quotes, remove them, they were here to escape a URI to be considered as a literal
 				String unescapedValue = (value.startsWith("\"") && value.endsWith("\""))?value.substring(1, value.length()-1):value;
 				
 				// consider it like a literal
-				if(datatype != null) {
+				if(headerDatatype != null) {
 					Literal l = null;
 					
-					if(datatype.stringValue().equals(XMLSchema.DATE.stringValue())) {
+					if(headerDatatype.stringValue().equals(XMLSchema.DATE.stringValue())) {
 						try {
 							Date d = ExcelHelper.asCalendar(normalizeSpace(unescapedValue)).getTime();
 							l = SimpleValueFactory.getInstance().createLiteral(
@@ -385,7 +397,7 @@ public final class ValueProcessorFactory {
 							if(
 									normalizeSpace(unescapedValue).matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]")
 							) {
-								l = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(unescapedValue), datatype);
+								l = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(unescapedValue), headerDatatype);
 							} 
 							
 							// let's be smart and try to match french-formatted dates as well
@@ -395,7 +407,7 @@ public final class ValueProcessorFactory {
 								try {
 									SimpleDateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
 									SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
-									l = SimpleValueFactory.getInstance().createLiteral(sdf2.format(sdf1.parse(normalizeSpace(unescapedValue))), datatype);
+									l = SimpleValueFactory.getInstance().createLiteral(sdf2.format(sdf1.parse(normalizeSpace(unescapedValue))), headerDatatype);
 								} catch (ParseException e1) {
 									e1.printStackTrace();
 									this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse date format for value '"+ value +"'. Is the cell formatted as a date ?");
@@ -406,7 +418,7 @@ public final class ValueProcessorFactory {
 								this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse date format for value '"+ value +"'. Is the cell formatted as a date ?");
 							}
 						}
-					} else if(datatype.stringValue().equals(XMLSchema.DATETIME.stringValue())) {
+					} else if(headerDatatype.stringValue().equals(XMLSchema.DATETIME.stringValue())) {
 						try {
 							try {
 								l = SimpleValueFactory.getInstance().createLiteral(DatatypeFactory.newInstance().newXMLGregorianCalendar((GregorianCalendar)ExcelHelper.asCalendar(normalizeSpace(unescapedValue))));
@@ -420,14 +432,14 @@ public final class ValueProcessorFactory {
 							if(
 									normalizeSpace(unescapedValue).matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]")
 							) {
-								l = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(unescapedValue), datatype);
+								l = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(unescapedValue), headerDatatype);
 							} 
 							
 							if (l == null) {
 								this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse datetime format for value '"+ value +"'. Is the cell forma");
 							}
 						}
-					} else if(datatype.stringValue().equals(XMLSchema.BOOLEAN.stringValue())) {
+					} else if(headerDatatype.stringValue().equals(XMLSchema.BOOLEAN.stringValue())) {
 						List<String> TRUE_VALUES = Arrays.asList(new String[] { "true", "vrai", "1" });
 						List<String> FALSE_VALUES = Arrays.asList(new String[] { "false", "faux", "0" });
 						
@@ -439,14 +451,14 @@ public final class ValueProcessorFactory {
 							this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse boolean format for value '"+ value +"'");
 						} else {
 							if(TRUE_VALUES.contains(unescapedValue.toLowerCase())) {
-								l = SimpleValueFactory.getInstance().createLiteral("true", datatype);
+								l = SimpleValueFactory.getInstance().createLiteral("true", headerDatatype);
 							} else {
-								l = SimpleValueFactory.getInstance().createLiteral("false", datatype);
+								l = SimpleValueFactory.getInstance().createLiteral("false", headerDatatype);
 							}							
 						}
 					}
 					else {
-						l = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(unescapedValue), datatype);
+						l = SimpleValueFactory.getInstance().createLiteral(normalizeSpace(unescapedValue), headerDatatype);
 					}
 					
 					if(l != null) {
