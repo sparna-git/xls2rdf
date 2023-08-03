@@ -20,6 +20,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.rio.trig.TriGWriter;
+import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import java.io.File;
@@ -119,7 +120,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 			connection.export(new StatementCollector(outputModel));
 			
 			try {
-				final File output = new File(this.testFolder, "output.ttl");
+				final File output = new File(this.testFolder, "output.trig");
 				if(!output.exists()) {
 					output.createNewFile();
 				}
@@ -131,6 +132,16 @@ public class Xls2RdfConverterTestExecution implements Test {
 			
 			try(RepositoryConnection connectionToCompare = outputRepositoryToCompare.getConnection()) {
 				connectionToCompare.add(outputModel, (Resource)null);
+				try {
+					final File output = new File(this.testFolder, "output.ttl");
+					if(!output.exists()) {
+						output.createNewFile();
+					}
+					FileOutputStream out = new FileOutputStream(output);
+					connection.export(new TurtleWriter(out));
+				} catch (Exception e) {
+					result.addError(this, e);
+				}
 			}
 		}
 		

@@ -7,6 +7,7 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.sparna.rdf.xls2rdf.postprocess.OWLPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.QBPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosXlPostProcessor;
@@ -54,6 +55,8 @@ public class Xls2RdfConverterFactory {
 			List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();
 			// add QB post processor
 			postProcessors.add(new QBPostProcessor());
+			// add OWL post process
+			postProcessors.add(new OWLPostProcessor());
 			// add SKOS post processor
 			postProcessors.add(new SkosPostProcessor(this.generateBroaderTransitive));
 			// if needed, add SKOS-XL post-processor

@@ -465,7 +465,10 @@ public final class ValueProcessorFactory {
 					if(l != null) {
 						model.add(subject, header.getProperty(), l);
 					}
-				} else {
+				} else if(value.startsWith("_:")) {
+					model.add(subject, header.getProperty(), SimpleValueFactory.getInstance().createBNode(value.substring(2)));
+				}
+				else {
 					langOrPlainLiteral(header.getProperty()).processValue(model, subject, value, cell, language);
 				}
 			}

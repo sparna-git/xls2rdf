@@ -538,9 +538,14 @@ public class Xls2RdfConverter {
 				
 				if(currentSubject != null) {
 					try {
-						rowBuilder.setCurrentSubject(
-								prefixManager.uri(currentSubject, false)
-						);
+						Resource currentSubjectResource;
+						if(currentSubject.startsWith("_:")) {
+							currentSubjectResource = SimpleValueFactory.getInstance().createBNode(currentSubject.substring(2));
+						} else {
+							currentSubjectResource = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(currentSubject, false));
+						}
+						
+						rowBuilder.setCurrentSubject(currentSubjectResource);
 					} catch (Exception e) {
 						e.printStackTrace();
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -602,8 +607,8 @@ public class Xls2RdfConverter {
 			}
 		}
 
-		public void setCurrentSubject(String currentSubject) {
-			this.currentSubject = SimpleValueFactory.getInstance().createIRI(currentSubject);
+		public void setCurrentSubject(Resource currentSubject) {
+			this.currentSubject = currentSubject;
 		}
 		
 		public void resetCurrentSubject() {

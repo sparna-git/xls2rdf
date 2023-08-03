@@ -12,10 +12,13 @@ import org.eclipse.rdf4j.model.vocabulary.FOAF;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.SHACL;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.postprocess.OWLPostProcessor.XLS2RDF;
 
 public class PrefixManager {
 
@@ -45,9 +48,10 @@ public class PrefixManager {
 		prefixes.put("doap", "http://usefulinc.com/ns/doap#");
 		prefixes.put("qb", "http://purl.org/linked-data/cube#");
 		prefixes.put("euvoc", "http://publications.europa.eu/ontology/euvoc#");
-		prefixes.put("sh", "http://www.w3.org/ns/shacl#");
+		prefixes.put("sh", SHACL.NAMESPACE);
 		prefixes.put("isothes", "http://purl.org/iso25964/skos-thes#");
 		prefixes.put("skosthes", "http://purl.org/iso25964/skos-thes#");
+		prefixes.put("xls2rdf", XLS2RDF.NAMESPACE);
 	}
 	
 	public void register(String prefix, String uri) {
