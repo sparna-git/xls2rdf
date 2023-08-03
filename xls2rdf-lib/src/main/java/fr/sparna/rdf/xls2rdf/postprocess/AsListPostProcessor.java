@@ -30,7 +30,6 @@ public class AsListPostProcessor implements Xls2RdfPostProcessorIfc {
 		
 		for (ColumnHeader aHeader : columnHeaders) {
 			if(aHeader.isAsList()) {
-				System.out.println("**** !!! post processing !");
 				Model toRemove = new LinkedHashModel();
 				Model toAdd = new LinkedHashModel();
 				// fetch all subject that have this predicate
