@@ -6,6 +6,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 
+import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
 public class RowHeaderLinkPostProcessor implements Xls2RdfPostProcessorIfc {
@@ -20,7 +21,7 @@ public class RowHeaderLinkPostProcessor implements Xls2RdfPostProcessorIfc {
 	}
 
 	@Override
-	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources) {
+	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders) {
 		rowResources.stream().forEach(rowResource -> {
 			if(
 					!this.addOnlyIfNotPresent

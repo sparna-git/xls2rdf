@@ -13,7 +13,8 @@ public interface Xls2RdfPostProcessorIfc {
 	 * @param model full model containing all converted statements
 	 * @param mainResource resource declared in the sheet header
 	 * @param rowResources resources generated from each row (URI in the first column)
+	 * @param columnNames original column headers
 	 */
-	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources);
+	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders);
 	
 }

@@ -3,6 +3,7 @@ package fr.sparna.rdf.xls2rdf;
 import ch.qos.logback.classic.BasicConfigurator;
 import ch.qos.logback.classic.LoggerContext;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.postprocess.AsListPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.reconcile.DynamicReconciliableValueSet;
 import fr.sparna.rdf.xls2rdf.reconcile.PreloadedReconciliableValueSet;
@@ -310,9 +311,10 @@ public class Xls2RdfConverter {
 		}		
 
 		List<Resource> rowResources = new ArrayList<>();
+		List<ColumnHeader> columnNames = new ArrayList<>();
 		if(rdfizableSheet.hasDataSection()) {
 			// read the column names from the header row
-			List<ColumnHeader> columnNames = rdfizableSheet.getColumnHeaders();
+			columnNames = rdfizableSheet.getColumnHeaders();
 			
 			log.debug("Converting data with these column headers: ");
 			for (ColumnHeader columnHeader : columnNames) {
@@ -372,11 +374,13 @@ public class Xls2RdfConverter {
 			log.info("Sheet has no title row, skipping data processing.");
 		}
 		
-		
+		// always post-process with asList
+		AsListPostProcessor alpp = new AsListPostProcessor();
+		alpp.afterSheet(model, csResource, rowResources, columnNames);
 		if(this.postProcessors != null && this.postProcessors.size() > 0) {
 			log.info("Applying SKOS post-processings on the result");
 			for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
-				aProcessor.afterSheet(model, csResource, rowResources);
+				aProcessor.afterSheet(model, csResource, rowResources, columnNames);
 			}
 		} else {
 			log.info("No post-processings to apply");

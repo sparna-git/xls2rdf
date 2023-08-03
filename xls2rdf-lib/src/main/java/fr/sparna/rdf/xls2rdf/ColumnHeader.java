@@ -21,6 +21,7 @@ public class ColumnHeader {
 	public static final String PARAMETER_ID = "id";
 	public static final String PARAMETER_IGNORE_IF_PARENTHESIS = "ignoreIfParenthesis";
 	public static final String PARAMETER_IGNORE_IF = "ignoreIf";
+	public static final String PARAMETER_AS_LIST = "asList";
 	
 	public static enum RECONCILE_VALUES {
 		external,
@@ -160,8 +161,16 @@ public class ColumnHeader {
 		return getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF_PARENTHESIS) != null && Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF_PARENTHESIS));
 	}
 	
+	public boolean isAsList() {
+		return getParameters().get(ColumnHeader.PARAMETER_AS_LIST) != null && Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_AS_LIST));
+	}
+	
 	public String getIgnoreIf() {
 		return (getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF) != null)?getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF):null;
+	}
+	
+	public boolean hasParameter(String parameter) {
+		return this.parameters.get(parameter) != null;
 	}
 
 	/**

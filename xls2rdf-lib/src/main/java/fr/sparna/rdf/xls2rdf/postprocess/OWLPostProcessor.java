@@ -18,6 +18,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
 public class OWLPostProcessor implements Xls2RdfPostProcessorIfc {
@@ -36,7 +37,7 @@ public class OWLPostProcessor implements Xls2RdfPostProcessorIfc {
 	}
 
 	@Override
-	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources) {
+	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders) {
 		log.debug("Postprocessing : "+this.getClass().getSimpleName());
 		
 		// if it is said in the graph that the main resource is an owl:Ontology...
@@ -44,6 +45,7 @@ public class OWLPostProcessor implements Xls2RdfPostProcessorIfc {
 				model.contains(mainResource, RDF.TYPE, OWL.ONTOLOGY)					
 		) {
 			log.debug("Detected a sheet with an owl:Ontology in the header");
+			
 			
 			// then every resource in the sheet without a type will be considered an Observation, linked to this Dataset
 			rowResources.stream().filter(r -> !model.filter(r, XLS2RDF.IS_COVERED_BY, null).isEmpty()).forEach(r -> {
