@@ -1,10 +1,12 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.postprocess;
 
 import java.util.List;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+
+import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
 public class RowHeaderLinkPostProcessor implements Xls2RdfPostProcessorIfc {
 

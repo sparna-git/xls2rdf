@@ -7,7 +7,11 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.sparna.rdf.xls2rdf.postprocess.QBPostProcessor;
+import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
+import fr.sparna.rdf.xls2rdf.postprocess.SkosXlPostProcessor;
 import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
+import fr.sparna.rdf.xls2rdf.write.RepositoryModelWriter;
 
 public class Xls2RdfConverterFactory {
 	

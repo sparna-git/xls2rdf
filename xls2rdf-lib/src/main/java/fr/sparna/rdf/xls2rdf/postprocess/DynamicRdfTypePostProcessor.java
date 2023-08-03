@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.postprocess;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -8,6 +8,8 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
 public class DynamicRdfTypePostProcessor implements Xls2RdfPostProcessorIfc {
 

@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.postprocess;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -17,6 +17,9 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.Xls2RdfException;
+import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
 public class SkosXlPostProcessor implements Xls2RdfPostProcessorIfc {
 

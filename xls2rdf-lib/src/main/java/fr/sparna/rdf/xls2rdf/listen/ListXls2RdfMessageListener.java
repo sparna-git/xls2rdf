@@ -1,7 +1,10 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.listen;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
 
 public class ListXls2RdfMessageListener implements Xls2RdfMessageListenerIfc {
 

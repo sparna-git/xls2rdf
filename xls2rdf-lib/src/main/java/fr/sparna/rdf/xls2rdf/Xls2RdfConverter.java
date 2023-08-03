@@ -2,11 +2,15 @@ package fr.sparna.rdf.xls2rdf;
 
 import ch.qos.logback.classic.BasicConfigurator;
 import ch.qos.logback.classic.LoggerContext;
+import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.reconcile.DynamicReconciliableValueSet;
 import fr.sparna.rdf.xls2rdf.reconcile.PreloadedReconciliableValueSet;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconcileServiceIfc;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
 import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
+import fr.sparna.rdf.xls2rdf.write.OutputStreamModelWriter;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -382,7 +386,7 @@ public class Xls2RdfConverter {
 		log.debug("Saving graph of "+model.size()+" statements generated from Sheet "+sheet.getSheetName());
 		modelWriter.saveGraphModel(csUri, model, prefixManager.getOutputPrefixes());
 		
-		// stores the idenifier of generated vocabulary
+		// stores the identifier of generated vocabulary
 		convertedVocabularyIdentifiers.add(csUri);
 		return model;
 	}

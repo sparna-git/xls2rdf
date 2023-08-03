@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.postprocess;
 
 import java.util.List;
 import java.util.Set;
@@ -13,6 +13,8 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
 public class QBPostProcessor implements Xls2RdfPostProcessorIfc {
 

@@ -13,6 +13,7 @@ import fr.sparna.rdf.xls2rdf.ColumnHeaderParser;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorFactory;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
+import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
 import junit.framework.Assert;
 
 public class ValueProcessorTest {

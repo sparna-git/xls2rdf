@@ -6,6 +6,10 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.sparna.rdf.xls2rdf.listen.ListXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
+import fr.sparna.rdf.xls2rdf.write.RepositoryModelWriter;
+
 import java.io.File;
 import java.util.Collections;
 

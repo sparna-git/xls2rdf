@@ -1,9 +1,10 @@
 package fr.sparna.rdf.xls2rdf.rest;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterFactory;
 import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverterFactory;
+import fr.sparna.rdf.xls2rdf.write.ModelWriterFactory;
+
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,9 @@
 package fr.sparna.rdf.xls2rdf;
 
+import fr.sparna.rdf.xls2rdf.postprocess.QBPostProcessor;
+import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
+import fr.sparna.rdf.xls2rdf.write.RepositoryModelWriter;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestResult;
