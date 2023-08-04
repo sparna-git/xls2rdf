@@ -11,6 +11,9 @@
 	  	border-bottom: 1px solid #e5e5e5;
 	  	margin-top:2em;
 	  }
+	  h3 {
+	  	margin-top:1.5em;
+	  }
 	  h4 {
 	  	margin-top:1.5em;
 	  }
@@ -206,36 +209,44 @@
 				
 				
 				<h2>Advanced features</h2>
-				
-				<h4>Creating blank nodes with [...]</h4>
-					<p />The converter understands the blank node syntax with "[...]" : simply put a cell value between square brackets and write the blank node data inside like you would do in a Turtle file.
-					This can be useful to generate references to reified SKOS definitions or SKOS-XL Labels. For example, if a cell with title <code>skos:definition</code> contains the following value :<br />
-					<code>[ rdf:value "Definition blah blah"; dcterms:created "2017-02-21"^^xsd:date ]</code>, then a reference to a blank node will be created. You need to use the prefixes defined in the file in your
-					blank node content. The blank node is parsed exactly as a piece of Turtle, so it can contain any piece of valid Turtle syntax. If anything goes wrong during the parsing, the converter
-					will generate a Literal with the cell content instead.
-				
-				<h4>Creating RDF lists with (...)</h4>
-					<p />The converter understands the RDF lists syntax with "(...)" : simply put a cell value between parenthesis and write the list items inside like you would do in a Turtle file : 
-					<code>(ex:concept1 ex:concept2 ex:concept3)</code>. You need to use the prefixes defined in the file in your list content. The list is parsed exactly as a piece of Turtle; 
-					if anything goes wrong during the parsing, the converter will generate a Literal with the cell content instead.
-				
-				<h4>Disabling cell conversion with a <strike>strikethrough</strike></h4>
-					<p />When working on a file, if you are unsure about the conversion of a certain cell but you don't want to delete the value, use a <strike>strikethrough font</strike> : the converter will ignore any
-					cell with such a font style. You can keep uncertain values in the files and simply change the font back to normal once the value is validated.
-					<p />
-				
-				<h4>Named graph management</h4>
-					<p />The converter actually puts all the triples generated in one sheet in a graph with the URI in cell B1. This is usually the same URI as the URI of the ConceptScheme;
-					but in case of processing generic RDF data, this cell B1 can be used to indicate the URI of the graph, with its associated metadata in the header.
-					<p />
-				
-				<h4>Changing Subject Column</h4>
+
+				<h3>Changing Subject Column</h3>
 					<p />By default, the property in each column is expressed on the subject URI of the first column of the spreadsheet. It is possible to state that a given column is expressed on a subject URI
 					in a different column on the table. To do this, add a column parameter <code>subjectColumn</code> with a reference to the column letter containing the URI of the subject.
 					For example <code>schema:name(subjectColumn="N")</code> means this column is the name of the URI stored in column N.
 					<p />This is how such a header could look like :
 				<img src="images/convert-screenshot-subjectColumn.png" width="100%" />
 				
+				<h3>Blank nodes</h3>
+
+				<h4>Blank nodes with [...]</h4>
+					<p />The converter understands the blank node syntax with "[...]" : simply put a cell value between square brackets and write the blank node data inside like you would do in a Turtle file.
+					This can be useful to generate references to reified SKOS definitions or SKOS-XL Labels. For example, if a cell with title <code>skos:definition</code> contains the following value :<br />
+					<code>[ rdf:value "Definition blah blah"; dcterms:created "2017-02-21"^^xsd:date ]</code>, then a reference to a blank node will be created. You need to use the prefixes defined in the file in your
+					blank node content. The blank node is parsed exactly as a piece of Turtle, so it can contain any piece of valid Turtle syntax. If anything goes wrong during the parsing, the converter
+					will generate a Literal with the cell content instead.
+
+				<h4>Blank nodes with <code>_:</code></h4>
+				<p />If a cell value starts with <code>_:</code>, then it is interpreted as a blank node identifier. This allow to refer to that blank node as the subject of other triples using the <code>subjectColumn</code> parameter of the header of another column.
+				<p />This is how it would look like :<br/>
+				<img src="images/convert-screenshot-blankNode.png" />
+				<p />This would create <code>ex:TEST ex:value [ rdfs:label "the label"@en ]</code>
+				
+				<h3>RDF Lists</h3>
+
+				<h4>RDF lists with (...)</h4>
+					<p />The converter understands the RDF lists syntax with "(...)" : simply put a cell value between parenthesis and write the list items inside like you would do in a Turtle file : 
+					<code>(ex:concept1 ex:concept2 ex:concept3)</code>. You need to use the prefixes defined in the file in your list content. The list is parsed exactly as a piece of Turtle; 
+					if anything goes wrong during the parsing, the converter will generate a Literal with the cell content instead.
+				
+				<h4>RDF lists with the <code>asList = "true"</code> parameter</h4>
+					<p />Apart from the ability to create lists using the "(...)" Turtle syntax, it is also possible to instruct the converter to turn all values of a single column on the same subject into an RDF list.
+					<p />For example the following sample file :<br/>
+					<img src="images/convert-screenshot-asList.png" />
+					<p />Will generate <code>ex:TEST ex:value (ex:1 ex:2)</code> instead of <code>ex:TEST ex:value ex:1, ex:2</code>
+				
+				<h3>Lookups and reconciliation</h3>
+
 				<h4>Referring to URIs using their labels</h4>
 					<p />SKOS involves creating hierarchies of concepts, and connecting related concepts. This involves making references to other concept URIs, typically in
 					a column <code>skos:broader</code>. But URIs can be opaque, and copy-pasting concept URIs across cells can be tedious. The lookupColumn parameter is a mechanism
@@ -277,12 +288,23 @@
 					</ul>
 					<img src="images/convert-screenshot-reconcileLocal.png" width="100%" />
 				
-				<h4>>Ignore values in parenthesis</h4>
+				<h3>Miscellaneous features</h3>
+
+				<h4>Named graph management</h4>
+					<p />The converter actually puts all the triples generated in one sheet in a graph with the URI in cell B1. This is usually the same URI as the URI of the ConceptScheme;
+					but in case of processing generic RDF data, this cell B1 can be used to indicate the URI of the graph, with its associated metadata in the header.
+					<p />
+
+				<h4>Disabling cell conversion with a <strike>strikethrough</strike></h4>
+					<p />When working on a file, if you are unsure about the conversion of a certain cell but you don't want to delete the value, use a <strike>strikethrough font</strike> : the converter will ignore any
+					cell with such a font style. You can keep uncertain values in the files and simply change the font back to normal once the value is validated.
+					<p />
+
+				<h4>Ignore values in parenthesis</h4>
 					<p />Add parameter <code>ignoreIfParenthesis="true"</code> to the column header parameters to ignore the values if they are between parenthesis. This can be combined with a separator, e.g.
 						<code>skos:broader(separator=";" ignoreIfParenthesis="true")</code>. In this case, if the cell value is "pollution;(water pollution)" then water pollution will be ignored.
 					<p />This can be used to maintain temporary values in the spreadsheet, waiting for further validation.
 					<p />
-				
 				
 				<h2>Default prefixes known in the converter</h2>
 				<p />This is the list of known prefixes in the converter. You don't have to declare them in the header.
@@ -314,6 +336,7 @@
 					<li><code>reconcile="local"</code> or <code>reconcile="external"</code> : whether to reconcile the value either locally or to an external reconcile endpoint (not implemented yet)</li>
 					<li><code>ignoreIfParenthesis="true"</code> whether to ignore the values if they are in parenthesis</li>
 					<li><code>ignoreIf="xxx"</code> indicate that the value xxx should be ignored when present in this column</li>
+					<li><code>asList="true"</code> indicate that all values of this column that are expressed on the same subject should instead be put in an RDF List. Instead of <code>ex:A ex:p ex:1, ex:2, ex:3</code> this would generate <code>ex:A ex:p (ex:1 ex:2 ex:3)</code>. Note that the order of items is **not** garanteed.</li>
 				</ul>
 			
 			</div>
