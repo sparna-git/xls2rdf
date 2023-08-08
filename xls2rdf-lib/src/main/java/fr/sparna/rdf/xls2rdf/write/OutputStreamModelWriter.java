@@ -80,7 +80,7 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 	public void endWorkbook() {
 		RDFHandler handler;
 		if(grouping) {
-			handler = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out));
+			handler = new BufferedGroupingRDFHandler(100000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out));
 		} else {
 			handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(out);
 		}
