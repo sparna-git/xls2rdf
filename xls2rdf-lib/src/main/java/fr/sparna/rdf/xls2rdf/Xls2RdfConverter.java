@@ -490,6 +490,10 @@ public class Xls2RdfConverter {
 				
 			}
 			
+			else if(header.isManchester()) {
+				cellProcessor = processorFactory.manchesterClassExpressionParser(header, prefixManager);
+			}
+			
 			// if this is not one of the known processor, but the property is known, then defaults to a generic processor
 			// also defaults to a generic processor if a custom datatype is declared on the property
 			else if(
