@@ -304,10 +304,11 @@
 				
 				<h4>How to use it ?</h4>
 				
-				<p />Append <code>(manchester="true")</code> to the property declaration in the title row (which would typically be <code>owl:equivalentClass</class>code> or <code>rdfs:subClassOf</code> if you are editing an OWL ontology),
+				<p />Append <code>(manchester="true")</code> to the property declaration in the title row (which would typically be <code>owl:equivalentClass</code> or <code>rdfs:subClassOf</code> if you are editing an OWL ontology),
 				in order to instruct the converter to actually parse the cells of this column using the Manchester syntax parser.
+				<p />Make sure you use prefixed URIs in your class expressions, using any the prefixes known in your spreadsheet.
 				<p />This is how it looks like:
-				<img src="images/convert-screenshot-manchester.png" width="100%" />
+				<img src="images/convert-screenshot-manchester.png" />
 				
 				<h3>Miscellaneous features</h3>
 
@@ -350,14 +351,17 @@
 				
 				<h2>Column header parameters reference</h2>
 				<ul>
-					<li><code>separator=";"</code> : specifies the separator to split cell in multiple values</li>
-					<li><code>id="theLabel"</code> : specifies the columnId to be used as a reference in subjectColumn or lookupColumn parameters</li>
-					<li><code>lookupColumn="skos:prefLabel"</code> or <code>lookupColumn="columnId"</code> or <code>lookupColumn="C"</code> : specifies the column to lookup the literal values to be converted to URIs</li>
-					<li><code>subjectColumn="dcterms:creator"</code> or <code>subjectColumn="columnId"</code> or <code>subjectColumn="C"</code> : specifies the column containing the URI of the subject for predicates generated from this column</li>
-					<li><code>reconcile="local"</code> or <code>reconcile="external"</code> : whether to reconcile the value either locally or to an external reconcile endpoint (not implemented yet)</li>
-					<li><code>ignoreIfParenthesis="true"</code> whether to ignore the values if they are in parenthesis</li>
-					<li><code>ignoreIf="xxx"</code> indicate that the value xxx should be ignored when present in this column</li>
+					
 					<li><code>asList="true"</code> indicate that all values of this column that are expressed on the same subject should instead be put in an RDF List. Instead of <code>ex:A ex:p ex:1, ex:2, ex:3</code> this would generate <code>ex:A ex:p (ex:1 ex:2 ex:3)</code>. Note that the order of items is **not** garanteed.</li>
+					<li><code>id="theLabel"</code> : specifies the columnId to be used as a reference in subjectColumn or lookupColumn parameters</li>
+					<li><code>ignoreIf="xxx"</code> indicate that the value xxx should be ignored when present in this column</li>
+					<li><code>ignoreIfParenthesis="true"</code> whether to ignore the values if they are in parenthesis</li>
+					<li><code>lookupColumn="skos:prefLabel"</code> or <code>lookupColumn="columnId"</code> or <code>lookupColumn="C"</code> : specifies the column to lookup the literal values to be converted to URIs</li>
+					<li><code>manchester="true"</code>  : Indicate that the values of this column should be parsed as Manchester OWL syntax class expressions</li>
+					<li><code>reconcile="local"</code> or <code>reconcile="external"</code> : whether to reconcile the value either locally or to an external reconcile endpoint (not implemented yet)</li>
+					<li><code>separator=";"</code> : specifies the separator to split cell in multiple values</li>
+					<li><code>subjectColumn="dcterms:creator"</code> or <code>subjectColumn="columnId"</code> or <code>subjectColumn="C"</code> : specifies the column containing the URI of the subject for predicates generated from this column</li>
+					
 				</ul>
 			
 			</div>
