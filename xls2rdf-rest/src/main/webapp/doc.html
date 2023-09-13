@@ -97,7 +97,7 @@
 		</div>
 		
 		<div class="row">
-			<div class="col-lg-12">
+			< class="col-lg-12">
 				<h2>Excel File structure</h2>
 				<p>Your excel file <strong>MUST</strong> follow the structure described below to be converted to RDF. Otherwise you will get an exception or an empty RDF file.
 				Download and look at <a href="#source-example">the examples above</a>.</p>
@@ -287,6 +287,27 @@
 						<li><code>schema:name</code></li>
 					</ul>
 					<img src="images/convert-screenshot-reconcileLocal.png" width="100%" />
+				
+				
+				<h3>Support for OWL Manchester Syntax class expressions</h3>
+				
+				<h4>What is it ?</h4>
+				
+					<p />The <a href="https://www.w3.org/TR/owl2-manchester-syntax/">Manchester Syntax</a> is a [quote]user-friendly[/quote] way of serializing OWL ontologies. Well, at least more user-friendly than RDF/XML
+					(what could be *less* user-friendly ?). In particular it has this <a href="http://protegeproject.github.io/protege/class-expression-syntax/">nice class expression syntax</a> that we all know if we use Protégé,
+					with keywords <code>some</code>, <code>only</code>, <code>and</code>, <code>or</code>, parenthesis, etc. These class expressions, if you want to produce them by stating the corresponding triples, turn out to be
+					horribly difficult to produce.
+					<p />That's why this Excel converter integrates the <a href="https://github.com/owlcs/owlapi">OWLAPI</a> to benefit from its <a href="http://owlcs.github.io/owlapi/apidocs_5/org/semanticweb/owlapi/util/mansyntax/ManchesterOWLSyntaxParser.html">
+						OWL Manchester syntax parser</a>, in order to be able to parse class expressions like <code>:x some :A and not(:y some :B)</code>, and get the corresponding triples out.
+					<p />This is useful to create and maintain full-fledged OWL ontologies in Excel tables.
+				
+				
+				<h4>How to use it ?</h4>
+				
+				<p />Append <code>(manchester="true")</code> to the property declaration in the title row (which would typically be <code>owl:equivalentClass</class>code> or <code>rdfs:subClassOf</code> if you are editing an OWL ontology),
+				in order to instruct the converter to actually parse the cells of this column using the Manchester syntax parser.
+				<p />This is how it looks like:
+				<img src="images/convert-screenshot-manchester.png" width="100%" />
 				
 				<h3>Miscellaneous features</h3>
 
