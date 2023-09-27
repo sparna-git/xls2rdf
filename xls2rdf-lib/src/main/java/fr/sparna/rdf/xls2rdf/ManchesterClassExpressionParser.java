@@ -23,7 +23,6 @@ import org.eclipse.rdf4j.rio.RDFParserRegistry;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.expression.OWLEntityChecker;
-import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
 import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -34,12 +33,14 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProvider;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProviderAdapter;
 import org.semanticweb.owlapi.util.QNameShortFormProvider;
-import org.semanticweb.owlapi.util.ShortFormProvider;
-import org.semanticweb.owlapi.util.SimpleShortFormProvider;
 import org.semanticweb.owlapi.util.mansyntax.ManchesterOWLSyntaxParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ManchesterClassExpressionParser implements ValueProcessorIfc {
 
+	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+	
 	/**
 	 * 
 	 */
@@ -59,6 +60,8 @@ public class ManchesterClassExpressionParser implements ValueProcessorIfc {
 		if (StringUtils.isBlank(ValueProcessorFactory.normalizeSpace(value))) {
 			return null;
 		}
+		
+		log.info("Parsing a Manchester syntax expression : '"+value+"'");
 		
 		
 		try {

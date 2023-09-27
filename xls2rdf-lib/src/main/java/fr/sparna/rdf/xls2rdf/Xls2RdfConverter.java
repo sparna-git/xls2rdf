@@ -529,6 +529,8 @@ public class Xls2RdfConverter {
 				&&
 				!header.getLanguage().isPresent()
 				&&
+				!header.isManchester()
+				&&
 				(value.startsWith("http")  || value.startsWith("mailto") || prefixManager.usesKnownPrefix(value.trim()))
 			) {
 				cellProcessor = processorFactory.split(cellProcessor, ",");
