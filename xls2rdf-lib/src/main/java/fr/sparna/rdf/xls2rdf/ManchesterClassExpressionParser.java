@@ -80,7 +80,12 @@ public class ManchesterClassExpressionParser implements ValueProcessorIfc {
 			manchesterParser.setOWLEntityChecker(checker);
 			
 			// parse the class expression
-			OWLClassExpression expr = manchesterParser.parseClassExpression(value);
+			OWLClassExpression expr;
+			try {
+				expr = manchesterParser.parseClassExpression(value);
+			} catch (Exception e) {
+				throw new Xls2RdfException(e, "Exception when parsing Manchester class expression: '"+value+"'");
+			}
 			
 			// stores the class expression in our ontology, in a dummy axiom
 			ontology.add(df.getOWLEquivalentClassesAxiom(df.getOWLClass("http://x"), expr));

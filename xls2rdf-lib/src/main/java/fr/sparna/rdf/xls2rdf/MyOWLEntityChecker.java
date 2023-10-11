@@ -25,57 +25,77 @@ public class MyOWLEntityChecker implements OWLEntityChecker {
 	}
 
 	@Override
-	public OWLClass getOWLClass(String name) {
-		System.out.println("getOWLClass : "+name);
-		
-		if(name.startsWith("xsd")) {
+	public OWLClass getOWLClass(String token) {
+		if(!isName(token)) {
 			return null;
 		}
 		
-		if(name.contains(DATATYPE_NAME_MARKER)) {
+		if(token.startsWith("xsd")) {
 			return null;
 		}
 		
-		return df.getOWLClass(this.prefixManager.expand(name));
-	}
-
-	@Override
-	public OWLObjectProperty getOWLObjectProperty(String name) {
-		System.out.println("getOWLObjectProperty : "+name);
-		
-		if(name.startsWith("xsd")) {
+		if(token.contains(DATATYPE_NAME_MARKER)) {
 			return null;
 		}
 		
-		if(name.contains(DATATYPE_NAME_MARKER)) {
+		return df.getOWLClass(this.prefixManager.expand(token));
+	}
+
+	@Override
+	public OWLObjectProperty getOWLObjectProperty(String token) {
+		if(!isName(token)) {
 			return null;
 		}
 		
-		return df.getOWLObjectProperty(this.prefixManager.expand(name));
+		if(token.startsWith("xsd")) {
+			return null;
+		}
+		
+		if(token.contains(DATATYPE_NAME_MARKER)) {
+			return null;
+		}
+		
+		return df.getOWLObjectProperty(this.prefixManager.expand(token));
 	}
 
 	@Override
-	public OWLDataProperty getOWLDataProperty(String name) {
-		System.out.println("getOWLDataProperty : "+name);
-		return df.getOWLDataProperty(this.prefixManager.expand(name));
+	public OWLDataProperty getOWLDataProperty(String token) {
+		if(!isName(token)) {
+			return null;
+		}
+		
+		return df.getOWLDataProperty(this.prefixManager.expand(token));
 	}
 
 	@Override
-	public OWLNamedIndividual getOWLIndividual(String name) {
-		System.out.println("getOWLIndividual : "+name);
-		return df.getOWLNamedIndividual(this.prefixManager.expand(name));
+	public OWLNamedIndividual getOWLIndividual(String token) {
+		if(!isName(token)) {
+			return null;
+		}
+		
+		return df.getOWLNamedIndividual(this.prefixManager.expand(token));
 	}
 
 	@Override
-	public OWLDatatype getOWLDatatype(String name) {
-		System.out.println("getOWLDatatype : "+name);
-		return df.getOWLDatatype(this.prefixManager.expand(name));
+	public OWLDatatype getOWLDatatype(String token) {
+		if(!isName(token)) {
+			return null;
+		}
+		
+		return df.getOWLDatatype(this.prefixManager.expand(token));
 	}
 
 	@Override
-	public OWLAnnotationProperty getOWLAnnotationProperty(String name) {
-		System.out.println("getOWLAnnotationProperty : "+name);
-		return df.getOWLAnnotationProperty(this.prefixManager.expand(name));
+	public OWLAnnotationProperty getOWLAnnotationProperty(String token) {
+		if(!isName(token)) {
+			return null;
+		}
+		
+		return df.getOWLAnnotationProperty(this.prefixManager.expand(token));
+	}
+	
+	private boolean isName(String token) {
+		return !(token.equals("(") || token.equals(")"));
 	}
 
 }
