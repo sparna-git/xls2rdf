@@ -204,11 +204,9 @@ public class Xls2RdfConverter {
 	 * Init the prefix manager with the prefixes declared in the Sheet
 	 * @param sheet
 	 */
-	private void initPrefixManager(Sheet sheet) {
-		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheet, this);
-		
+	private void initPrefixManager(Sheet sheet) {		
 		// read the prefixes
-		this.prefixManager.register(rdfizableSheet.readPrefixes());
+		this.prefixManager.register(RdfizableSheet.readPrefixes(sheet));
 	}
 
 	/**
@@ -223,7 +221,7 @@ public class Xls2RdfConverter {
 		Model model = new LinkedHashModelFactory().createEmptyModel();
 		SimpleValueFactory svf = SimpleValueFactory.getInstance();
 		
-		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheet, this);
+		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager);
 		
 		if(!rdfizableSheet.canRDFize()) {
 			log.debug(sheet.getSheetName()+" : Ignoring sheet.");

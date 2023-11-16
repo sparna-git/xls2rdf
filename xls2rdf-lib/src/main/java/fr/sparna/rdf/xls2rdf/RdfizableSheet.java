@@ -28,20 +28,20 @@ import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
  */
 public class RdfizableSheet {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+	static Logger log = LoggerFactory.getLogger(RdfizableSheet.class.getName());
 	
 	protected Sheet sheet;
-	protected Xls2RdfConverter converter;
+	protected PrefixManager prefixManager;
 	protected int titleRowIndex;
 	protected List<ColumnHeader> columnHeaders;
 
 	public RdfizableSheet(
 			Sheet sheet,
-			Xls2RdfConverter converter
+			PrefixManager prefixManager
 	) {
 		super();
 		this.sheet = sheet;
-		this.converter = converter;
+		this.prefixManager = prefixManager;
 	}
 	
 	public void init() {
@@ -72,7 +72,7 @@ public class RdfizableSheet {
 			log.debug(sheet.getSheetName()+" : B1 is empty.");
 			return false;
 		} else {
-			String fixedUri = converter.prefixManager.uri(uri, false);
+			String fixedUri = this.prefixManager.uri(uri, false);
 			try {
 				new URI(fixedUri);
 			} catch (URISyntaxException e) {
@@ -108,7 +108,7 @@ public class RdfizableSheet {
 		int headerRowIndex = 1;
 		
 		boolean found = false;
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(converter.prefixManager);
+		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
 		for (int rowIndex = headerRowIndex; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 			
 			int numFound = 0;
@@ -186,7 +186,7 @@ public class RdfizableSheet {
 		List<ColumnHeader> columnNames = new ArrayList<>();
 		Row row = this.sheet.getRow(rowNumber);
 		
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(converter.prefixManager);
+		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
 		if(row != null) {
 			for (short i = 0; true; i++) {
 				Cell cell = row.getCell(i);
@@ -205,7 +205,7 @@ public class RdfizableSheet {
 	protected List<ColumnHeader> getHeaderColumnHeaders() {
 		List<ColumnHeader> headerColumnHeaders = new ArrayList<>();
 		
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(converter.prefixManager);
+		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
 		for (int rowIndex = 1; rowIndex < this.getTitleRowIndex(); rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
 				String key = getCellValue(sheet.getRow(rowIndex).getCell(0));
@@ -233,7 +233,7 @@ public class RdfizableSheet {
 	 * Reads the prefixes declared in the sheet. The prefixes are read in the top 40 rows, when column A contains "PREFIX" or "@prefix" (ignoring case).
 	 * @return the map of prefixes
 	 */
-	public Map<String, String> readPrefixes() {
+	public static Map<String, String> readPrefixes(Sheet sheet) {
 		Map<String, String> prefixes = new HashMap<String, String>();
 		
 		// read the prefixes in the top 40 rows	(including the first one for cases where all prefixes are grouped in the first sheet)
