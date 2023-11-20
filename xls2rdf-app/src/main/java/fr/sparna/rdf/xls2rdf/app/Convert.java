@@ -19,6 +19,7 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.sparna.rdf.xls2rdf.MergeFilesOutputXls;
 import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverterFactory;
@@ -134,6 +135,35 @@ public class Convert implements CliCommandIfc {
 			fileStream.flush();
 			fileStream.close();
 		}
+		
+		
+		// for merge Modul
+		if (a.isMergecsv()) {
+			
+			// get an input stream on csv file
+			if(!a.getCsvf().exists()) {
+				log.error("Given input file "+a.getCsvf().getAbsolutePath()+" does not exist.");
+				return;
+			}
+			
+			// get an input stream on input file
+			if(!a.getInput().exists()) {
+				log.error("Given input file "+a.getInput().getAbsolutePath()+" does not exist.");
+				return;
+			}
+			
+			// get an input stream on output file
+			if(!a.getOutput().exists()) {
+				log.error("Given input file "+a.getOutput().getAbsolutePath()+" does not exist.");
+				return;
+			}
+			
+			//
+			MergeFilesOutputXls mergeConver = new MergeFilesOutputXls();
+			mergeConver.mergeFile(a.getCsvf(), a.getInput(), a.getOutput());
+			
+		}
+		
 	}
 	
 }

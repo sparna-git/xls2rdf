@@ -95,6 +95,38 @@ public class ArgumentsConvert {
 	)
 	private boolean pretty = false;
 	
+	@Parameter(
+			names = { "-c", "--csv" },
+			description = "Input csv file",
+			converter = FileConverter.class,
+			required = false
+	)
+	private File csvf;
+	
+	@Parameter(
+			names = {"-mcsv","--mergecsv"},
+			description = "Merge the csv data file with a header xls file. Default is false", 
+			required = false
+	)
+	private boolean mergecsv = false;
+	
+		
+	public File getCsvf() {
+		return csvf;
+	}
+
+	public void setCsvf(File csvf) {
+		this.csvf = csvf;
+	}
+
+	public boolean isMergecsv() {
+		return mergecsv;
+	}
+
+	public void setMergecsv(boolean mergecsv) {
+		this.mergecsv = mergecsv;
+	}
+
 	public File getInput() {
 		return input;
 	}
