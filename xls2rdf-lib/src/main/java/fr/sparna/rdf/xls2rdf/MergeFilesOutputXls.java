@@ -2,10 +2,8 @@ package fr.sparna.rdf.xls2rdf;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Iterator;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -23,37 +21,13 @@ import org.slf4j.LoggerFactory;
 public class MergeFilesOutputXls {
 	
 	static Logger log = LoggerFactory.getLogger(RdfizableSheet.class.getName());
-	
-	private File csvfile;
-	private File xlsinput;
-	private File outputfile;
-	
-	
-	public File getCsvfile() {
-		return csvfile;
-	}
-	public void setCsvfile(File csvfile) {
-		this.csvfile = csvfile;
-	}
-	public File getXlsinput() {
-		return xlsinput;
-	}
-	public void setXlsinput(File xlsinput) {
-		this.xlsinput = xlsinput;
-	}
-	public File getOutputfile() {
-		return outputfile;
-	}
-	public void setOutputfile(File outputfile) {
-		this.outputfile = outputfile;
-	}
-	
+
 	/*
 	 *  @Param csvfile
 	 * 
 	 */	
-	public void mergeFile(File csvfile, File xlsfile, File Output) throws InvalidFormatException, IOException {
-		
+	// public Workbook mergeFile(File csvfile, Workbook xlsfile)
+	public Workbook mergeFile(File csvfile, File xlsfile) throws InvalidFormatException, IOException {
 		
 		/*
 		 *  Convert the files in WoorkBook
@@ -75,15 +49,7 @@ public class MergeFilesOutputXls {
 		 */
 		Workbook wbMerge =  merge_files(workbookCSV, workbookXSL);
 		
-		//Test
-		if (Output.isFile()) {
-			try (OutputStream fileOut = new FileOutputStream(Output)) {
-			    wbMerge.write(fileOut);
-			    wbMerge.close();
-			}
-			
-			log.debug(xlsfile.getName()+" "+"is merge ........");
-		}
+		return wbMerge;
 		
 	}
 	

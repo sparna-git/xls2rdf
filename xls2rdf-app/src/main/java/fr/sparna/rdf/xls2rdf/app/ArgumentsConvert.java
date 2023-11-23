@@ -1,18 +1,20 @@
 package fr.sparna.rdf.xls2rdf.app;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import com.beust.jcommander.converters.FileConverter;
 
 import java.io.File;
 
-
+@Parameters(commandDescription = "Converts an Excel file to RDF using the xls2rdf converter.")
 public class ArgumentsConvert {
 
 	@Parameter(
 			names = { "-i", "--input" },
 			description = "Input Excel file",
 			converter = FileConverter.class,
-			required = true
+			required = true,
+			validateWith = FileExistsValidator.class
 	)
 	private File input;
 	
@@ -94,38 +96,7 @@ public class ArgumentsConvert {
 			required = false
 	)
 	private boolean pretty = false;
-	
-	@Parameter(
-			names = { "-c", "--csv" },
-			description = "Input csv file",
-			converter = FileConverter.class,
-			required = false
-	)
-	private File csvf;
-	
-	@Parameter(
-			names = {"-mcsv","--mergecsv"},
-			description = "Merge the csv data file with a header xls file. Default is false", 
-			required = false
-	)
-	private boolean mergecsv = false;
-	
-		
-	public File getCsvf() {
-		return csvf;
-	}
 
-	public void setCsvf(File csvf) {
-		this.csvf = csvf;
-	}
-
-	public boolean isMergecsv() {
-		return mergecsv;
-	}
-
-	public void setMergecsv(boolean mergecsv) {
-		this.mergecsv = mergecsv;
-	}
 
 	public File getInput() {
 		return input;

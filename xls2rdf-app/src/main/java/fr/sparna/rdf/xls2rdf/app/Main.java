@@ -9,6 +9,7 @@ public class Main {
 	enum COMMAND {		
 		
 		CONVERT(new ArgumentsConvert(), new Convert()),
+		MERGE(new ArgumentsMerge(), new Merge()),
 		;
 		
 		private CliCommandIfc command;
