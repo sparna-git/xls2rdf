@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +18,11 @@ public class Merge implements CliCommandIfc {
 	public void execute(Object args) throws Exception {
 		ArgumentsMerge a = (ArgumentsMerge)args;
 		
+		// convert input xlsx File to Workbook 
+		Workbook workbookXLSX = WorkbookFactory.create(a.getExcel());
+		
 		MergeFilesOutputXls merger = new MergeFilesOutputXls();
-		Workbook wb = merger.mergeFile(a.getCsv(), a.getExcel());
+		Workbook wb = merger.mergeFile(a.getCsv(), workbookXLSX);
 
 		//Test
 		try (OutputStream fileOut = new FileOutputStream(a.getOutput())) {
