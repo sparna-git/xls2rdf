@@ -18,14 +18,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class MergeFilesOutputXls {
+public class MergeCsvToXls {
 		
 	static Logger log = LoggerFactory.getLogger(RdfizableSheet.class.getName());
 
-	public Workbook mergeFile(File csvfile, Workbook workbookXLS) throws InvalidFormatException, IOException {
+	// TODO : prendre en paramètre l'objet CSVParser
+	public Workbook mergeCsv(File csvfile, Workbook workbookXLS) throws InvalidFormatException, IOException {
 		
 		// Parser csv File
 		InputStream inFile = new FileInputStream(csvfile);
+		
+		
 		CSVParser csvParser = new CSVParser(
 				new InputStreamReader(inFile),				
 				CSVFormat.DEFAULT.builder()
