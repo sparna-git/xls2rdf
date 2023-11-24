@@ -1,0 +1,6 @@
+URI;rdf:type;sh:targetClass;rdfs:comment@en;skos:example^^xsd:string;sh:nodeKind;sh:pattern^^xsd:string;sh:closed^^xsd:boolean;sh:ignoredProperties;rdfs:label@fr;rdfs:label@en;sh:description^^xsd:string;sh:order^^xsd:integer;skos:editorialNote@en;owl:versionInfo;shacl-play:color
+https://shacl-play.sparna.fr/shapes/Activity;sh:NodeShape;eli-dl:Activity;;;;;;;;Activity;;;;;
+https://shacl-play.sparna.fr/shapes/Expression;sh:NodeShape;eli:Expression;;;;;;;;Expression;;;;;
+https://shacl-play.sparna.fr/shapes/Manifestation;sh:NodeShape;eli:Manifestation;;;;;;;;Manifestation;;;;;
+https://shacl-play.sparna.fr/shapes/Work;sh:NodeShape;eli:Work;;;;;;;;Work;;;;;
+https://shacl-play.sparna.fr/shapes/WorkSubdivision;sh:NodeShape;eli-dl:WorkSubdivision;;;;;;;;WorkSubdivision;;;;;

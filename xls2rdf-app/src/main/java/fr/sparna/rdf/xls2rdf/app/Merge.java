@@ -8,7 +8,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.MergeFilesOutputXls;
+import fr.sparna.rdf.xls2rdf.MergeCsvToXls;
 
 public class Merge implements CliCommandIfc {
 
@@ -18,17 +18,15 @@ public class Merge implements CliCommandIfc {
 	public void execute(Object args) throws Exception {
 		ArgumentsMerge a = (ArgumentsMerge)args;
 		
-		// convert input xlsx File to Workbook 
-		Workbook workbookXLSX = WorkbookFactory.create(a.getExcel());
+		Workbook workbookXSL = WorkbookFactory.create(a.getExcel());
 		
-		MergeFilesOutputXls merger = new MergeFilesOutputXls();
-		Workbook wb = merger.mergeFile(a.getCsv(), workbookXLSX);
+		MergeCsvToXls merger = new MergeCsvToXls();
+		Workbook wb = merger.mergeCsv(a.getCsv(), workbookXSL);
 
-		//Test
 		try (OutputStream fileOut = new FileOutputStream(a.getOutput())) {
 			wb.write(fileOut);
 			wb.close();
-			log.debug("Successfully wrote output file to : " + a.getOutput().getAbsolutePath());
+			log.debug("Successfully wrote Excel file in " + a.getOutput().getAbsolutePath());
 		}		
 	}
 	

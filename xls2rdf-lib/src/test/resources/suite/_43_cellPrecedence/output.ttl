@@ -4,6 +4,7 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
 @prefix org: <http://www.w3.org/ns/org#> .
+@prefix xls2rdf: <https://xls2rdf.sparna.fr/vocabulary#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skosthes: <http://purl.org/iso25964/skos-thes#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -20,12 +21,10 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 
-qudt:QuantityValue {
-  qtyv:NC_1 a qudt:QuantityValue;
-    qudt:value 2.4E2;
-    rdfs:label "English label"@en .
-  
-  qtyv:Qty_1 a qudt:QuantityValue;
-    qudt:value 1;
-    rdfs:label "French label"@fr .
-}
+qtyv:NC_1 a qudt:QuantityValue;
+  qudt:value 2.4E2;
+  rdfs:label "English label"@en .
+
+qtyv:Qty_1 a qudt:QuantityValue;
+  qudt:value 1;
+  rdfs:label "French label"@fr .
