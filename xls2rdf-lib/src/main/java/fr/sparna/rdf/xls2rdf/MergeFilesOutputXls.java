@@ -26,22 +26,39 @@ public class MergeFilesOutputXls {
 		
 		// Parser csv File
 		InputStream inFile = new FileInputStream(csvfile);
-		CSVParser csvParser = new CSVParser(new InputStreamReader(inFile), CSVFormat.DEFAULT
-																		.withFirstRecordAsHeader()
-																		.withDelimiter(';'));
+		CSVParser csvParser = new CSVParser(
+				new InputStreamReader(inFile),				
+				CSVFormat.DEFAULT.builder()
+				.setDelimiter(';')
+				.setSkipHeaderRecord(true).build()
+		);
+		
 		// Create outputXLS Workbook and load data
 		Workbook workBookOutput = workbookXLS;
 		
-		int indexSheet = workBookOutput.getSheetIndex(getSheetActive(workBookOutput));
-		int rowIndexTitle = get_rowIndexTitle(workBookOutput);
+	    // Get all prefix
+	    PrefixManager prefixManager = getPrefixes(workbookXLS);
+		
+		int indexSheet = this.getMergeSheetIndex(workBookOutput, prefixManager);
+		
+		// TODO : test if indexSheet < 0
+		
+		Sheet targetSheet = workBookOutput.getSheetAt(indexSheet);
+		
+		
+		int rowIndexTitle = new RdfizableSheet(targetSheet, prefixManager).getTitleRowIndex();
+		
+		
+		
 		int nRow = rowIndexTitle;
 		// iterate on all CSV Records
 		for (CSVRecord dataRecord : csvParser.getRecords()) {
 			nRow++;
 			int nCol = 0;
-			Row newRow = workBookOutput.getSheetAt(indexSheet).createRow(nRow);
+			Row newRow = targetSheet.createRow(nRow);
+			// TODO : insérer les colonnes dans l'ordre, sans essayer de trouver la colonne avec le même titre
 			for (String columnNameCSV : dataRecord.getParser().getHeaderNames()) {
-				for (Cell columnName : workBookOutput.getSheetAt(indexSheet).getRow(rowIndexTitle)) {
+				for (Cell columnName : targetSheet.getRow(rowIndexTitle)) {
 					if (columnNameCSV.equals(columnName.toString())) {
 						// create cell
 						Cell newCell = newRow.createCell(nCol++);
@@ -49,10 +66,10 @@ public class MergeFilesOutputXls {
 						newCell.setCellValue(dataRecord.get(columnNameCSV));
 						break;
 					}
-					
 				}
 			}
-		}		
+		}	
+		
 		return workBookOutput;		
 	}
 	
@@ -67,43 +84,23 @@ public class MergeFilesOutputXls {
 		return prefixManager;
 	}
 
-	public int get_rowIndexTitle(Workbook wbXslfile) throws InvalidFormatException, IOException {
+	public int getTitleRowIndex(Sheet targetSheet, PrefixManager prefixManager) throws InvalidFormatException, IOException {	
+		RdfizableSheet rdfizableSheet = new RdfizableSheet(targetSheet, prefixManager);
 		
-		int titleRowIndex = 0;
-		
-		int numberOfSheetIndex = wbXslfile.getSheetIndex(getSheetActive(wbXslfile));
-		Sheet sheetToMerge = wbXslfile.getSheetAt(numberOfSheetIndex);
-		
-		// Get all Prefixes from to xls file 
-		PrefixManager prefixManager = getPrefixes(wbXslfile);
-		
-		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheetToMerge, prefixManager);
-		
-		if (rdfizableSheet.computeTitleRowIndex() == 1) {
-			titleRowIndex = rdfizableSheet.computeTitleRowIndex()-1;
-		} else {
-			titleRowIndex = rdfizableSheet.computeTitleRowIndex();
-		}
-		
-		return titleRowIndex;
+		return rdfizableSheet.computeTitleRowIndex();
 	}
 	
-	public String getSheetActive(Workbook wbInput) throws InvalidFormatException, IOException {
-	    
-	    // Get all prefix
-	    PrefixManager prefixManager = getPrefixes(wbInput);
-	    
-	    // find the sheet to merger
-	    String nameSheet = "";
+	public Integer getMergeSheetIndex(Workbook wbInput, PrefixManager prefixManager) throws InvalidFormatException, IOException {
+	    // find the target sheet
 	    for (Sheet sheet : wbInput) {
 	      RdfizableSheet rdfizableSheetActive = new RdfizableSheet(sheet, prefixManager);
 	      if (rdfizableSheetActive.canRDFize()) {
-	        nameSheet = sheet.getSheetName();
-	        break;
+	        return wbInput.getSheetIndex(sheet.getSheetName());
 	      }
 	    }
 	    
-	    return nameSheet;
+	    // return -1 if not found
+	    return -1;
 	  }
 		
 }

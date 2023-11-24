@@ -28,6 +28,7 @@ public class Merge implements CliCommandIfc {
 		try (OutputStream fileOut = new FileOutputStream(a.getOutput())) {
 			wb.write(fileOut);
 			wb.close();
+			log.debug("Successfully wrote output file to : " + a.getOutput().getAbsolutePath());
 		}		
 	}
 	
