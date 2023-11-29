@@ -17,43 +17,35 @@ public class MergeCsvToXls {
 		
 	static Logger log = LoggerFactory.getLogger(RdfizableSheet.class.getName());
 
-	public Workbook mergeCsv(List<CSVRecord> csvParser, Workbook workbookXLS) throws InvalidFormatException, IOException {
+	public Workbook mergeCsv(List<CSVRecord> csvRecords, Workbook workbookXLS) throws InvalidFormatException, IOException {
 		
 		// Get all prefix
 	    PrefixManager prefixManager = getPrefixes(workbookXLS);		
 		int indexSheet = this.getMergeSheetIndex(workbookXLS , prefixManager);
-		
+				
 		// TODO : test if indexSheet < 0
 		if (indexSheet == -1) {
-			log.debug("Warning: Not found a sheet in the document....");
+			log.debug("Warning: Not found a sheetstyle in the document....");
 			return null;
 		} else {
-			
-			
-			Workbook workBookOutput = workbookXLS.getClass().cast(workbookXLS);
-			Sheet targetSheet = workBookOutput.getSheetAt(indexSheet);
-			int rowIndexTitle = new RdfizableSheet(targetSheet, prefixManager).computeTitleRowIndex();
-			
+			Sheet targetSheet = workbookXLS.getSheetAt(indexSheet);
+			int rowIndexTitle = new RdfizableSheet(targetSheet, prefixManager).computeTitleRowIndex();			
 			int nRow = rowIndexTitle;
 			
-			for (int i = 1; i < csvParser.size(); i++) {
-				
-				CSVRecord r = csvParser.get(i); 
+			// get all data values
+			for (int i = 1; i < csvRecords.size(); i++) {				
+				CSVRecord r = csvRecords.get(i); 
 				nRow++;
-				int nCol = 0;
 				// create row in the sheet
 				Row newRow = targetSheet.createRow(nRow);
-				for (String value : r.values()) {
-					for (Cell columnName : targetSheet.getRow(rowIndexTitle)) {
-						// create cell
-						Cell newCell = newRow.createCell(nCol++);
-						// Save of data value in workbook			
-						newCell.setCellValue(value);
-						break;
-					}
+				for (int j = 0; j < r.values().length; j++) {
+					Cell newCell = newRow.createCell(j);
+					// write in column
+					String value = r.get(j);
+					newCell.setCellValue(value);
 				}
 			}
-			return workBookOutput;
+			return workbookXLS;
 		}
 	}
 	
@@ -68,12 +60,6 @@ public class MergeCsvToXls {
 		return prefixManager;
 	}
 
-	public int getTitleRowIndex(Sheet targetSheet, PrefixManager prefixManager) throws InvalidFormatException, IOException {	
-		RdfizableSheet rdfizableSheet = new RdfizableSheet(targetSheet, prefixManager);
-		
-		return rdfizableSheet.computeTitleRowIndex();
-	}
-	
 	public Integer getMergeSheetIndex(Workbook wbInput, PrefixManager prefixManager) throws InvalidFormatException, IOException {
 	    // find the target sheet
 	    for (Sheet sheet : wbInput) {
@@ -82,7 +68,6 @@ public class MergeCsvToXls {
 	        return wbInput.getSheetIndex(sheet.getSheetName());
 	      }
 	    }
-	    
 	    // return -1 if not found
 	    return -1;
 	  }

@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
@@ -24,8 +25,12 @@ public class Merge implements CliCommandIfc {
 	@Override
 	public void execute(Object args) throws Exception {
 		ArgumentsMerge a = (ArgumentsMerge)args;
+
+		// Copy file output from excel
+		FileUtils.copyFile(a.getExcel(), a.getOutput());
+		// Create workbook instance
+		Workbook workbookXSL = WorkbookFactory.create(a.getOutput());
 		
-		Workbook workbookXSL = WorkbookFactory.create(a.getExcel());
 		// Parser csv File
 		InputStream inFile = new FileInputStream(a.getCsv());
 		CSVParser csvParser = new CSVParser(
@@ -36,19 +41,24 @@ public class Merge implements CliCommandIfc {
 				.build()
 		);
 		// get Records values
-		List<CSVRecord> cvsRecord = csvParser.getRecords();
-		
-		
+		List<CSVRecord> cvsRecords = csvParser.getRecords();
+				
 		MergeCsvToXls merger = new MergeCsvToXls();
-		Workbook wb = merger.mergeCsv(cvsRecord, workbookXSL);
-		
+		Workbook wb = merger.mergeCsv(cvsRecords, workbookXSL);		
 		if (wb != null) {
-			try (OutputStream fileOut = new FileOutputStream(a.getOutput())) {
-				wb.write(fileOut);
-				wb.close();
+			
+			// Delete output file ????????
+			if (a.getOutput().exists()) {
+				a.getOutput().delete();				
+			}
+			
+			try (OutputStream outputFile = new FileOutputStream(a.getOutput())) {
+				wb.write(outputFile);
 				log.debug("Successfully wrote Excel file in " + a.getOutput().getAbsolutePath());
+			} catch (Exception e) {
+				// TODO: handle exception
+				
 			}
 		}	
-	}
-	
+	}	
 }
