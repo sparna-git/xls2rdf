@@ -230,14 +230,14 @@ public class RdfizableSheet {
 	}
 	
 	/**
-	 * Reads the prefixes declared in the sheet. The prefixes are read in the top 40 rows, when column A contains "PREFIX" or "@prefix" (ignoring case).
+	 * Reads the prefixes declared in the sheet. The prefixes are read in the top 100 rows, when column A contains "PREFIX" or "@prefix" (ignoring case).
 	 * @return the map of prefixes
 	 */
 	public static Map<String, String> readPrefixes(Sheet sheet) {
 		Map<String, String> prefixes = new HashMap<String, String>();
 		
-		// read the prefixes in the top 40 rows	(including the first one for cases where all prefixes are grouped in the first sheet)
-		for (int rowIndex = 0; rowIndex <= 40; rowIndex++) {
+		// read the prefixes in the top 100 rows	(including the first one for cases where all prefixes are grouped in the first sheet)
+		for (int rowIndex = 0; rowIndex <= 100; rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
 				String prefixKeyword = getCellValue(sheet.getRow(rowIndex).getCell(0));
 				// if we have the "prefix" keyword...
