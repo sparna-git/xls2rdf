@@ -1,13 +1,8 @@
 package fr.sparna.rdf.xls2rdf;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.List;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -22,58 +17,36 @@ public class MergeCsvToXls {
 		
 	static Logger log = LoggerFactory.getLogger(RdfizableSheet.class.getName());
 
-	// TODO : prendre en paramètre l'objet CSVParser
-	public Workbook mergeCsv(File csvfile, Workbook workbookXLS) throws InvalidFormatException, IOException {
+	public Workbook mergeCsv(List<CSVRecord> csvRecords, Workbook workbookXLS) throws InvalidFormatException, IOException {
 		
-		// Parser csv File
-		InputStream inFile = new FileInputStream(csvfile);
-		
-		
-		CSVParser csvParser = new CSVParser(
-				new InputStreamReader(inFile),				
-				CSVFormat.DEFAULT.builder()
-				.setDelimiter(';')
-				.setSkipHeaderRecord(true).build()
-		);
-		
-		// Create outputXLS Workbook and load data
-		Workbook workBookOutput = workbookXLS;
-		
-	    // Get all prefix
-	    PrefixManager prefixManager = getPrefixes(workbookXLS);
-		
-		int indexSheet = this.getMergeSheetIndex(workBookOutput, prefixManager);
-		
+		// Get all prefix
+	    PrefixManager prefixManager = getPrefixes(workbookXLS);		
+		int indexSheet = this.getMergeSheetIndex(workbookXLS , prefixManager);
+				
 		// TODO : test if indexSheet < 0
-		
-		Sheet targetSheet = workBookOutput.getSheetAt(indexSheet);
-		
-		
-		int rowIndexTitle = new RdfizableSheet(targetSheet, prefixManager).getTitleRowIndex();
-		
-		
-		
-		int nRow = rowIndexTitle;
-		// iterate on all CSV Records
-		for (CSVRecord dataRecord : csvParser.getRecords()) {
-			nRow++;
-			int nCol = 0;
-			Row newRow = targetSheet.createRow(nRow);
-			// TODO : insérer les colonnes dans l'ordre, sans essayer de trouver la colonne avec le même titre
-			for (String columnNameCSV : dataRecord.getParser().getHeaderNames()) {
-				for (Cell columnName : targetSheet.getRow(rowIndexTitle)) {
-					if (columnNameCSV.equals(columnName.toString())) {
-						// create cell
-						Cell newCell = newRow.createCell(nCol++);
-						// Save of data value in workbook			
-						newCell.setCellValue(dataRecord.get(columnNameCSV));
-						break;
-					}
+		if (indexSheet == -1) {
+			log.debug("Warning: Not found a sheetstyle in the document....");
+			return null;
+		} else {
+			Sheet targetSheet = workbookXLS.getSheetAt(indexSheet);
+			int rowIndexTitle = new RdfizableSheet(targetSheet, prefixManager).computeTitleRowIndex();			
+			int nRow = rowIndexTitle;
+			
+			// get all data values
+			for (int i = 1; i < csvRecords.size(); i++) {				
+				CSVRecord r = csvRecords.get(i); 
+				nRow++;
+				// create row in the sheet
+				Row newRow = targetSheet.createRow(nRow);
+				for (int j = 0; j < r.values().length; j++) {
+					Cell newCell = newRow.createCell(j);
+					// write in column
+					String value = r.get(j);
+					newCell.setCellValue(value);
 				}
 			}
-		}	
-		
-		return workBookOutput;		
+			return workbookXLS;
+		}
 	}
 	
 	public PrefixManager getPrefixes(Workbook workbook) throws InvalidFormatException, IOException {
@@ -87,12 +60,6 @@ public class MergeCsvToXls {
 		return prefixManager;
 	}
 
-	public int getTitleRowIndex(Sheet targetSheet, PrefixManager prefixManager) throws InvalidFormatException, IOException {	
-		RdfizableSheet rdfizableSheet = new RdfizableSheet(targetSheet, prefixManager);
-		
-		return rdfizableSheet.computeTitleRowIndex();
-	}
-	
 	public Integer getMergeSheetIndex(Workbook wbInput, PrefixManager prefixManager) throws InvalidFormatException, IOException {
 	    // find the target sheet
 	    for (Sheet sheet : wbInput) {
@@ -101,7 +68,6 @@ public class MergeCsvToXls {
 	        return wbInput.getSheetIndex(sheet.getSheetName());
 	      }
 	    }
-	    
 	    // return -1 if not found
 	    return -1;
 	  }
