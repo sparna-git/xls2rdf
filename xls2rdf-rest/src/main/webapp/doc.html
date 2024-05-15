@@ -328,6 +328,12 @@
 					<p />This can be used to maintain temporary values in the spreadsheet, waiting for further validation.
 					<p />
 				
+				<h4>Copy the content of a column in another predicated</h4>
+					<p />Add parameter <code>copyTo="anotherPredicate"</code> to copy the content of the column to another predicate, without having to duplicate the column. e.g.
+						<code>skos:prefLabel@fr(copyTo="rdfs:label")</code>.
+					<p />This is useful to set 2 predicates to the same value without having to duplicate the column. This does not work if the value is a blank node or a list.
+					<p />
+
 				<h2>Default prefixes known in the converter</h2>
 				<p />This is the list of known prefixes in the converter. You don't have to declare them in the header.
 				<ul>
@@ -353,6 +359,7 @@
 				<ul>
 					
 					<li><code>asList="true"</code> indicate that all values of this column that are expressed on the same subject should instead be put in an RDF List. Instead of <code>ex:A ex:p ex:1, ex:2, ex:3</code> this would generate <code>ex:A ex:p (ex:1 ex:2 ex:3)</code>. Note that the order of items is **not** garanteed.</li>
+					<li><code>copyTo="another predicate"</code>Copy the value of this column into another predicate. Useful to set e.g. <code>skos:prefLabel</code> and <code>rdfs:label</code> to the same value in a single column, or <code>rdf:type</code> + <code>wdt:P31</code>.</li>
 					<li><code>id="theLabel"</code> : specifies the columnId to be used as a reference in subjectColumn or lookupColumn parameters</li>
 					<li><code>ignoreIf="xxx"</code> indicate that the value xxx should be ignored when present in this column</li>
 					<li><code>ignoreIfParenthesis="true"</code> whether to ignore the values if they are in parenthesis</li>

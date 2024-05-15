@@ -60,16 +60,18 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 				(value.startsWith("http") || value.startsWith("mailto") || prefixManager.usesKnownPrefix(ValueProcessorFactory.normalizeSpace(value)))
 		) {
 			if(!header.isInverse()) {
-				model.add(subject, header.getProperty(), SimpleValueFactory.getInstance().createIRI(prefixManager.uri(ValueProcessorFactory.normalizeSpace(value), false)));
+				Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(ValueProcessorFactory.normalizeSpace(value), false));
+				model.add(subject, header.getProperty(), v);
+				return v;
 			} else {
 				model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(ValueProcessorFactory.normalizeSpace(value), false)), header.getProperty(),subject);
 			}			
 		} else if(headerDatatype == null && headerLanguage == null && value.startsWith("(") && value.endsWith(")")) {
-			// handle rdf:list
-			this.valueProcessorFactory.turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);	
+			// handle rdf:List
+			return this.valueProcessorFactory.turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);	
 		} else if(headerDatatype == null && headerLanguage == null && value.startsWith("[") && value.endsWith("]")) {
 			// handle blank nodes
-			this.valueProcessorFactory.turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
+			return this.valueProcessorFactory.turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
 		} else if(
 				value.startsWith("\"")
 				&&
@@ -81,7 +83,7 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 		) {
 			// handle cells that explicitly indicate a datatype or a language
 			// in that case it has precedence over the ones indicated in the header
-			this.valueProcessorFactory.turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
+			return this.valueProcessorFactory.turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
 		} else {
 			// if the value is surrounded with quotes, remove them, they were here to escape a URI to be considered as a literal
 			String unescapedValue = (value.startsWith("\"") && value.endsWith("\""))?value.substring(1, value.length()-1):value;
@@ -169,12 +171,15 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 				
 				if(l != null) {
 					model.add(subject, header.getProperty(), l);
+					return l;
 				}
 			} else if(value.startsWith("_:")) {
-				model.add(subject, header.getProperty(), SimpleValueFactory.getInstance().createBNode(value.substring(2)));
+				Value v = SimpleValueFactory.getInstance().createBNode(value.substring(2));
+				model.add(subject, header.getProperty(), v);
+				return v;
 			}
 			else {
-				this.valueProcessorFactory.langOrPlainLiteral(header.getProperty()).processValue(model, subject, value, cell, language);
+				return this.valueProcessorFactory.langOrPlainLiteral(header.getProperty()).processValue(model, subject, value, cell, language);
 			}
 		}
 		

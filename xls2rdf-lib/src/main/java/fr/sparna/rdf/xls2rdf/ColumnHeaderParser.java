@@ -51,6 +51,15 @@ public class ColumnHeaderParser {
 				}
 				h.setReconcileOn(reconcileOn);
 			}
+
+			// sets the copyTo property from parameters, if needed
+			if(parameters.containsKey(ColumnHeader.PARAMETER_COPY_TO)) {
+				IRI copyTo = parseProperty(parameters.get(ColumnHeader.PARAMETER_COPY_TO));
+				if(copyTo == null) {
+					 throw new InvalidParameterException("Unable to parse value of "+ ColumnHeader.PARAMETER_COPY_TO +" : '"+parameters.get(ColumnHeader.PARAMETER_COPY_TO)+"'");
+				}
+				h.setCopyTo(copyTo);
+			}
 		}
 				
 		h.setHeaderCell(cell);

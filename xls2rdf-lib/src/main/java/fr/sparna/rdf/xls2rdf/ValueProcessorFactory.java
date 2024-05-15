@@ -20,6 +20,7 @@ import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
@@ -219,6 +220,16 @@ public final class ValueProcessorFactory {
 
 		};
 	}
+
+	public ValueProcessorIfc copyTo(IRI copyTo, ValueProcessorIfc delegate) {
+		return (model, subject, value, cell, language) -> {
+			Value v = delegate.processValue(model, subject, value, cell, language);
+			if(v != null) {
+				model.add(subject, copyTo, v);
+			}
+			return null;
+		};
+	}
 	
 	
 	public ValueProcessorIfc resourceOrLiteral(ColumnHeader header, PrefixManager prefixManager) {
@@ -252,14 +263,14 @@ public final class ValueProcessorFactory {
 				parser.parse(new StringReader(turtle.toString()), RDF.NS.toString());
 				// then add all the resulting statements to the final Model
 				model.addAll(collector.getStatements());
+				return null;
 			} catch (Exception e) {
 				// if anything goes wrong, default to creating a literal
 				log.error("Error in parsing Turtle :\n"+turtle);
 				e.printStackTrace();
-				langOrPlainLiteral(property).processValue(model, subject, value, cell, language);
+				return langOrPlainLiteral(property).processValue(model, subject, value, cell, language);
 			}
 			
-			return null;
 		};
 	}
 	

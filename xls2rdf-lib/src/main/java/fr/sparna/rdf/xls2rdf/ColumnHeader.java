@@ -9,7 +9,6 @@ import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.Cell;
 import org.eclipse.rdf4j.model.IRI;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader.RECONCILE_VALUES;
 
 public class ColumnHeader {
 	
@@ -23,6 +22,7 @@ public class ColumnHeader {
 	public static final String PARAMETER_IGNORE_IF = "ignoreIf";
 	public static final String PARAMETER_AS_LIST = "asList";
 	public static final String PARAMETER_MANCHESTER = "manchester";
+	public static final String PARAMETER_COPY_TO = "copyTo";
 	
 	public static enum RECONCILE_VALUES {
 		external,
@@ -69,6 +69,11 @@ public class ColumnHeader {
 	 * The actual cell in which the header was originally declared, from which we can get the column index
 	 */
 	private Cell headerCell;
+	/**
+	 * The IRI of the property to copyTo, set by the "copyTo" parameter
+	 */
+	private IRI copyTo;
+
 	
 	public ColumnHeader(String originalValue) {
 		this.originalValue = originalValue;
@@ -144,6 +149,14 @@ public class ColumnHeader {
 
 	public IRI getReconcileOn() {
 		return reconcileOn;
+	}
+
+	public IRI getCopyTo() {
+		return copyTo;
+	}
+
+	public void setCopyTo(IRI copyTo) {
+		this.copyTo = copyTo;
 	}
 
 	public void setReconcileOn(IRI reconcileOn) {

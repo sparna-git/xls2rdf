@@ -515,6 +515,11 @@ public class Xls2RdfConverter {
 			if(header.isIgnoreIfParenthesis()) {
 				cellProcessor = processorFactory.ignoreIfParenthesis(cellProcessor);
 			}
+
+			// copy to another predicate if needed
+			if(header.getCopyTo() != null) {
+				cellProcessor = processorFactory.copyTo(header.getCopyTo(), cellProcessor);
+			}
 			
 			if(header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR) != null) {
 				cellProcessor = processorFactory.split(cellProcessor, header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR));
