@@ -31,20 +31,9 @@ public class Merge implements CliCommandIfc {
 		// Create workbook instance
 		Workbook workbookXSL = WorkbookFactory.create(a.getOutput());
 		
-		// Parser csv File
-		InputStream inFile = new FileInputStream(a.getCsv());
-		CSVParser csvParser = new CSVParser(
-				new InputStreamReader(inFile),				
-				CSVFormat.DEFAULT.builder()
-				.setDelimiter(";")
-				.setSkipHeaderRecord(true)
-				.build()
-		);
-		// get Records values
-		List<CSVRecord> cvsRecords = csvParser.getRecords();
-				
+		// Parser csv File			
 		MergeCsvToXls merger = new MergeCsvToXls();
-		Workbook wb = merger.mergeCsv(cvsRecords, workbookXSL);		
+		Workbook wb = merger.mergeCsv(a.getCsv(), workbookXSL);		
 		if (wb != null) {
 			
 			// Delete output file ????????

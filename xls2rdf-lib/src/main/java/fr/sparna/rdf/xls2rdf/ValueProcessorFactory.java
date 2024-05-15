@@ -227,7 +227,7 @@ public final class ValueProcessorFactory {
 			if(v != null) {
 				model.add(subject, copyTo, v);
 			}
-			return null;
+			return v;
 		};
 	}
 	
