@@ -97,6 +97,13 @@ public class ArgumentsConvert {
 	)
 	private boolean pretty = false;
 
+	@Parameter(
+			names = { "-sh", "--skipHidden" },
+			description = "If set to true, will not convert hidden rows and hidden columns",
+			required = false
+	)
+	private boolean skipHidden = true;
+
 
 	public File getInput() {
 		return input;
@@ -200,6 +207,14 @@ public class ArgumentsConvert {
 
 	public void setNoReconcileFail(boolean noReconcileFail) {
 		this.noReconcileFail = noReconcileFail;
+	}
+
+	public boolean isSkipHidden() {
+		return skipHidden;
+	}
+
+	public void setSkipHidden(boolean skipHidden) {
+		this.skipHidden = skipHidden;
 	}
 	
 }

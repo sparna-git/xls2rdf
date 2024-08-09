@@ -83,7 +83,8 @@ public class Convert implements CliCommandIfc {
 				a.isXlify(),
 				a.isXlifyDefinitions(),
 				a.isBroaderTransitiveify(),
-				a.isNoReconcileFail()
+				a.isNoReconcileFail(),
+				a.isSkipHidden()
 		);
 		
 		Repository supportRepository = new SailRepository(new MemoryStore());

@@ -22,6 +22,7 @@ public class Xls2RdfConverterFactory {
 	private boolean generateXl = false;
 	private boolean generateXlDefinitions = false;
 	private boolean noFailOnReconcile = false;
+	private boolean skipHidden = false;
 	private final boolean generateBroaderTransitive;
 	private Repository supportRepository = null;
 	
@@ -30,7 +31,8 @@ public class Xls2RdfConverterFactory {
 			boolean generateXl,
 			boolean generateXlDefinitions,
 			boolean generateBroaderTransitive,
-			boolean noFailOnReconcile
+			boolean noFailOnReconcile,
+			boolean skipHidden
 	) {
 		super();
 		this.applyPostProcessings = applyPostProcessings;
@@ -38,6 +40,7 @@ public class Xls2RdfConverterFactory {
 		this.generateXlDefinitions = generateXlDefinitions;
 		this.generateBroaderTransitive = generateBroaderTransitive;
 		this.noFailOnReconcile = noFailOnReconcile;
+		this.skipHidden = skipHidden;
 	}
 	
 	public Xls2RdfConverter newConverter(Repository outputRepository, String lang) {
@@ -73,6 +76,8 @@ public class Xls2RdfConverterFactory {
 		}
 		
 		converter.setFailIfNoReconcile(!this.noFailOnReconcile);
+
+		converter.setSkipHidden(this.skipHidden);
 		
 		return converter;
 	}
