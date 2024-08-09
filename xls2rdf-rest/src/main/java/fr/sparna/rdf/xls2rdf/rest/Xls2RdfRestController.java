@@ -41,6 +41,7 @@ public class Xls2RdfRestController {
 			@RequestParam(value="url", required=true) String url,
 			@RequestParam(value="format", required=false) String format,
 			@RequestParam(value="skosxl", required=false, defaultValue = "false") boolean useSkosXl,
+			@RequestParam(value="skipHidden", required=false, defaultValue = "false") boolean skipHidden,
 			@RequestParam(value="broaderTransitive", required=false, defaultValue = "false") boolean broaderTransitive,
 			@RequestParam(value="noPostProcessings", required=false, defaultValue = "false") boolean ignorePostProc)
 					throws Exception {
@@ -87,7 +88,9 @@ public class Xls2RdfRestController {
 								broaderTransitive,
 								ignorePostProc,
 								//fail if no reconcile
-								false
+								false,
+								// skip hidden rows and columns
+								skipHidden
 						);
 
 						Collections.sort(cvIds);

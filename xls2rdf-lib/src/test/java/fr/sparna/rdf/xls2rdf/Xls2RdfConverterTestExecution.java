@@ -50,6 +50,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 		this.outputRepository.init();
 		
 		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository), "fr");
+		this.converter.setSkipHidden(true);
 		
 		// init post processors
 		List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();

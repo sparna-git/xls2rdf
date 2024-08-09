@@ -23,7 +23,8 @@ public class Xls2RdfService {
 					boolean skosxl,
 					boolean broaderTransitive,
 					boolean ignorePostProc,
-					boolean failIfNoReconcile
+					boolean failIfNoReconcile,
+					boolean skipHidden
 	) {
 		ModelWriterFactory factory = new ModelWriterFactory(false, format, false);
 		
@@ -34,7 +35,8 @@ public class Xls2RdfService {
 				skosxl,
 				skosxl,
 				broaderTransitive,
-				failIfNoReconcile
+				failIfNoReconcile,
+				skipHidden
 		);
 		
 		Xls2RdfConverter converter = converterFactory.newConverter(modelWriter, lang);
