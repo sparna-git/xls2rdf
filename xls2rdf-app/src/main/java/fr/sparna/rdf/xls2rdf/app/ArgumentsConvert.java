@@ -102,7 +102,7 @@ public class ArgumentsConvert {
 			description = "If set to true, will not convert hidden rows and hidden columns",
 			required = false
 	)
-	private boolean skipHidden = true;
+	private boolean skipHidden = false;
 
 
 	public File getInput() {
