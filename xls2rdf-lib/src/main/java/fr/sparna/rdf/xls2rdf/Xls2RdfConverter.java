@@ -116,6 +116,11 @@ public class Xls2RdfConverter {
 	 * Triggers an Exception if a reconcile fails
 	 */
 	private boolean failIfNoReconcile = false;
+
+	/**
+	 * Whether to skip hidden columns and rows
+	 */
+	private boolean skipHidden = false;
 	
 	public Xls2RdfConverter(ModelWriterIfc modelWriter) {		
 		this(modelWriter, null);
@@ -396,6 +401,11 @@ public class Xls2RdfConverter {
 	private Resource handleRow(Model model, Resource headerResource, List<ColumnHeader> columnHeaders, PrefixManager prefixManager, Row row) {
 		RowBuilder rowBuilder = null;
 		for (int colIndex = 0; colIndex < columnHeaders.size(); colIndex++) {
+			// skip hidden columns
+			if(skipHidden && row.getSheet().isColumnHidden(colIndex)) {
+				continue;
+			}
+
 			ColumnHeader header = columnHeaders.get(colIndex);
 			
 			Cell cell = row.getCell(colIndex);			
@@ -408,7 +418,7 @@ public class Xls2RdfConverter {
 						||
 						this.workbook.getFontAt(cell.getCellStyle().getFontIndex()).getStrikeout()
 						||
-						row.getZeroHeight()
+						(skipHidden && row.getZeroHeight())
 						
 				) {
 					return null;
@@ -684,6 +694,14 @@ public class Xls2RdfConverter {
 
 	public void setFailIfNoReconcile(boolean failIfNoReconcile) {
 		this.failIfNoReconcile = failIfNoReconcile;
+	}
+
+	public boolean isSkipHidden() {
+		return skipHidden;
+	}
+
+	public void setSkipHidden(boolean skipHidden) {
+		this.skipHidden = skipHidden;
 	}
 
 	public static void main(String[] args) throws Exception {
