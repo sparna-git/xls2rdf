@@ -43,7 +43,9 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 
 	@Override
 	public Value processValue(Model model, Resource subject, String value, Cell cell, String language) {
-		if (StringUtils.isBlank(ValueProcessorFactory.normalizeSpace(value))) {
+		String theCellValue = this.header.isNormalizeSpace()?ValueProcessorFactory.normalizeSpace(value):value;
+		
+		if (StringUtils.isBlank(theCellValue)) {
 			return null;
 		}
 		
@@ -57,14 +59,14 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 				&&
 				headerLanguage == null
 				&&
-				(value.startsWith("http") || value.startsWith("mailto") || prefixManager.usesKnownPrefix(ValueProcessorFactory.normalizeSpace(value)))
+				(value.startsWith("http") || value.startsWith("mailto") || prefixManager.usesKnownPrefix(theCellValue))
 		) {
 			if(!header.isInverse()) {
-				Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(ValueProcessorFactory.normalizeSpace(value), false));
+				Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(theCellValue, false));
 				model.add(subject, header.getProperty(), v);
 				return v;
 			} else {
-				model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(ValueProcessorFactory.normalizeSpace(value), false)), header.getProperty(),subject);
+				model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(theCellValue, false)), header.getProperty(),subject);
 			}			
 		} else if(headerDatatype == null && headerLanguage == null && value.startsWith("(") && value.endsWith(")")) {
 			// handle rdf:List
@@ -179,7 +181,7 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 				return v;
 			}
 			else {
-				return this.valueProcessorFactory.langOrPlainLiteral(header.getProperty()).processValue(model, subject, value, cell, language);
+				return this.valueProcessorFactory.langOrPlainLiteral(header.getProperty()).processValue(model, subject, theCellValue, cell, language);
 			}
 		}
 		

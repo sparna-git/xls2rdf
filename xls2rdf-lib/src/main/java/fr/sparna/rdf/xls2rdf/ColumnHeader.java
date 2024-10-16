@@ -23,6 +23,7 @@ public class ColumnHeader {
 	public static final String PARAMETER_AS_LIST = "asList";
 	public static final String PARAMETER_MANCHESTER = "manchester";
 	public static final String PARAMETER_COPY_TO = "copyTo";
+	public static final String PARAMETER_NORMALIZE_SPACE = "normalize-space";
 	
 	public static enum RECONCILE_VALUES {
 		external,
@@ -185,6 +186,14 @@ public class ColumnHeader {
 	
 	public String getIgnoreIf() {
 		return (getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF) != null)?getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF):null;
+	}
+
+	public boolean isNormalizeSpace() {
+		boolean normalizeSpace = true;
+		if (getParameters().get(ColumnHeader.PARAMETER_NORMALIZE_SPACE) != null) {
+			normalizeSpace = Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_NORMALIZE_SPACE));
+		}
+		return normalizeSpace;
 	}
 	
 	public boolean hasParameter(String parameter) {

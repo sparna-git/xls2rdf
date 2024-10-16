@@ -334,6 +334,11 @@
 					<p />This is useful to set 2 predicates to the same value without having to duplicate the column. This does not work if the value is a blank node or a list.
 					<p />
 
+				<h4>Don't normalize whitespaces</h4>
+					<p />Add parameter <code>normalize-space="false"</code> so that the whitespaces in the value are not normalized. This is useful if you want to preserve whitespaces such as in Markdown text.
+						<code>dcterms:description@fr(normalize-space="false")</code>.
+					<p />
+
 				<h2>Default prefixes known in the converter</h2>
 				<p />This is the list of known prefixes in the converter. You don't have to declare them in the header.
 				<ul>
@@ -364,7 +369,8 @@
 					<li><code>ignoreIf="xxx"</code> indicate that the value xxx should be ignored when present in this column</li>
 					<li><code>ignoreIfParenthesis="true"</code> whether to ignore the values if they are in parenthesis</li>
 					<li><code>lookupColumn="skos:prefLabel"</code> or <code>lookupColumn="columnId"</code> or <code>lookupColumn="C"</code> : specifies the column to lookup the literal values to be converted to URIs</li>
-					<li><code>manchester="true"</code>  : Indicate that the values of this column should be parsed as Manchester OWL syntax class expressions</li>
+					<li><code>manchester="true"</code> : Indicate that the values of this column should be parsed as Manchester OWL syntax class expressions</li>
+					<li><code>normalize-space="false"</code> : Indicate we don't want any whitespace normalization. Set this to "false" in case the value is a markdown text to be processed as Markdown.</li>
 					<li><code>reconcile="local"</code> or <code>reconcile="external"</code> : whether to reconcile the value either locally or to an external reconcile endpoint (not implemented yet)</li>
 					<li><code>separator=";"</code> : specifies the separator to split cell in multiple values</li>
 					<li><code>subjectColumn="dcterms:creator"</code> or <code>subjectColumn="columnId"</code> or <code>subjectColumn="C"</code> : specifies the column containing the URI of the subject for predicates generated from this column</li>
