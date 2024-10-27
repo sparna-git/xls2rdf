@@ -24,6 +24,7 @@ public class ColumnHeader {
 	public static final String PARAMETER_MANCHESTER = "manchester";
 	public static final String PARAMETER_COPY_TO = "copyTo";
 	public static final String PARAMETER_NORMALIZE_SPACE = "normalize-space";
+	public static final String PARAMETER_SPARQL_PATH_TO_SHACL = "sparqlPathToShacl";
 	
 	public static enum RECONCILE_VALUES {
 		external,
@@ -74,6 +75,7 @@ public class ColumnHeader {
 	 * The IRI of the property to copyTo, set by the "copyTo" parameter
 	 */
 	private IRI copyTo;
+
 
 	
 	public ColumnHeader(String originalValue) {
@@ -195,7 +197,15 @@ public class ColumnHeader {
 		}
 		return normalizeSpace;
 	}
-	
+
+	public boolean isSparqlPathToShacl() {
+		boolean sparqlPathToShacl = false;
+		if (getParameters().get(ColumnHeader.PARAMETER_SPARQL_PATH_TO_SHACL) != null) {
+			sparqlPathToShacl = Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_SPARQL_PATH_TO_SHACL));
+		}
+		return sparqlPathToShacl;
+	}
+
 	public boolean hasParameter(String parameter) {
 		return this.parameters.get(parameter) != null;
 	}

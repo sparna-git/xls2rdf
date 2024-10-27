@@ -501,6 +501,15 @@ public class Xls2RdfConverter {
 			else if(header.isManchester()) {
 				cellProcessor = processorFactory.manchesterClassExpressionParser(header, prefixManager);
 			}
+
+			else if(header.isSparqlPathToShacl()) {
+				cellProcessor = new SparqlPathParser(
+					processorFactory.resourceOrLiteral(header, prefixManager),
+					header,
+					prefixManager,
+					messageListener
+				);
+			}
 			
 			// if this is not one of the known processor, but the property is known, then defaults to a generic processor
 			// also defaults to a generic processor if a custom datatype is declared on the property

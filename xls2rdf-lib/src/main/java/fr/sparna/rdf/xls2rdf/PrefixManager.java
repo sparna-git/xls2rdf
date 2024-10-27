@@ -132,6 +132,14 @@ public class PrefixManager {
 		return buffer.toString();
 	}
 
+	public String getPrefixesSparqlHeader() {
+		StringBuffer buffer = new StringBuffer();
+		this.prefixes.entrySet().stream().forEach(e -> { 
+			buffer.append("PREFIX "+e.getKey()+":\t"+"<"+e.getValue()+">"+"\n");
+		});
+		return buffer.toString();
+	}
+
 	public Map<String, String> getPrefixes() {
 		return prefixes;
 	}

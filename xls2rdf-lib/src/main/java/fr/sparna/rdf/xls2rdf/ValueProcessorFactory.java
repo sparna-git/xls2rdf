@@ -329,6 +329,11 @@ public final class ValueProcessorFactory {
 		ManchesterClassExpressionParser p = new ManchesterClassExpressionParser(header, prefixManager, messageListener);
 		return p;
 	}
+
+	public ValueProcessorIfc sparqlPathToShaclParser(ColumnHeader header, PrefixManager prefixManager) {
+		ManchesterClassExpressionParser p = new ManchesterClassExpressionParser(header, prefixManager, messageListener);
+		return p;
+	}
 	
 	public static String normalizeSpace(String s) {
 		return s.replaceAll("\\h+"," ").trim();
