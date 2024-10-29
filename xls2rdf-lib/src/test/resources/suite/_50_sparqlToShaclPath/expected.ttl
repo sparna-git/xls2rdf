@@ -9,7 +9,7 @@
 
 
 <http://labs.sparna.fr/skos-play/convert/test> a skos:ConceptScheme ;
-	skos:hasTopConcept test:concept_1;
+	skos:hasTopConcept test:concept_1, test:concept_2, test:concept_3, test:concept_4;
 	.
 
 test:concept_1 a skos:Concept ;
@@ -18,3 +18,21 @@ test:concept_1 a skos:Concept ;
 	skos:prefLabel "a"@fr;
 	sh:path [sh:alternativePath ([sh:inversePath skos:broader] skos:narrower)]
 .
+
+test:concept_2 a skos:Concept;
+  skos:prefLabel "b"@fr;
+  sh:path skos:broader;
+  skos:inScheme <http://labs.sparna.fr/skos-play/convert/test>;
+  skos:topConceptOf <http://labs.sparna.fr/skos-play/convert/test> .
+
+test:concept_3 a skos:Concept;
+  skos:prefLabel "c"@fr;
+  sh:path "invalid"@fr;
+  skos:inScheme <http://labs.sparna.fr/skos-play/convert/test>;
+  skos:topConceptOf <http://labs.sparna.fr/skos-play/convert/test> .
+
+test:concept_4 a skos:Concept;
+  skos:prefLabel "d"@fr;
+  sh:path [sh:inversePath skos:broader];
+  skos:inScheme <http://labs.sparna.fr/skos-play/convert/test>;
+  skos:topConceptOf <http://labs.sparna.fr/skos-play/convert/test> .

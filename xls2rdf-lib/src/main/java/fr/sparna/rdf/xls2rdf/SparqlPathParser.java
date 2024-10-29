@@ -74,9 +74,8 @@ public class SparqlPathParser implements ValueProcessorIfc {
 			String shaclPath = converter.convertToShaclPropertyPath(ValueProcessorFactory.normalizeSpace(value));
 			return this.delegateProcessor.processValue(model, subject, shaclPath, cell, language);
 		} catch (TokenMgrError | ParseException e) {
-			log.error("Unable to parse SPARQL property path : "+value, e);
-			e.printStackTrace();
-			this.messageListener.onMessage(MessageCode.UNABLE_TO_PARSE_SHACL_PATH, value, language);
+			// will default to a normal parsing
+			this.delegateProcessor.processValue(model, subject, value, cell, language);
 			return null;
 		}
 	};		

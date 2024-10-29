@@ -502,7 +502,7 @@ public class Xls2RdfConverter {
 				cellProcessor = processorFactory.manchesterClassExpressionParser(header, prefixManager);
 			}
 
-			else if(header.isSparqlPathToShacl()) {
+			else if(header.getProperty().toString().equals("http://www.w3.org/ns/shacl#path")) {
 				cellProcessor = new SparqlPathParser(
 					processorFactory.resourceOrLiteral(header, prefixManager),
 					header,
