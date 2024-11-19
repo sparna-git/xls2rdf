@@ -14,7 +14,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.SHACL;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +27,8 @@ public class PrefixManager {
 	private Map<String, String> prefixes = new HashMap<>();
 	// prefixes explicitely declared in the file
 	private Map<String, String> explicitelyDeclaredPrefixes = new HashMap<>();
+
+	private String baseUri = null;
 	
 	public PrefixManager() {
 		// always add some known namespaces
@@ -43,7 +45,7 @@ public class PrefixManager {
 		prefixes.put("dcterms", DCTERMS.NAMESPACE);
 		prefixes.put("dct", DCTERMS.NAMESPACE);
 		prefixes.put("dcat", DCAT.NAMESPACE);
-		prefixes.put("xsd", XMLSchema.NAMESPACE);
+		prefixes.put("xsd", XSD.NAMESPACE);
 		prefixes.put("adms", "http://www.w3.org/ns/adms#");
 		prefixes.put("doap", "http://usefulinc.com/ns/doap#");
 		prefixes.put("qb", "http://purl.org/linked-data/cube#");
@@ -123,6 +125,14 @@ public class PrefixManager {
 			return null;
 		}
 	}
+
+	public String relativeUri(String value) {
+		if(this.baseUri == null) {
+			throw new RuntimeException("Found a relative IRI '"+value+"' but base IRI is unknown. Set it with BASE keyword.");
+		}
+
+		return this.baseUri+value;
+	}
 	
 	public String getPrefixesTurtleHeader() {
 		StringBuffer buffer = new StringBuffer();
@@ -158,6 +168,14 @@ public class PrefixManager {
 			}
 		});
 		return outputPrefixes;
+	}
+
+	public String getBaseUri() {
+		return baseUri;
+	}
+
+	public void setBaseUri(String baseUri) {
+		this.baseUri = baseUri;
 	}
 	
 }

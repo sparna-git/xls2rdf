@@ -24,13 +24,15 @@ public class RepositoryModelWriter implements ModelWriterIfc {
 	}
 
 	@Override
-	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes) {
+	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri) {
 		try {
 			try(RepositoryConnection c = this.outputRepository.getConnection()) {
 				// register the prefixes
 				prefixes.entrySet().forEach(e -> c.setNamespace(e.getKey(), e.getValue()));
 				c.add(model, SimpleValueFactory.getInstance().createIRI(graph));
 			}
+
+			// baseIri cannot be kept here in the outputRepository
 		} catch(Exception e) {
 			throw Xls2RdfException.rethrow(e);
 		}

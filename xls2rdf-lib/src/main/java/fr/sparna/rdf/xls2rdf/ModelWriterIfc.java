@@ -8,7 +8,7 @@ public interface ModelWriterIfc {
 
 	public void beginWorkbook();
 	
-	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes);
+	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri);
 	
 	public void endWorkbook();	
 	

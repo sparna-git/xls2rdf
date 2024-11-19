@@ -33,6 +33,8 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 	private Repository outputRepository;
 	
 	private boolean grouping = true;
+
+	private String baseIri;
 	
 	public OutputStreamModelWriter(OutputStream out) {
 		super();
@@ -57,13 +59,16 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 	 * @see fr.sparna.rdf.skos.xls2skos.ModelSaverIfc#saveGraphModel(java.lang.String, org.eclipse.rdf4j.model.Model)
 	 */
 	@Override
-	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes) {
+	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri) {
 		try {
 			try(RepositoryConnection c = this.outputRepository.getConnection()) {
 				// register the prefixes
 				prefixes.entrySet().forEach(e -> c.setNamespace(e.getKey(), e.getValue()));
 				c.add(model, SimpleValueFactory.getInstance().createIRI(graph));
 			}
+
+			// keep track of baseIri
+			this.baseIri = baseIri;
 		} catch(Exception e) {
 			throw Xls2RdfException.rethrow(e);
 		}
@@ -78,22 +83,22 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 
 	@Override
 	public void endWorkbook() {
-		RDFHandler handler;
-		if(grouping) {
-			handler = new BufferedGroupingRDFHandler(100000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out));
-		} else {
-			handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(out);
-		}
-		
-		try(RepositoryConnection c = this.outputRepository.getConnection()) {
-			c.setNamespace("skos", SKOS.NAMESPACE);
-			c.setNamespace("skosxl", SKOSXL.NAMESPACE);
-			c.export(handler);
-		}
-		
 		try {
+			RDFHandler handler;
+			if(grouping) {
+				handler = new BufferedGroupingRDFHandler(100000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out, this.baseIri));
+			} else {
+				handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(out, this.baseIri);
+			}
+			
+			try(RepositoryConnection c = this.outputRepository.getConnection()) {
+				c.setNamespace("skos", SKOS.NAMESPACE);
+				c.setNamespace("skosxl", SKOSXL.NAMESPACE);
+				c.export(handler);
+			}		
+		
 			out.flush();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}

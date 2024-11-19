@@ -212,6 +212,11 @@ public class Xls2RdfConverter {
 	private void initPrefixManager(Sheet sheet) {		
 		// read the prefixes
 		this.prefixManager.register(RdfizableSheet.readPrefixes(sheet));
+		String baseIri = RdfizableSheet.readBaseIri(sheet);
+		// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaratio
+		if(baseIri != null) {
+			this.prefixManager.setBaseUri(baseIri);
+		}
 	}
 
 	/**
@@ -391,7 +396,7 @@ public class Xls2RdfConverter {
 		
 		// writes the resulting Model
 		log.debug("Saving graph of "+model.size()+" statements generated from Sheet "+sheet.getSheetName());
-		modelWriter.saveGraphModel(csUri, model, prefixManager.getOutputPrefixes());
+		modelWriter.saveGraphModel(csUri, model, prefixManager.getOutputPrefixes(), prefixManager.getBaseUri());
 		
 		// stores the identifier of generated vocabulary
 		convertedVocabularyIdentifiers.add(csUri);

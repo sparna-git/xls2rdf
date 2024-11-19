@@ -179,8 +179,11 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 				Value v = SimpleValueFactory.getInstance().createBNode(value.substring(2));
 				model.add(subject, header.getProperty(), v);
 				return v;
-			}
-			else {
+			} else if(value.startsWith("<") && value.endsWith(">")) {
+				Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.relativeUri(value.substring(1, value.length()-1)));
+				model.add(subject, header.getProperty(), v);
+				return v;
+			} else {
 				return this.valueProcessorFactory.langOrPlainLiteral(header.getProperty()).processValue(model, subject, theCellValue, cell, language);
 			}
 		}

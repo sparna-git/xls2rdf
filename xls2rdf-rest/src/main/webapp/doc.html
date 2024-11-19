@@ -112,12 +112,17 @@
 				(e.g. <code>dct:title</code>, see below) or as a full URI (starting with 'http');
 				<p /><strong>Prefix declaration</strong> : Prefixes can be declared in the header :
 				<ul>
-					<li>column A contains the special keyword "PREFIX" (case-insensitive)</li>
+					<li>column A contains the special keyword "PREFIX" (case-insensitive) or "@prefix"</li>
 					<li>column B contains the prefix</li>
 					<li>column C contains the URI to be prefixed</li>
 				</ul>
 				<p />Default prefixes are already known and don't have to be declared (see below).
-				<p /><strong>Other lines</strong> : the header CAN contain other lines that will be ignored if column A does not contain a known prefixed property or the "PREFIX" keyword.
+				<p /><strong>Base IRI declaration</strong> : a base IRI can be declared in the header :
+				<ul>
+					<li>column A contains the special keyword "BASE" (case-insensitive) or "@base"</li>
+					<li>column B contains the corresponding base IRI</li>
+				</ul>
+				<p /><strong>Other lines</strong> : the header CAN contain other lines that will be ignored if column A does not contain a known prefixed property or the "PREFIX" keyword or the "BASE" keyword.
 				<p />This is how a typical header can look like :
 				<img src="images/convert-screenshot-header.png" width="100%" />
 				
@@ -132,7 +137,7 @@
 					<ul>
 						<li>If the cell value starts with 'http' or 'mailto' or with a declared prefix, it will be interpreted as an object property;</li>
 						<li>Multiple URIs can be given in single cell, by separating them with commas <code>, </code>;</li>
-						<li>Otherwise, the value is interpreted as a literal;</li>
+						<li>Otherwise, the value is interpreted as a literal, but there are many special cases, see below;</li>
 					</ul>
 					<p />This is how a typical body part can look like :
 					<img src="images/convert-screenshot-body.png" width="100%" />
@@ -337,6 +342,10 @@
 				<h4>Don't normalize whitespaces</h4>
 					<p />Add parameter <code>normalize-space="false"</code> so that the whitespaces in the value are not normalized. This is useful if you want to preserve whitespaces such as in Markdown text.
 						<code>dcterms:description@fr(normalize-space="false")</code>.
+					<p />
+
+				<h4>Base IRI</h4>
+					<p />If a cell value starts with <code>&lt;</code> and ends with <code>&gt;</code> then it is interpreted as an IRI, relative to the IRI declared in the BASE declaration in the header (see above). This enables you to write relative IRIs, e.g. <code>&lt;images/myImage.png&gt;</code>
 					<p />
 
 				<h2>Default prefixes known in the converter</h2>

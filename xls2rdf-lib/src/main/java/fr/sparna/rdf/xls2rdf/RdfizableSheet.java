@@ -262,6 +262,27 @@ public class RdfizableSheet {
 		return prefixes;
 	}
 
+	public static String readBaseIri(Sheet sheet) {
+		// read the base IRI in the top 100 rows	(including the first one for cases where all prefixes are grouped in the first sheet)
+		for (int rowIndex = 0; rowIndex <= 100; rowIndex++) {
+			if(sheet.getRow(rowIndex) != null) {
+				String baseKeyword = getCellValue(sheet.getRow(rowIndex).getCell(0));
+				// if we have the "base" keyword...
+				// note : we add a null check here because there are problems with some sheets
+				if(baseKeyword != null && (baseKeyword.equalsIgnoreCase("BASE") || baseKeyword.equalsIgnoreCase("@base"))) {
+					// and we have the prefix and namespaces defined...
+					String baseIri = getCellValue(sheet.getRow(rowIndex).getCell(1));
+					if(StringUtils.isNotBlank(baseIri)) {
+						log.info("Found base IRI : "+baseIri);
+						return baseIri;
+					}
+				}
+			}
+		}
+		
+		return null;
+	}
+
 	public boolean validateHeaders(Predicate<IRI> propertyValidator, Xls2RdfMessageListenerIfc messageListener) {		
 		boolean allValid = true;
 		

@@ -39,6 +39,8 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 	
 	private Map<String, Model> modelsByGraph = new HashMap<>();
 	private Map<String, Map<String, String>> prefixesByGraph = new HashMap<>();
+
+	private Map<String, String> baseIriByGraph = new HashMap<>();
 	
 	private boolean grouping = true;
 	
@@ -51,7 +53,7 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 	 * @see fr.sparna.rdf.skos.xls2skos.ModelSaverIfc#saveGraphModel(java.lang.String, org.eclipse.rdf4j.model.Model)
 	 */
 	@Override
-	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes) {
+	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri) {
 		graph = graph + ((this.graphSuffix != null)?graphSuffix:"");
 		
 		if(modelsByGraph.containsKey(graph)) {
@@ -60,8 +62,8 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 			modelsByGraph.put(graph, model);
 		}
 		
-		// TODO : accumulate prefixes by graphs
 		prefixesByGraph.put(graph, prefixes);
+		baseIriByGraph.put(graph, baseIri);
 	}
 	
 	public void exportModel(Model model, RDFHandler handler, Map<String, String> prefixes) {
@@ -104,12 +106,12 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 					if(grouping) {
 						handler = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(fos));
 					} else {
-						handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(fos);
+						// pass the baseIri to the getWriter call
+						handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(fos, baseIriByGraph.get(graph));
 					}
 					exportModel(model, handler, prefixesByGraph.get(graph));
 					fos.flush();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					throw new RuntimeException("Failed to save model", e);
 				}
 				

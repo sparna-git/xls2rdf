@@ -11,14 +11,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
-import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandler;
-import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.eclipse.rdf4j.rio.helpers.BufferedGroupingRDFHandler;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
@@ -74,7 +71,7 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 	 * @see fr.sparna.rdf.skos.xls2skos.ModelSaverIfc#saveGraphModel(java.lang.String, org.eclipse.rdf4j.model.Model)
 	 */
 	@Override
-	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes) {
+	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri) {
 		try {
 			// declare a new ZipEntry in the Zip file
 			graph = graph + ((this.graphSuffix != null)?graphSuffix:"");
@@ -87,9 +84,9 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 			// writes in the entry
 			RDFHandler handler;
 			if(grouping) {
-				handler = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out));
+				handler = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out, baseIri));
 			} else {
-				handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(out);
+				handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(out, baseIri);
 			}
 			exportModel(model, handler, prefixes);
 			
