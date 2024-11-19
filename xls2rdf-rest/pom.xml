@@ -51,7 +51,7 @@
             <dependency>
                 <groupId>fr.sparna.rdf.xls2rdf</groupId>
                 <artifactId>xls2rdf-pom</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
