@@ -102,13 +102,7 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 				File file = new File(outputFolder, filename + "." + format.getDefaultFileExtension());
 				try (FileOutputStream fos = new FileOutputStream(file)) {
 					
-					RDFHandler handler;
-					if(grouping) {
-						handler = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(fos));
-					} else {
-						// pass the baseIri to the getWriter call
-						handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(fos, baseIriByGraph.get(graph));
-					}
+					RDFHandler handler = RDFHandlerFactory.buildHandler(grouping, filename, format, fos);
 					exportModel(model, handler, prefixesByGraph.get(graph));
 					fos.flush();
 				} catch (Exception e) {

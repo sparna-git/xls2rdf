@@ -2,8 +2,8 @@ package fr.sparna.rdf.xls2rdf.write;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.eclipse.rdf4j.model.Model;
@@ -84,12 +84,7 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 	@Override
 	public void endWorkbook() {
 		try {
-			RDFHandler handler;
-			if(grouping) {
-				handler = new BufferedGroupingRDFHandler(100000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out, this.baseIri));
-			} else {
-				handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(out, this.baseIri);
-			}
+			RDFHandler handler = RDFHandlerFactory.buildHandler(grouping, baseIri, format, out);
 			
 			try(RepositoryConnection c = this.outputRepository.getConnection()) {
 				c.setNamespace("skos", SKOS.NAMESPACE);

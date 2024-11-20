@@ -82,12 +82,7 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 			out.putNextEntry(new ZipEntry(entryname));
 			
 			// writes in the entry
-			RDFHandler handler;
-			if(grouping) {
-				handler = new BufferedGroupingRDFHandler(20000, RDFWriterRegistry.getInstance().get(format).get().getWriter(out, baseIri));
-			} else {
-				handler = RDFWriterRegistry.getInstance().get(format).get().getWriter(out, baseIri);
-			}
+			RDFHandler handler = RDFHandlerFactory.buildHandler(grouping, baseIri, format, out);
 			exportModel(model, handler, prefixes);
 			
 			// close the entry
