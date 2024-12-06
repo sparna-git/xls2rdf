@@ -37,4 +37,4 @@ The upload form at https://skos-play.sparna.fr/play/convert contains downloable 
 
 ## rdf2xls
 
-See also https://github.com/tfrancart/rdf2xls which is the inverse tool : recreate Excel files from RDF data, based on a SHACL specification of the Excel file structure.
+See also https://github.com/sparna-git/rdf2xls which is the inverse tool : recreate Excel files from RDF data, based on a SHACL specification of the Excel file structure.
