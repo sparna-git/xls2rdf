@@ -315,6 +315,21 @@
 				<p />This is how it looks like:<br />
 				<img src="images/convert-screenshot-manchester.png" />
 				
+				<h3>Specific support for SHACL logical operators</h3>
+
+				<p />SHACL logical operators, typically <a href="https://www.w3.org/TR/shacl/#OrConstraintComponent">sh:or</a>, require a cumbersome RDF structure.
+						xls2rdf provide specific wrapper to enable to easily turn a list of values in a column to the corresponding SHACL logical operator (typically sh:or, or sh:and or sh:xone).
+						to do this add the parameter <code>wrapper="sh:or"</code> (or <code>wrapper="sh:and"</code> or <code>wrapper="sh:xone"</code>) to your header, combining it with a <code>separator="x"</code> parameter.
+				<p />This is how it looks like:<br />
+				<img src="images/convert-screenshot-shor.png" />
+				<p />The above example will output the single triple <code>ex sh:class &lt;http://exemple.fr/1&gt;</code> if "http://exemple.fr/1" is the only value in the value, but will output the following if there is the 2 values "http://exemple.fr/1" and "http://exemple.fr/2" in the cell:
+				<p /><code>
+					ex sh:or (
+						[sh:class &lt;http://exemple.fr/1&gt;]
+						[sh:class &lt;http://exemple.fr/2&gt;]
+					)
+				</code>
+
 				<h3>Miscellaneous features</h3>
 
 				<h4>Named graph management</h4>
@@ -383,7 +398,7 @@
 					<li><code>reconcile="local"</code> or <code>reconcile="external"</code> : whether to reconcile the value either locally or to an external reconcile endpoint (not implemented yet)</li>
 					<li><code>separator=";"</code> : specifies the separator to split cell in multiple values</li>
 					<li><code>subjectColumn="dcterms:creator"</code> or <code>subjectColumn="columnId"</code> or <code>subjectColumn="C"</code> : specifies the column containing the URI of the subject for predicates generated from this column</li>
-					
+					<li><code>wrapper="sh:or"</code> or <code>wrapper="sh:and"</code> or <code>wrapper="sh:xone"</code> : instruct the converter to wrap the list of values of the cell into a SHACL sh:or operator</li>
 				</ul>
 			
 			</div>
