@@ -262,7 +262,7 @@ public final class ValueProcessorFactory {
 
 			model.addAll(toAdd);
 
-			return toAdd.stream().toList();
+			return toAdd.stream().collect(Collectors.toList());
 		};
 	}
 
