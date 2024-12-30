@@ -1,9 +1,11 @@
 package fr.sparna.rdf.xls2rdf;
 
+import java.util.List;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.Statement;
 
 public interface ValueProcessorIfc {
 	
@@ -17,6 +19,6 @@ public interface ValueProcessorIfc {
 	 * @param language
 	 * @return
 	 */
-	public Value processValue(Model model, Resource subject, String value, Cell cell, String language);
+	public List<Statement> processValue(Model model, Resource subject, String value, Cell cell, String language);
 	
 }

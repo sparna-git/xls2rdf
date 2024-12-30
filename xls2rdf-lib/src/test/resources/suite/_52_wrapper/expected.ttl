@@ -1,0 +1,30 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:<http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix test: <http://labs.sparna.fr/skos-play/convert/test/> .
+
+<http://labs.sparna.fr/skos-play/convert/test> a skos:ConceptScheme ;
+	skos:hasTopConcept test:concept_1;
+	.
+
+test:concept_1 a skos:Concept ;
+	skos:inScheme <http://labs.sparna.fr/skos-play/convert/test>;
+	skos:topConceptOf <http://labs.sparna.fr/skos-play/convert/test>;
+	skos:prefLabel "a"@fr;
+	sh:or _:1
+.
+
+_:1 a rdf:List;
+  rdf:first _:2;
+  rdf:rest _:3 .
+
+_:3 rdf:first _:4;
+  rdf:rest rdf:nil .
+
+_:2 sh:class <http://exemple.fr/1> .
+
+_:4 sh:class <http://exemple.fr/2> .

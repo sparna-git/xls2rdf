@@ -47,7 +47,6 @@ public class OWLPostProcessor implements Xls2RdfPostProcessorIfc {
 			log.debug("Detected a sheet with an owl:Ontology in the header");
 			
 			
-			// then every resource in the sheet without a type will be considered an Observation, linked to this Dataset
 			rowResources.stream().filter(r -> !model.filter(r, XLS2RDF.IS_COVERED_BY, null).isEmpty()).forEach(r -> {
 				// gather all the is_covered_by values
 				List<IRI> isCoveredByValues = model.filter(r, XLS2RDF.IS_COVERED_BY, null).objects().stream()

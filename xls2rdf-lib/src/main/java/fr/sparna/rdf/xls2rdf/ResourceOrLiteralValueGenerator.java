@@ -3,6 +3,7 @@ package fr.sparna.rdf.xls2rdf;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -42,7 +44,7 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 	}
 
 	@Override
-	public Value processValue(Model model, Resource subject, String value, Cell cell, String language) {
+	public List<Statement> processValue(Model model, Resource subject, String value, Cell cell, String language) {
 		String theCellValue = this.header.isNormalizeSpace()?ValueProcessorFactory.normalizeSpace(value):value;
 		
 		if (StringUtils.isBlank(theCellValue)) {
@@ -63,8 +65,9 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 		) {
 			if(!header.isInverse()) {
 				Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(theCellValue, false));
-				model.add(subject, header.getProperty(), v);
-				return v;
+				Statement s = SimpleValueFactory.getInstance().createStatement(subject, header.getProperty(), v);
+				model.add(s);
+				return Collections.singletonList(s);
 			} else {
 				model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(theCellValue, false)), header.getProperty(),subject);
 			}			
@@ -172,17 +175,20 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 				}
 				
 				if(l != null) {
-					model.add(subject, header.getProperty(), l);
-					return l;
+					Statement s = SimpleValueFactory.getInstance().createStatement(subject, header.getProperty(), l);
+					model.add(s);
+					return Collections.singletonList(s);
 				}
 			} else if(value.startsWith("_:")) {
 				Value v = SimpleValueFactory.getInstance().createBNode(value.substring(2));
-				model.add(subject, header.getProperty(), v);
-				return v;
+				Statement s = SimpleValueFactory.getInstance().createStatement(subject, header.getProperty(), v);
+				model.add(s);
+				return Collections.singletonList(s);
 			} else if(value.startsWith("<") && value.endsWith(">")) {
 				Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.relativeUri(value.substring(1, value.length()-1)));
-				model.add(subject, header.getProperty(), v);
-				return v;
+				Statement s = SimpleValueFactory.getInstance().createStatement(subject, header.getProperty(), v);
+				model.add(s);
+				return Collections.singletonList(s);
 			} else {
 				return this.valueProcessorFactory.langOrPlainLiteral(header.getProperty()).processValue(model, subject, theCellValue, cell, language);
 			}

@@ -5,23 +5,27 @@ import static fr.sparna.rdf.xls2rdf.ExcelHelper.getCellValue;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.GregorianCalendar;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 import org.eclipse.rdf4j.common.iteration.Iterations;
+import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.RDFCollections;
+import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.repository.Repository;
@@ -57,10 +61,14 @@ public final class ValueProcessorFactory {
 				return null;
 			}
 
-			Arrays.stream(StringUtils.split(value, separator)).forEach(
-				aValue -> delegate.processValue(model, subject, normalizeSpace(aValue), cell, language)
-			);
-			return null;
+			List<Statement> result = new ArrayList<>();
+			Arrays.stream(StringUtils.split(value, separator)).forEach(aValue -> {
+				List<Statement> statements = delegate.processValue(model, subject, normalizeSpace(aValue), cell, language);
+				if(statements != null) {
+					result.addAll(statements);
+				}
+			});
+			return result;
 		};
 	}
 	
@@ -78,8 +86,9 @@ public final class ValueProcessorFactory {
 				throw new Xls2RdfException("Expected a URI but got '"+normalizeSpace(value)+"'");
 			}
 			
-			model.add(subject, property, iri);
-			return null;
+			Statement s = SimpleValueFactory.getInstance().createStatement(subject, property, iri);
+			model.add(s);
+			return Collections.singletonList(s);
 		};
 	}
 	
@@ -101,9 +110,8 @@ public final class ValueProcessorFactory {
 				log.error(new CellReference(cell.getRowIndex(), cell.getColumnIndex()).formatAsString()+" Unable to find value '"+lookupValue+"' in column "+CellReference.convertNumToColString(lookupColumn)+", while trying to generate property "+header.getProperty());
 				// keep the triple as a literal with special predicate ?				
 				// throw new Xls2SkosException("Unable to find value '"+lookupValue+"' in column of index "+lookupColumn+", while trying to generate property "+property);
+				return null;
 			}
-			
-			return null;
 		};
 	}
 	
@@ -214,8 +222,7 @@ public final class ValueProcessorFactory {
 			if (theValue.startsWith("(") && theValue.endsWith(")")) {
 				return null;
 			} else {
-				delegate.processValue(model, subject, theValue, cell, language);
-				return null;
+				return delegate.processValue(model, subject, theValue, cell, language);
 			}
 
 		};
@@ -223,11 +230,84 @@ public final class ValueProcessorFactory {
 
 	public ValueProcessorIfc copyTo(IRI copyTo, ValueProcessorIfc delegate) {
 		return (model, subject, value, cell, language) -> {
-			Value v = delegate.processValue(model, subject, value, cell, language);
-			if(v != null) {
-				model.add(subject, copyTo, v);
+			List<Statement> statements = delegate.processValue(model, subject, value, cell, language);
+			List<Statement> newStatements = new ArrayList<>();
+			if(statements != null) {
+				statements.stream().forEach(v -> {
+					newStatements.add(SimpleValueFactory.getInstance().createStatement(subject, copyTo, v.getObject()));
+				});
+				model.addAll(newStatements);		
 			}
-			return v;
+			newStatements.addAll(statements);
+			return newStatements;
+		};
+	}
+
+	public ValueProcessorIfc asList(ColumnHeader header, ValueProcessorIfc delegate) {
+		return (model, subject, value, cell, language) -> {
+			List<Statement> originalStatements = delegate.processValue(model, subject, value, cell, language);
+
+			Model toAdd = new LinkedHashModel();
+
+			// get all values
+			Set<Value> values = originalStatements.stream().map(s -> s.getObject()).collect(Collectors.toSet());
+
+			// aggregate in list
+			Resource listHead = Values.bnode();
+			RDFCollections.asRDF(values,listHead,toAdd);
+			// remove all original triples
+			model.removeAll(originalStatements);
+			// add instead triple to the list
+			toAdd.add(subject, header.getProperty(), listHead);
+
+			model.addAll(toAdd);
+
+			return toAdd.stream().toList();
+		};
+	}
+
+	public ValueProcessorIfc wrapWithShaclLogicalOperator(ColumnHeader header, IRI logicalOperator, ValueProcessorIfc delegate) {
+		return (model, subject, value, cell, language) -> {
+			List<Statement> originalStatements = delegate.processValue(model, subject, value, cell, language);
+
+			Model toRemove = new LinkedHashModel();
+			Model toAdd = new LinkedHashModel();
+
+			// get all values
+			Set<Value> values = originalStatements.stream().map(s -> s.getObject()).collect(Collectors.toSet());
+
+			// join with the boolean operator only if there is more than 1 value
+			if(values.size() > 1) {
+				// for each values...
+				List<BNode> items = new ArrayList<>();
+				for(Value v : values) {
+					BNode bnode = Values.bnode();
+					items.add(bnode);
+					toAdd.add(
+						SimpleValueFactory.getInstance().createStatement(
+							bnode,
+							header.getProperty(),
+							v
+						)
+					);
+				}
+
+				// aggregate in list
+				Resource listHead = Values.bnode();
+				// 3rd parameter is a sink
+				RDFCollections.asRDF(items,listHead,toAdd);
+
+				toAdd.add(subject, logicalOperator, listHead);
+
+				// remove all original triples
+				toRemove.addAll(originalStatements);
+			}
+
+			// remove everything that needs to be removed
+			model.removeAll(toRemove);
+			model.addAll(toAdd);
+
+			return toAdd.stream().collect(Collectors.toList());
 		};
 	}
 	
@@ -263,7 +343,7 @@ public final class ValueProcessorFactory {
 				parser.parse(new StringReader(turtle.toString()), RDF.NS.toString());
 				// then add all the resulting statements to the final Model
 				model.addAll(collector.getStatements());
-				return null;
+				return collector.getStatements().stream().collect(Collectors.toList());
 			} catch (Exception e) {
 				// if anything goes wrong, default to creating a literal
 				log.error("Error in parsing Turtle :\n"+turtle);
@@ -273,31 +353,13 @@ public final class ValueProcessorFactory {
 			
 		};
 	}
-	
-	public ValueProcessorIfc dateLiteral(IRI property) {
-		return (model, subject, value, cell, language) -> {
-			
-			if (StringUtils.isBlank(value)) return null;
-
-			Literal literal = null; 
-			try {
-				literal = SimpleValueFactory.getInstance().createLiteral(DatatypeFactory.newInstance().newXMLGregorianCalendar((GregorianCalendar)ExcelHelper.asCalendar(value)));
-				model.add(subject, property,literal);
-			}
-			catch (NumberFormatException ignore) {
-			}
-			catch (DatatypeConfigurationException ignore) {
-				ignore.printStackTrace();
-			}
-			return literal;
-		};
-	}
 
 	public ValueProcessorIfc plainLiteral(IRI property) {
 		return (model, subject, value, cell, language) -> {
 			Literal literal = SimpleValueFactory.getInstance().createLiteral(value);
-			model.add(subject, property, literal);
-			return literal;
+			Statement s = SimpleValueFactory.getInstance().createStatement(subject, property, literal);
+			model.add(s);
+			return Collections.singletonList(s);
 		};
 	}
 	
@@ -309,8 +371,9 @@ public final class ValueProcessorFactory {
 			} else {
 				literal = SimpleValueFactory.getInstance().createLiteral(value);
 			}
-			model.add(subject, property, literal);
-			return literal;
+			Statement s = SimpleValueFactory.getInstance().createStatement(subject, property, literal);
+			model.add(s);
+			return Collections.singletonList(s);
 		};
 	}
 
@@ -319,18 +382,17 @@ public final class ValueProcessorFactory {
 			// String labelUri = ConceptSchemeFromExcel.fixUri(value);
 			String labelUri = prefixManager.uri(value, true);
 			IRI labelResource = SimpleValueFactory.getInstance().createIRI(labelUri);
-			model.add(labelResource, RDF.TYPE, SKOSXL.LABEL);
-			model.add(subject, xlLabelProperty, labelResource);
-			return labelResource;
+			List<Statement> statements = new ArrayList<>();
+
+			statements.add(SimpleValueFactory.getInstance().createStatement(labelResource, RDF.TYPE, SKOSXL.LABEL));
+			statements.add(SimpleValueFactory.getInstance().createStatement(subject, xlLabelProperty, labelResource));
+
+			model.addAll(statements);
+			return statements;
 		};
 	}
 
 	public ValueProcessorIfc manchesterClassExpressionParser(ColumnHeader header, PrefixManager prefixManager) {
-		ManchesterClassExpressionParser p = new ManchesterClassExpressionParser(header, prefixManager, messageListener);
-		return p;
-	}
-
-	public ValueProcessorIfc sparqlPathToShaclParser(ColumnHeader header, PrefixManager prefixManager) {
 		ManchesterClassExpressionParser p = new ManchesterClassExpressionParser(header, prefixManager, messageListener);
 		return p;
 	}

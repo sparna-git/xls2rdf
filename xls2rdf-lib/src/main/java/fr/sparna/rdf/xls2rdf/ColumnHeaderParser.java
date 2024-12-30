@@ -60,6 +60,15 @@ public class ColumnHeaderParser {
 				}
 				h.setCopyTo(copyTo);
 			}
+
+			// sets the wrapper property from parameters, if needed
+			if(parameters.containsKey(ColumnHeader.PARAMETER_WRAPPER)) {
+				IRI wrapperOperator = parseProperty(parameters.get(ColumnHeader.PARAMETER_WRAPPER));
+				if(wrapperOperator == null) {
+					 throw new InvalidParameterException("Unable to parse value of "+ ColumnHeader.PARAMETER_WRAPPER +" : '"+parameters.get(ColumnHeader.PARAMETER_WRAPPER)+"'");
+				}
+				h.setWrapper(wrapperOperator);
+			}
 		}
 				
 		h.setHeaderCell(cell);

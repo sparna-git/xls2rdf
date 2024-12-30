@@ -24,6 +24,7 @@ public class ColumnHeader {
 	public static final String PARAMETER_MANCHESTER = "manchester";
 	public static final String PARAMETER_COPY_TO = "copyTo";
 	public static final String PARAMETER_NORMALIZE_SPACE = "normalize-space";
+	public static final String PARAMETER_WRAPPER = "wrapper";
 	
 	public static enum RECONCILE_VALUES {
 		external,
@@ -74,6 +75,10 @@ public class ColumnHeader {
 	 * The IRI of the property to copyTo, set by the "copyTo" parameter
 	 */
 	private IRI copyTo;
+	/**
+	 * The IRI of the wrapper to use, set by the "wrapper" parameter, typically sh:or
+	 */
+	private IRI wrapper;
 
 
 	
@@ -159,6 +164,14 @@ public class ColumnHeader {
 
 	public void setCopyTo(IRI copyTo) {
 		this.copyTo = copyTo;
+	}
+
+	public IRI getWrapper() {
+		return wrapper;
+	}
+
+	public void setWrapper(IRI wrapper) {
+		this.wrapper = wrapper;
 	}
 
 	public void setReconcileOn(IRI reconcileOn) {

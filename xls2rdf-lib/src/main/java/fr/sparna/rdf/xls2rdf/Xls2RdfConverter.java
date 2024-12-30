@@ -24,6 +24,7 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.SHACL;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
@@ -385,6 +386,7 @@ public class Xls2RdfConverter {
 		// always post-process with asList
 		AsListPostProcessor alpp = new AsListPostProcessor();
 		alpp.afterSheet(model, csResource, rowResources, columnNames);
+
 		if(this.postProcessors != null && this.postProcessors.size() > 0) {
 			log.info("Applying SKOS post-processings on the result");
 			for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
@@ -595,6 +597,21 @@ public class Xls2RdfConverter {
 					log.warn("Unable to set a new current subject from cell '"+new CellReference(row.getRowNum()+1, colIndex).formatAsString()+"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 			}
+
+			// TODO : this can enable to generate RDF list from a comma-separated cell values
+			// if(header.isAsList()) {
+			// 	cellProcessor = processorFactory.asList(header, cellProcessor);
+			// }
+
+			if(header.getWrapper() != null) {
+				if(header.getWrapper().toString().equals(SHACL.OR.toString())) {
+					cellProcessor = processorFactory.wrapWithShaclLogicalOperator(header, SHACL.OR, cellProcessor);
+				} else if(header.getWrapper().toString().equals(SHACL.AND.toString())) {
+					cellProcessor = processorFactory.wrapWithShaclLogicalOperator(header, SHACL.AND, cellProcessor);
+				} else if(header.getWrapper().toString().equals(SHACL.XONE.toString())) {
+					cellProcessor = processorFactory.wrapWithShaclLogicalOperator(header, SHACL.XONE, cellProcessor);
+				}
+			} 
 			
 			// if a value generator was successfully generated, then process the value
 			if(cellProcessor != null) {

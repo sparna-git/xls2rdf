@@ -3,14 +3,17 @@ package fr.sparna.rdf.xls2rdf;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -56,18 +59,16 @@ public class ManchesterClassExpressionParser implements ValueProcessorIfc {
 	}
 
 	@Override
-	public Value processValue(Model model, Resource subject, String value, Cell cell, String language) {
+	public List<Statement> processValue(Model model, Resource subject, String value, Cell cell, String language) {
 		if (StringUtils.isBlank(ValueProcessorFactory.normalizeSpace(value))) {
 			return null;
 		}
 		
-		log.info("Parsing a Manchester syntax expression : '"+value+"'");
-		
+		log.info("Parsing a Manchester syntax expression : '"+value+"'");		
 		
 		try {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLDataFactory df = manager.getOWLDataFactory();
-			ValueFactory vf = SimpleValueFactory.getInstance();
 			
 			// create dummy ontology
 			OWLOntology ontology = manager.createOntology();
@@ -90,13 +91,9 @@ public class ManchesterClassExpressionParser implements ValueProcessorIfc {
 			// stores the class expression in our ontology, in a dummy axiom
 			ontology.add(df.getOWLEquivalentClassesAxiom(df.getOWLClass("http://x"), expr));
 			
-
-			
 			/*
 			RioStorer storer = new RioStorer(new TurtleDocumentFormatFactory(), collector);
-			storer.setRioHandler(collector);
-			
-			
+			storer.setRioHandler(collector);		
 			TurtleDocumentFormat turtle = new TurtleDocumentFormat();
 			storer.storeOntology(ontology, vf.createIRI("http://dummy.com"), turtle);
 			*/
@@ -130,10 +127,12 @@ public class ManchesterClassExpressionParser implements ValueProcessorIfc {
 	        
 	        // read triple from the class expression
 	        Model theInterestingTriples = retrieveStatementsTreeRec(ontologyModel, (Resource)equivalentClassEntity);
-	        model.addAll(theInterestingTriples);
-	        
-	        // add link from subject to class expression
-	        model.add(subject, header.getProperty(), (Resource)equivalentClassEntity);
+			// add link from subject to class expression
+	        theInterestingTriples.add(subject, header.getProperty(), (Resource)equivalentClassEntity);
+
+	        model.addAll(theInterestingTriples);  
+			
+			return theInterestingTriples.stream().collect(Collectors.toList());       
 		
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();
@@ -151,9 +150,7 @@ public class ManchesterClassExpressionParser implements ValueProcessorIfc {
 			e.printStackTrace();
 			throw new Xls2RdfException("Exception while re-parsing class expression from Turtle",e);
 		}
-		
-		
-		return null;
+
 	};		
 	
 	private BidirectionalShortFormProvider getShortFormProvider(OWLOntology ont, Map<String, String> prefixes) {
