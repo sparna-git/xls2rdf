@@ -12,7 +12,7 @@
     <groupId>fr.sparna.rdf.xls2rdf</groupId>
     <artifactId>xls2rdf-rest</artifactId>
     <packaging>war</packaging>
-    <version>3.2.0</version>
+    <version>3.2.1</version>
 
     <name>Excel2RDF REST service</name>
     <description>REST service for xls2rdf</description>
