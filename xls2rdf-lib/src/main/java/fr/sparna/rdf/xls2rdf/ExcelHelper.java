@@ -24,7 +24,7 @@ public class ExcelHelper {
 
 	public static String getCellValue(Cell cell) {
 		if(cell == null) return null;
-		return getCellValue(cell.getCellTypeEnum(), cell);
+		return getCellValue(cell.getCellType(), cell);
 	}
 	
 	private static String getCellValue(CellType type, Cell cell) {
@@ -45,7 +45,7 @@ public class ExcelHelper {
         	return Boolean.toString(cell.getBooleanCellValue());
         } else if (type == CellType.FORMULA) {
             // Re-run based on the formula type
-            return getCellValue(cell.getCachedFormulaResultTypeEnum(), cell);
+            return getCellValue(cell.getCachedFormulaResultType(), cell);
         } else {
         	throw new Xls2RdfException("Cell type unknown or unsupported ({}) at Sheet '{}', row {}, column {}", type.name(), cell.getSheet().getSheetName(), cell.getRowIndex(), cell.getColumnIndex());
         }
