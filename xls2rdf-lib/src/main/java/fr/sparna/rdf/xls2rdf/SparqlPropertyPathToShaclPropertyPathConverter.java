@@ -27,8 +27,8 @@ public class SparqlPropertyPathToShaclPropertyPathConverter {
      * The different path modifies and their corresponding lower and upper bounds
      */
     enum PATH_MOD {
-        STAR("*", "sh:zeroOrMorePath", 1, Long.MAX_VALUE),
-        PLUS("+", "sh:oneOrMorePath", 0, Long.MAX_VALUE),
+        STAR("*", "sh:zeroOrMorePath", 0, Long.MAX_VALUE),
+        PLUS("+", "sh:oneOrMorePath", 1, Long.MAX_VALUE),
         QUESTION_MARK("?", "sh:zeroOrOne", 0, 1);
 
         private String sparqlRepresentation;
@@ -197,7 +197,7 @@ public class SparqlPropertyPathToShaclPropertyPathConverter {
                 PATH_MOD pm = PATH_MOD.parseASTPathMod(((ASTPathElt)propertyPath).getPathMod());
                 switch (pm) {
                     case PLUS:
-                    b.append("[sh:oneOrMorePath "+toShaclTurtlePath(propertyPath.jjtGetChild(0))+"]");
+                        b.append("[sh:oneOrMorePath "+toShaclTurtlePath(propertyPath.jjtGetChild(0))+"]");
                         break;                
                     case QUESTION_MARK:
                         b.append("[sh:zeroOrOnePath "+toShaclTurtlePath(propertyPath.jjtGetChild(0))+"]");
