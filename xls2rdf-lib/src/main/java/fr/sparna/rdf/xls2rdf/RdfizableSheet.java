@@ -118,7 +118,7 @@ public class RdfizableSheet {
 					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
 					ColumnHeader header = headerParser.parse(getCellValue(c), c);
 					if(header.getProperty() != null) {
-						log.info("Found proper property in header : "+header.getProperty().toString());
+						log.debug("Found proper property in header : "+header.getProperty().toString());
 						numFound++;
 					}
 				} catch (Exception e) {
@@ -251,7 +251,7 @@ public class RdfizableSheet {
 						}
 						String namespace = getCellValue(sheet.getRow(rowIndex).getCell(2));
 						if(StringUtils.isNotBlank(namespace)) {
-							log.info("Found prefix : "+prefix+" : <"+namespace+">");
+							log.debug("Found prefix : "+prefix+" : <"+namespace+">");
 							prefixes.put(prefix, namespace);
 						}
 					}
@@ -273,7 +273,7 @@ public class RdfizableSheet {
 					// and we have the prefix and namespaces defined...
 					String baseIri = getCellValue(sheet.getRow(rowIndex).getCell(1));
 					if(StringUtils.isNotBlank(baseIri)) {
-						log.info("Found base IRI : "+baseIri);
+						log.debug("Found base IRI : "+baseIri);
 						return baseIri;
 					}
 				}
