@@ -37,7 +37,7 @@ public class SparqlPathParser implements ValueProcessorIfc {
 			return null;
 		}
 		
-		log.info("Parsing a SPARQL property path : '"+value+"'");
+		log.debug("Parsing a SPARQL property path : '"+value+"'");
 
 		try {
 			SparqlPropertyPathToShaclPropertyPathConverter converter = new SparqlPropertyPathToShaclPropertyPathConverter(this.prefixManager);
