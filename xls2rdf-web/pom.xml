@@ -10,12 +10,12 @@
     </parent>
 
     <groupId>fr.sparna.rdf.xls2rdf</groupId>
-    <artifactId>xls2rdf-rest</artifactId>
+    <artifactId>xls2rdf-web</artifactId>
     <packaging>war</packaging>
     <version>4.0.0</version>
 
-    <name>Excel2RDF REST service</name>
-    <description>REST service for xls2rdf</description>
+    <name>Excel2RDF Web application</name>
+    <description>Web application for xls2rdf</description>
 
     <organization>
         <name>Sparna</name>

@@ -100,7 +100,7 @@
     <modules>
         <module>xls2rdf-lib</module>
         <module>xls2rdf-app</module>
-        <module>xls2rdf-rest</module>
+        <module>xls2rdf-web</module>
     </modules>
 
 </project>
