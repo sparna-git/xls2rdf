@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.processor;
 
 import static fr.sparna.rdf.xls2rdf.ExcelHelper.getCellValue;
 
@@ -37,7 +37,14 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.sparna.rdf.xls2rdf.ColumnHeader;
+import fr.sparna.rdf.xls2rdf.ExcelHelper;
+import fr.sparna.rdf.xls2rdf.PrefixManager;
+import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
+import fr.sparna.rdf.xls2rdf.Xls2RdfException;
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.processor.manchester.ManchesterClassExpressionParserProcessor;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
 
 public final class ValueProcessorFactory {
@@ -103,7 +110,7 @@ public final class ValueProcessorFactory {
 			Row foundRow = ExcelHelper.columnLookup(lookupValue, sheet, lookupColumn, true);
 			
 			if(foundRow != null) {				
-				ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(this, header, prefixManager, messageListener);
+				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, header, prefixManager, messageListener);
 				return g.processValue(model, subject, getCellValue(foundRow.getCell(uriColumn)), cell, language);				
 			} else {
 				// throw Exception if a reference was not found
@@ -125,7 +132,7 @@ public final class ValueProcessorFactory {
 			
 			IRI result = reconciledValues.getReconciledValue(value);
 			if(result != null) {
-				ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(this, header, prefixManager, messageListener);
+				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, header, prefixManager, messageListener);
 				return g.processValue(model, subject, result.toString(), cell, language);
 			} else {
 				log.error("Unable to find value '"+lookupValue+"'@"+language+" in reconciled values");
@@ -202,7 +209,7 @@ public final class ValueProcessorFactory {
 				}
 				
 				if(filteredStatements.size() == 1) {
-					ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(this, header, prefixManager, messageListener);
+					ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, header, prefixManager, messageListener);
 					return g.processValue(model, subject, filteredStatements.get(0).getSubject().toString(), cell, language);		
 				} else if(filteredStatements.size() > 1) {
 					log.error("Found multiple values for '"+lookupValue+"' in type/scheme '"+reconcileOn+"' : "+filteredStatements.stream().map(s -> s.getSubject().toString()).collect(Collectors.joining(", ")));
@@ -313,7 +320,7 @@ public final class ValueProcessorFactory {
 	
 	
 	public ValueProcessorIfc resourceOrLiteral(ColumnHeader header, PrefixManager prefixManager) {
-		ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(this, header, prefixManager, messageListener);
+		ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, header, prefixManager, messageListener);
 		return g;
 	}
 
@@ -384,7 +391,7 @@ public final class ValueProcessorFactory {
 			IRI labelResource = SimpleValueFactory.getInstance().createIRI(labelUri);
 			List<Statement> statements = new ArrayList<>();
 
-			statements.add(SimpleValueFactory.getInstance().createStatement(labelResource, RDF.TYPE, SKOSXL.LABEL));
+			statements.add(SimpleValueFactory.getInstance().createStatement(labelResource, RDF.TYPE, org.eclipse.rdf4j.model.vocabulary.SKOSXL.LABEL));
 			statements.add(SimpleValueFactory.getInstance().createStatement(subject, xlLabelProperty, labelResource));
 
 			model.addAll(statements);
@@ -393,7 +400,7 @@ public final class ValueProcessorFactory {
 	}
 
 	public ValueProcessorIfc manchesterClassExpressionParser(ColumnHeader header, PrefixManager prefixManager) {
-		ManchesterClassExpressionParser p = new ManchesterClassExpressionParser(header, prefixManager, messageListener);
+		ManchesterClassExpressionParserProcessor p = new ManchesterClassExpressionParserProcessor(header, prefixManager, messageListener);
 		return p;
 	}
 	

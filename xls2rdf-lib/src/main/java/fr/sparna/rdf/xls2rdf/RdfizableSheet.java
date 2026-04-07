@@ -104,7 +104,7 @@ public class RdfizableSheet {
 	 * This is determined by checking if column B and C both contain a URI (full, starting with http://, or abbreviated using one of the declared prefix).
 	 * @return
 	 */
-	protected int computeTitleRowIndex() {
+	public int computeTitleRowIndex() {
 		int headerRowIndex = 1;
 		
 		boolean found = false;

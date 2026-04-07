@@ -9,8 +9,6 @@ import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 
-import ch.qos.logback.core.recovery.ResilientSyslogOutputStream;
-
 public class MyOWLEntityChecker implements OWLEntityChecker {
 
 	private static final String DATATYPE_NAME_MARKER = "literal_";
