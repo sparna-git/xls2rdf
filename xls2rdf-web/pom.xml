@@ -5,26 +5,22 @@
     <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>2.3.0.RELEASE</version>
+      <version>3.5.10</version>
       <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <groupId>fr.sparna.rdf.xls2rdf</groupId>
-    <artifactId>xls2rdf-rest</artifactId>
+    <artifactId>xls2rdf-web</artifactId>
     <packaging>war</packaging>
-    <version>3.2.1</version>
+    <version>4.0.0</version>
 
-    <name>Excel2RDF REST service</name>
-    <description>REST service for xls2rdf</description>
+    <name>Excel2RDF Web application</name>
+    <description>Web application for xls2rdf</description>
 
     <organization>
         <name>Sparna</name>
         <url>http://www.sparna.fr/</url>
     </organization>
-
-    <properties>
-      <java.version>11</java.version>
-    </properties>
 
   <build>
     <plugins>
@@ -36,10 +32,9 @@
       <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.1</version>
+          <version>3.15.0</version>
           <configuration>
-              <source>${java.version}</source>
-              <target>${java.version}</target>
+              <release>${java.version}</release>
           </configuration>
       </plugin>
     </plugins>
@@ -81,29 +76,28 @@
           <version>${project.version}</version>
       </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-tomcat</artifactId>
-      <scope>provided</scope>
-    </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-tomcat</artifactId>
+        <scope>provided</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.junit.vintage</groupId>
-          <artifactId>junit-vintage-engine</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <scope>test</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
 
     </dependencies>
 

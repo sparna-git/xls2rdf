@@ -2,11 +2,12 @@ package fr.sparna.rdf.xls2rdf.rest;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,11 +24,6 @@ public class SimpleErrorController implements ErrorController {
     public SimpleErrorController(ErrorAttributes errorAttributes) {
         Assert.notNull(errorAttributes, "ErrorAttributes must not be null");
         this.errorAttributes = errorAttributes;
-    }
-
-    @Override
-    public String getErrorPath() {
-        return "/error";
     }
 
     @RequestMapping
@@ -51,6 +47,9 @@ public class SimpleErrorController implements ErrorController {
 
     private Map<String, Object> getErrorAttributes(HttpServletRequest request, boolean includeStackTrace) {
         WebRequest webRequest = new ServletWebRequest(request);
-        return this.errorAttributes.getErrorAttributes(webRequest, includeStackTrace);
+        ErrorAttributeOptions options = includeStackTrace ? 
+            ErrorAttributeOptions.of(ErrorAttributeOptions.Include.STACK_TRACE) : 
+            ErrorAttributeOptions.defaults();
+        return this.errorAttributes.getErrorAttributes(webRequest, options);
     }
 }
