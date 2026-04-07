@@ -6,10 +6,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
-import fr.sparna.rdf.xls2rdf.ColumnHeaderParser;
-import fr.sparna.rdf.xls2rdf.PrefixManager;
-
 public class ColumnHeaderParserTest {
 
 	private ColumnHeaderParser parser;
