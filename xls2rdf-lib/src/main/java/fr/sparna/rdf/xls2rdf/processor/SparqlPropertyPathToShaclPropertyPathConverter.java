@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.processor;
 
 import org.eclipse.rdf4j.query.parser.sparql.ast.ASTBasicGraphPattern;
 import org.eclipse.rdf4j.query.parser.sparql.ast.ASTGraphPatternGroup;
@@ -17,6 +17,8 @@ import org.eclipse.rdf4j.query.parser.sparql.ast.Node;
 import org.eclipse.rdf4j.query.parser.sparql.ast.ParseException;
 import org.eclipse.rdf4j.query.parser.sparql.ast.SyntaxTreeBuilder;
 import org.eclipse.rdf4j.query.parser.sparql.ast.TokenMgrError;
+
+import fr.sparna.rdf.xls2rdf.PrefixManager;
 
 /**
  * Parses a property path in SPARQL and returns its SHACL representation written in Turtle

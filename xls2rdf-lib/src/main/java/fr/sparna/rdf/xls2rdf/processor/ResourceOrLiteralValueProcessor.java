@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.processor;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,9 +23,14 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
+import fr.sparna.rdf.xls2rdf.ColumnHeader;
+import fr.sparna.rdf.xls2rdf.ExcelHelper;
+import fr.sparna.rdf.xls2rdf.PrefixManager;
+import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
 
-public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
+public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
 
 	/**
 	 * 
@@ -35,7 +40,7 @@ public class ResourceOrLiteralValueGenerator implements ValueProcessorIfc {
 	protected PrefixManager prefixManager;
 	protected Xls2RdfMessageListenerIfc messageListener;
 	
-	public ResourceOrLiteralValueGenerator(ValueProcessorFactory valueProcessorFactory, ColumnHeader header, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
+	public ResourceOrLiteralValueProcessor(ValueProcessorFactory valueProcessorFactory, ColumnHeader header, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
 		super();
 		this.valueProcessorFactory = valueProcessorFactory;
 		this.header = header;

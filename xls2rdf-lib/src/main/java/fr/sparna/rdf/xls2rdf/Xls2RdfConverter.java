@@ -5,6 +5,8 @@ import ch.qos.logback.classic.LoggerContext;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
 import fr.sparna.rdf.xls2rdf.postprocess.AsListPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
+import fr.sparna.rdf.xls2rdf.processor.SparqlPathParserProcessor;
+import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
 import fr.sparna.rdf.xls2rdf.reconcile.DynamicReconciliableValueSet;
 import fr.sparna.rdf.xls2rdf.reconcile.PreloadedReconciliableValueSet;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconcileServiceIfc;
@@ -510,7 +512,7 @@ public class Xls2RdfConverter {
 			}
 
 			else if(header.getProperty() != null && header.getProperty().toString().equals("http://www.w3.org/ns/shacl#path")) {
-				cellProcessor = new SparqlPathParser(
+				cellProcessor = new SparqlPathParserProcessor(
 					processorFactory.resourceOrLiteral(header, prefixManager),
 					header,
 					prefixManager,

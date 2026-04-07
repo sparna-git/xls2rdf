@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.processor.manchester;
 
 import java.util.Collections;
 import java.util.stream.Stream;
