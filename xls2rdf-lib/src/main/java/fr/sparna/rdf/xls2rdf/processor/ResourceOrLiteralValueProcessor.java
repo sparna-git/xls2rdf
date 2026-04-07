@@ -12,8 +12,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.util.CellReference;
+import fr.sparna.rdf.xls2rdf.model.Cell;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
@@ -128,12 +127,12 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
 								l = SimpleValueFactory.getInstance().createLiteral(sdf2.format(sdf1.parse(ValueProcessorFactory.normalizeSpace(unescapedValue))), headerDatatype);
 							} catch (ParseException e1) {
 								e1.printStackTrace();
-								this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse date format for value '"+ value +"'. Is the cell formatted as a date ?");
+								this.messageListener.onMessage(MessageCode.WRONG_FORMAT, cell.getCellExcelReference(), "Failed to parse date format for value '"+ value +"'. Is the cell formatted as a date ?");
 							}
 						} 
 						
 						if (l == null){
-							this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse date format for value '"+ value +"'. Is the cell formatted as a date ?");
+							this.messageListener.onMessage(MessageCode.WRONG_FORMAT, cell.getCellExcelReference(), "Failed to parse date format for value '"+ value +"'. Is the cell formatted as a date ?");
 						}
 					}
 				} else if(headerDatatype.stringValue().equals(XMLSchema.DATETIME.stringValue())) {
@@ -154,7 +153,7 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
 						} 
 						
 						if (l == null) {
-							this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse datetime format for value '"+ value +"'. Is the cell forma");
+							this.messageListener.onMessage(MessageCode.WRONG_FORMAT, cell.getCellExcelReference(), "Failed to parse datetime format for value '"+ value +"'. Is the cell forma");
 						}
 					}
 				} else if(headerDatatype.stringValue().equals(XMLSchema.BOOLEAN.stringValue())) {
@@ -166,7 +165,7 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
 							&&
 							!FALSE_VALUES.contains(unescapedValue.toLowerCase())
 					) {
-						this.messageListener.onMessage(MessageCode.WRONG_FORMAT, new CellReference(cell).formatAsString(), "Failed to parse boolean format for value '"+ value +"'");
+						this.messageListener.onMessage(MessageCode.WRONG_FORMAT, cell.getCellExcelReference(), "Failed to parse boolean format for value '"+ value +"'");
 					} else {
 						if(TRUE_VALUES.contains(unescapedValue.toLowerCase())) {
 							l = SimpleValueFactory.getInstance().createLiteral("true", headerDatatype);

@@ -20,6 +20,12 @@ public class ExcelRow implements Row {
     }
 
     @Override
+    public String getColumnValue(int columnIndex) {
+        Cell cell = getCell(columnIndex);
+        return cell == null ? null : cell.getCellValue();
+    }
+
+    @Override
     public int getRowNum() {
         return delegate.getRowNum();
     }
@@ -38,7 +44,7 @@ public class ExcelRow implements Row {
         return parentSheet.getWorkbook();
     }
 
-    org.apache.poi.ss.usermodel.Row getPoiRow() {
+    public org.apache.poi.ss.usermodel.Row getPoiRow() {
         return delegate;
     }
 }

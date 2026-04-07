@@ -12,18 +12,6 @@ public interface Cell {
     String getCellValue();
 
     /**
-     * @return the cell value as a double.
-     * @throws IllegalStateException if the cell does not contain a numeric value.
-     */
-    double getCellValueAsDouble();
-
-    /**
-     * @return the cell value as a boolean.
-     * @throws IllegalStateException if the cell does not contain a boolean value.
-     */
-    boolean getCellValueAsBoolean();
-
-    /**
      * @return the parent row containing this cell.
      */
     Row getRow();

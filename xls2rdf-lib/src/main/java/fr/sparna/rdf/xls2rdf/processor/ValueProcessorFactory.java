@@ -1,6 +1,5 @@
 package fr.sparna.rdf.xls2rdf.processor;
 
-import static fr.sparna.rdf.xls2rdf.ExcelHelper.getCellValue;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -11,9 +10,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellReference;
+import fr.sparna.rdf.xls2rdf.model.Row;
+import fr.sparna.rdf.xls2rdf.model.Sheet;
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
@@ -46,6 +44,7 @@ import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
 import fr.sparna.rdf.xls2rdf.processor.manchester.ManchesterClassExpressionParserProcessor;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
+import fr.sparna.rdf.xls2rdf.model.ExcelRefs;
 
 public final class ValueProcessorFactory {
 	
@@ -109,12 +108,12 @@ public final class ValueProcessorFactory {
 			
 			Row foundRow = ExcelHelper.columnLookup(lookupValue, sheet, lookupColumn, true);
 			
-			if(foundRow != null) {				
+			if(foundRow != null) {                
 				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, header, prefixManager, messageListener);
-				return g.processValue(model, subject, getCellValue(foundRow.getCell(uriColumn)), cell, language);				
+				return g.processValue(model, subject, foundRow.getColumnValue(uriColumn), cell, language);                
 			} else {
 				// throw Exception if a reference was not found
-				log.error(new CellReference(cell.getRowIndex(), cell.getColumnIndex()).formatAsString()+" Unable to find value '"+lookupValue+"' in column "+CellReference.convertNumToColString(lookupColumn)+", while trying to generate property "+header.getProperty());
+				log.error((cell != null ? cell.getCellExcelReference() : "?")+" Unable to find value '"+lookupValue+"' in column "+ExcelRefs.colIndexToLetters(lookupColumn)+", while trying to generate property "+header.getProperty());
 				// keep the triple as a literal with special predicate ?				
 				// throw new Xls2SkosException("Unable to find value '"+lookupValue+"' in column of index "+lookupColumn+", while trying to generate property "+property);
 				return null;

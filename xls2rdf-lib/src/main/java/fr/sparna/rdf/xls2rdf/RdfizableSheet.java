@@ -1,7 +1,5 @@
 package fr.sparna.rdf.xls2rdf;
 
-import static fr.sparna.rdf.xls2rdf.ExcelHelper.getCellValue;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -11,15 +9,14 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellReference;
 import org.eclipse.rdf4j.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
+import fr.sparna.rdf.xls2rdf.model.Cell;
+import fr.sparna.rdf.xls2rdf.model.Row;
+import fr.sparna.rdf.xls2rdf.model.Sheet;
 
 /**
  * A Sheet in a Workbook that can be turned into RDF.
@@ -35,10 +32,10 @@ public class RdfizableSheet {
 	protected int titleRowIndex;
 	protected List<ColumnHeader> columnHeaders;
 
-	public RdfizableSheet(
-			Sheet sheet,
-			PrefixManager prefixManager
-	) {
+	    public RdfizableSheet(
+		    Sheet sheet,
+		    PrefixManager prefixManager
+	    ) {
 		super();
 		this.sheet = sheet;
 		this.prefixManager = prefixManager;
@@ -66,7 +63,7 @@ public class RdfizableSheet {
 			return false;
 		}
 		
-		String uri = getCellValue(sheet.getRow(0).getCell(1));
+		String uri = sheet.getRow(0).getColumnValue(1);
 		
 		if(StringUtils.isBlank(uri)) {
 			log.debug(sheet.getSheetName()+" : B1 is empty.");
@@ -88,7 +85,7 @@ public class RdfizableSheet {
 	}
 	
 	public String getSchemeOrGraph() {
-		return getCellValue(sheet.getRow(0).getCell(1));
+		return sheet.getRow(0).getCell(1).getCellValue();
 	}
 	
 	public int getTitleRowIndex() {
@@ -116,7 +113,7 @@ public class RdfizableSheet {
 			for (short colIndex = 1; colIndex < 10; colIndex++) {
 				try {
 					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
-					ColumnHeader header = headerParser.parse(getCellValue(c), c);
+					ColumnHeader header = headerParser.parse(c.getCellValue(), c);
 					if(header.getProperty() != null) {
 						log.debug("Found proper property in header : "+header.getProperty().toString());
 						numFound++;
@@ -144,7 +141,7 @@ public class RdfizableSheet {
 					ColumnHeader headerA = null;
 					try {
 						Cell c = sheet.getRow(rowIndex).getCell(0);
-						headerA = headerParser.parse(getCellValue(sheet.getRow(rowIndex).getCell(0)), c);
+						headerA = headerParser.parse(c.getCellValue(), c);
 					} catch (Exception e) {
 						// we prevent anything to go wrong in the parsing at this stage, since the parsing
 						// tests cells for which we are unsure of the format.
@@ -153,9 +150,9 @@ public class RdfizableSheet {
 					
 					if(headerA != null) {
 						if(
-								getCellValue(sheet.getRow(rowIndex).getCell(0)).equals("URI")
+								sheet.getRow(rowIndex).getCell(0).getCellValue().equals("URI")
 								||
-								getCellValue(sheet.getRow(rowIndex).getCell(0)).equals("IRI")
+								sheet.getRow(rowIndex).getCell(0).getCellValue().equals("IRI")
 						) {
 							headerRowIndex = rowIndex;
 							found = true;
@@ -191,7 +188,7 @@ public class RdfizableSheet {
 			for (short i = 0; true; i++) {
 				Cell cell = row.getCell(i);
 				if (null == cell) break;
-				String columnName = cell.getStringCellValue();
+				String columnName = cell.getCellValue();
 				// stop at the first empty value
 				if (StringUtils.isBlank(columnName)) {
 					break;
@@ -208,9 +205,8 @@ public class RdfizableSheet {
 		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
 		for (int rowIndex = 1; rowIndex < this.getTitleRowIndex(); rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
-				String key = getCellValue(sheet.getRow(rowIndex).getCell(0));
-				Cell cell = sheet.getRow(rowIndex).getCell(1);
-				String value = getCellValue(cell);
+				String key = sheet.getRow(rowIndex).getColumnValue(0);
+				String value = sheet.getRow(rowIndex).getColumnValue(1);
 				
 				// parse the property
 				ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
@@ -237,19 +233,23 @@ public class RdfizableSheet {
 		Map<String, String> prefixes = new HashMap<String, String>();
 		
 		// read the prefixes in the top 100 rows	(including the first one for cases where all prefixes are grouped in the first sheet)
-		for (int rowIndex = 0; rowIndex <= 100; rowIndex++) {
+		int maxRowToCheck = Math.min(100, sheet.getLastRowNum());
+		for (int rowIndex = 0; rowIndex <= maxRowToCheck; rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
-				String prefixKeyword = getCellValue(sheet.getRow(rowIndex).getCell(0));
+				Row row = sheet.getRow(rowIndex);
+				String prefixKeyword = row.getColumnValue(0);
 				// if we have the "prefix" keyword...
 				// note : we add a null check here because there are problems with some sheets
 				if(prefixKeyword != null && (prefixKeyword.equalsIgnoreCase("PREFIX") || prefixKeyword.equalsIgnoreCase("@prefix"))) {
+
 					// and we have the prefix and namespaces defined...
-					String prefix = getCellValue(sheet.getRow(rowIndex).getCell(1));
+					String prefix = row.getColumnValue(1);
 					if(StringUtils.isNotBlank(prefix)) {
 						if(prefix.charAt(prefix.length()-1) == ':') {
 							prefix = prefix.substring(0, prefix.length()-1);
 						}
-						String namespace = getCellValue(sheet.getRow(rowIndex).getCell(2));
+
+						String namespace = row.getColumnValue(2);
 						if(StringUtils.isNotBlank(namespace)) {
 							log.debug("Found prefix : "+prefix+" : <"+namespace+">");
 							prefixes.put(prefix, namespace);
@@ -266,12 +266,14 @@ public class RdfizableSheet {
 		// read the base IRI in the top 100 rows	(including the first one for cases where all prefixes are grouped in the first sheet)
 		for (int rowIndex = 0; rowIndex <= 100; rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
-				String baseKeyword = getCellValue(sheet.getRow(rowIndex).getCell(0));
+				Row row = sheet.getRow(rowIndex);
+
+				String baseKeyword = row.getColumnValue(0);
 				// if we have the "base" keyword...
 				// note : we add a null check here because there are problems with some sheets
 				if(baseKeyword != null && (baseKeyword.equalsIgnoreCase("BASE") || baseKeyword.equalsIgnoreCase("@base"))) {
 					// and we have the prefix and namespaces defined...
-					String baseIri = getCellValue(sheet.getRow(rowIndex).getCell(1));
+					String baseIri = row.getColumnValue(1);
 					if(StringUtils.isNotBlank(baseIri)) {
 						log.debug("Found base IRI : "+baseIri);
 						return baseIri;
@@ -292,11 +294,11 @@ public class RdfizableSheet {
 				log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
 				boolean valid = propertyValidator.test(columnHeader.getProperty());
 				if(!valid) {
-					String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+new CellReference(columnHeader.getHeaderCell()).formatAsString();
+					    String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+columnHeader.getHeaderCell().getCellExcelReference();
 					log.error(message);
 					messageListener.onMessage(
 							MessageCode.INVALID_PROPERTY,
-							new CellReference(columnHeader.getHeaderCell()).formatAsString(),
+						    columnHeader.getHeaderCell().getCellExcelReference(),
 							message
 					);
 					allValid = false;
@@ -312,11 +314,11 @@ public class RdfizableSheet {
 					log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
 					boolean valid = propertyValidator.test(columnHeader.getProperty());
 					if(!valid) {
-						String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+new CellReference(columnHeader.getHeaderCell()).formatAsString();
+						String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+columnHeader.getHeaderCell().getCellExcelReference();
 						log.error(message);
 						messageListener.onMessage(
 								MessageCode.INVALID_PROPERTY,
-								new CellReference(columnHeader.getHeaderCell()).formatAsString(),
+							columnHeader.getHeaderCell().getCellExcelReference(),
 								message
 						);
 						allValid = false;

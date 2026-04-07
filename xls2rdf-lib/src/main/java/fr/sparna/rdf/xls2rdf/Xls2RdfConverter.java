@@ -13,14 +13,7 @@ import fr.sparna.rdf.xls2rdf.reconcile.ReconcileServiceIfc;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
 import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
 import fr.sparna.rdf.xls2rdf.write.OutputStreamModelWriter;
-
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.ss.util.CellReference;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -47,7 +40,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static fr.sparna.rdf.xls2rdf.ExcelHelper.getCellValue;
+import fr.sparna.rdf.xls2rdf.model.Cell;
+import fr.sparna.rdf.xls2rdf.model.Row;
+import fr.sparna.rdf.xls2rdf.model.Sheet;
+import fr.sparna.rdf.xls2rdf.model.Workbook;
+import fr.sparna.rdf.xls2rdf.model.excel.ExcelWorkbookFactory;
+import fr.sparna.rdf.xls2rdf.model.ExcelRefs;
 
 
 
@@ -75,10 +73,7 @@ public class Xls2RdfConverter {
 	 */
 	protected PrefixManager prefixManager = new PrefixManager();
 	
-	/**
-	 * The workbook currently being processed, to get references to fonts
-	 */
-	private transient Workbook workbook;
+	// No direct dependency on Apache POI workbook; use abstraction only.
 	
 	/**
 	 * Global Repository containing all the converted data from all sheets, useful for reconciling values
@@ -124,7 +119,7 @@ public class Xls2RdfConverter {
 	 * Whether to skip hidden columns and rows
 	 */
 	private boolean skipHidden = false;
-	
+
 	public Xls2RdfConverter(ModelWriterIfc modelWriter) {		
 		this(modelWriter, null);
 	}
@@ -143,7 +138,7 @@ public class Xls2RdfConverter {
 	public List<Model> processFile(File input) {
 		try {
 			log.info("Converting file "+input.getAbsolutePath()+"...");
-			Workbook workbook = WorkbookFactory.create(input);
+			Workbook workbook = ExcelWorkbookFactory.open(input);
 			return processWorkbook(workbook);
 		} catch (Exception e) {
 			throw Xls2RdfException.rethrow(e);
@@ -157,7 +152,7 @@ public class Xls2RdfConverter {
 	 */
 	public List<Model> processInputStream(InputStream input) {
 		try {
-			Workbook workbook = WorkbookFactory.create(input);
+			Workbook workbook = ExcelWorkbookFactory.open(input);
 			return processWorkbook(workbook);
 		} catch (Exception e) {
 			throw Xls2RdfException.rethrow(e);
@@ -165,7 +160,7 @@ public class Xls2RdfConverter {
 	}
 	
 	/**
-	 * Process an Excel sheet.
+	 * Process a Workbook
 	 * 
 	 * @param workbook
 	 * @return
@@ -175,9 +170,6 @@ public class Xls2RdfConverter {
 		List<Model> models = new ArrayList<>();
 
 		try {
-			
-			// store the workbook reference
-			this.workbook = workbook;
 			
 			// notify begin
 			modelWriter.beginWorkbook();
@@ -212,7 +204,7 @@ public class Xls2RdfConverter {
 	 * Init the prefix manager with the prefixes declared in the Sheet
 	 * @param sheet
 	 */
-	private void initPrefixManager(Sheet sheet) {		
+	private void initPrefixManager(Sheet sheet) {        
 		// read the prefixes
 		this.prefixManager.register(RdfizableSheet.readPrefixes(sheet));
 		String baseIri = RdfizableSheet.readBaseIri(sheet);
@@ -279,12 +271,14 @@ public class Xls2RdfConverter {
 		ColumnHeaderParser headerParser = new ColumnHeaderParser(prefixManager);
 		for (int rowIndex = 1; rowIndex < headerRowIndex; rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
-				String key = getCellValue(sheet.getRow(rowIndex).getCell(0));
-				Cell cell = sheet.getRow(rowIndex).getCell(1);
-				String value = getCellValue(cell);
+			Row row = sheet.getRow(rowIndex);
+			Cell cellKey = row.getCell(0);
+			String key = (cellKey != null) ? cellKey.getCellValue() : null;
+			Cell cell = row.getCell(1);
+			String value = (cell != null) ? cell.getCellValue() : null;
 				
-				// parse the property
-				ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
+			// parse the property	
+			ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
 				if(
 						header != null
 						&&
@@ -310,11 +304,11 @@ public class Xls2RdfConverter {
 					} 
 					
 					log.debug("Adding value on header object \""+value+"\" with lang "+header.getLanguage().orElse(this.lang));
-					cellProcessor.processValue(
+					    cellProcessor.processValue(
 							model,
 							csResource,
 							value,
-							cell,
+							    cell,
 							header.getLanguage().orElse(this.lang)
 					);
 				}
@@ -335,12 +329,12 @@ public class Xls2RdfConverter {
 			// reconcile columns that need to be reconciled, and store result
 			for (ColumnHeader columnHeader : columnNames) {
 				if(columnHeader.isReconcileExternal() && this.reconcileService != null) {					
-					PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
+					    PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
 							reconcileService,
 							this.failIfNoReconcile
 					);
-					reconciliableValueSet.initReconciledValues(
-							PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnHeader.getHeaderCell().getColumnIndex(), headerRowIndex),
+					    reconciliableValueSet.initReconciledValues(
+						    PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnHeader.getHeaderCell().getColumnIndex(), headerRowIndex),
 							columnHeader.getReconcileOn(),
 							this.messageListener
 					);
@@ -417,17 +411,17 @@ public class Xls2RdfConverter {
 
 			ColumnHeader header = columnHeaders.get(colIndex);
 			
-			Cell cell = row.getCell(colIndex);			
-			String value = getCellValue(cell);
+			Cell cell = row.getCell(colIndex);            
+			String value = (cell != null)?cell.getCellValue():null;
 			// if it is the first column...
 			if (null == rowBuilder) {
 				// if the value of the first column is empty, or is striked through, or if it is hidden, skip the whole row
 				if (
 						StringUtils.isBlank(value)
 						||
-						this.workbook.getFontAt(cell.getCellStyle().getFontIndex()).getStrikeout()
+						(cell != null && cell.isStruckThrough())
 						||
-						(skipHidden && row.getZeroHeight())
+						(skipHidden && row.isHidden())
 						
 				) {
 					return null;
@@ -443,7 +437,7 @@ public class Xls2RdfConverter {
 			}
 			
 			// process the cell for each subsequent columns after the first one
-			if(this.workbook.getFontAt(cell.getCellStyle().getFontIndex()).getStrikeout()) {
+			if(cell != null && cell.isStruckThrough()) {
 				// skip the cell if it is striked out
 				continue;
 			}
@@ -481,7 +475,7 @@ public class Xls2RdfConverter {
 				
 				cellProcessor = processorFactory.lookup(
 						header,
-						row.getSheet(),
+					row.getSheet(),
 						lookupColumnIndex,
 						lookupSubjectColumn,
 						prefixManager
@@ -575,7 +569,7 @@ public class Xls2RdfConverter {
 					throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 				
-				String currentSubject = getCellValue(row.getCell(subjectColumnIndex));
+				String currentSubject = (row.getCell(subjectColumnIndex) != null)?row.getCell(subjectColumnIndex).getCellValue():null;
 				
 				if(currentSubject != null) {
 					try {
@@ -596,7 +590,7 @@ public class Xls2RdfConverter {
 						throw new Xls2RdfException(e, "Cannot set subject URI in cell "+subjectColumnRef+(row.getRowNum()+1)+", value is '"+ currentSubject +"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
 					}
 				} else {
-					log.warn("Unable to set a new current subject from cell '"+new CellReference(row.getRowNum()+1, colIndex).formatAsString()+"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
+					log.warn("Unable to set a new current subject from cell '"+ExcelRefs.cellRef(row.getRowNum(), colIndex)+"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 			}
 
@@ -618,10 +612,10 @@ public class Xls2RdfConverter {
 			// if a value generator was successfully generated, then process the value
 			if(cellProcessor != null) {
 				try {
-					rowBuilder.processCell(
+					    rowBuilder.processCell(
 							cellProcessor,
 							value,
-							cell,
+						    cell,
 							header.getLanguage().orElse(this.lang)
 					);
 				} catch (Exception e) {
@@ -630,7 +624,7 @@ public class Xls2RdfConverter {
 					e.printStackTrace(new PrintStream(baos));
 					String stacktraceString = new String(baos.toByteArray());
 					String stacktraceStringBegin = (stacktraceString.length() > 256)?stacktraceString.substring(0, 256):stacktraceString;
-					throw new Xls2RdfException(e, "Convert exception while processing value '"+value+"', cell "+new CellReference(row.getRowNum()+1, colIndex).formatAsString()+" (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
+					throw new Xls2RdfException(e, "Convert exception while processing value '"+value+"', cell "+ExcelRefs.cellRef(row.getRowNum(), colIndex)+" (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
 				}
 			}
 			
@@ -658,7 +652,7 @@ public class Xls2RdfConverter {
 		public void processCell(ValueProcessorIfc valueGenerator, String value, Cell cell, String language) {
 			// if the column is unknown, ignore it
 			// if no current subject was found, cannot add any value
-			if(valueGenerator != null && this.currentSubject != null) {				
+			if(valueGenerator != null && this.currentSubject != null) {                
 				valueGenerator.processValue(model, currentSubject, value, cell, language);
 			}
 		}

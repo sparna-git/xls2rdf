@@ -51,7 +51,7 @@ public class ExcelSheet implements Sheet {
         return parentWorkbook;
     }
 
-    org.apache.poi.ss.usermodel.Sheet getPoiSheet() {
+    public org.apache.poi.ss.usermodel.Sheet getPoiSheet() {
         return delegate;
     }
 }

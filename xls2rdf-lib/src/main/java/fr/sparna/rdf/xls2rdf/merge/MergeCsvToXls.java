@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.merge;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,6 +11,11 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.PrefixManager;
+import fr.sparna.rdf.xls2rdf.RdfizableSheet;
+import fr.sparna.rdf.xls2rdf.model.excel.ExcelSheet;
+import fr.sparna.rdf.xls2rdf.model.excel.ExcelWorkbook;
 
 
 public class MergeCsvToXls {
@@ -29,7 +34,7 @@ public class MergeCsvToXls {
 			return null;
 		} else {
 			Sheet targetSheet = workbookXLS.getSheetAt(indexSheet);
-			int rowIndexTitle = new RdfizableSheet(targetSheet, prefixManager).computeTitleRowIndex();			
+			int rowIndexTitle = new RdfizableSheet(new ExcelSheet(targetSheet, new ExcelWorkbook(workbookXLS)), prefixManager).computeTitleRowIndex();			
 			int nRow = rowIndexTitle;
 			
 			// get all data values
@@ -54,7 +59,7 @@ public class MergeCsvToXls {
 		PrefixManager prefixManager = new PrefixManager();
 		// register prefixes
 		for (Sheet sheet : workbook) {
-			prefixManager.register(RdfizableSheet.readPrefixes(sheet));
+			prefixManager.register(RdfizableSheet.readPrefixes(new ExcelSheet(sheet, new ExcelWorkbook(workbook))));
 		}
 		
 		return prefixManager;
@@ -63,7 +68,7 @@ public class MergeCsvToXls {
 	public Integer getMergeSheetIndex(Workbook wbInput, PrefixManager prefixManager) throws InvalidFormatException, IOException {
 	    // find the target sheet
 	    for (Sheet sheet : wbInput) {
-	      RdfizableSheet rdfizableSheetActive = new RdfizableSheet(sheet, prefixManager);
+	      RdfizableSheet rdfizableSheetActive = new RdfizableSheet(new ExcelSheet(sheet, new ExcelWorkbook(wbInput)), prefixManager);
 	      if (rdfizableSheetActive.canRDFize()) {
 	        return wbInput.getSheetIndex(sheet.getSheetName());
 	      }

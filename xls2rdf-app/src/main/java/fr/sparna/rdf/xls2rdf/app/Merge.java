@@ -16,7 +16,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.MergeCsvToXls;
+import fr.sparna.rdf.xls2rdf.merge.MergeCsvToXls;
 
 public class Merge implements CliCommandIfc {
 

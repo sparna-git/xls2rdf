@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.util.CellReference;
 import org.eclipse.rdf4j.model.IRI;
+
+import fr.sparna.rdf.xls2rdf.model.Cell;
+import fr.sparna.rdf.xls2rdf.model.ExcelRefs;
 
 
 public class ColumnHeader {
@@ -231,10 +232,8 @@ public class ColumnHeader {
 		
 		// if we haven't found the proper column id, try it as an Excel column reference
 		if(idRef.length() <= 2) {
-			short subjectColumnIndex = (short)CellReference.convertColStringToIndex(idRef);
-			if(subjectColumnIndex != -1) {
-				return subjectColumnIndex;
-			}
+			int idx = ExcelRefs.colLettersToIndex(idRef);
+			if(idx != -1) return idx;
 		}
 
 		return -1;
@@ -262,10 +261,8 @@ public class ColumnHeader {
 		
 		// if we haven't found the proper column id, try it as an Excel column reference
 		if(idOrPropertyRef.length() <= 2) {
-			short subjectColumnIndex = (short)CellReference.convertColStringToIndex(idOrPropertyRef);
-			if(subjectColumnIndex != -1) {
-				return subjectColumnIndex;
-			}
+			int idx = ExcelRefs.colLettersToIndex(idOrPropertyRef);
+			if(idx != -1) return idx;
 		}
 		
 		return -1;
@@ -290,9 +287,10 @@ public class ColumnHeader {
 	}
 
 
-
-	
+    
 	
 	
 	
 }
+
+

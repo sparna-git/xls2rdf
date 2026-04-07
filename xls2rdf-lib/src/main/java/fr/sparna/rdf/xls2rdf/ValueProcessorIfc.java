@@ -2,7 +2,7 @@ package fr.sparna.rdf.xls2rdf;
 
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.Cell;
+import fr.sparna.rdf.xls2rdf.model.Cell;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;

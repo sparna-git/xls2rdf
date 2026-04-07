@@ -7,11 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.poi.ss.usermodel.Cell;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.model.Cell;
 
 public class ColumnHeaderParser {
 	

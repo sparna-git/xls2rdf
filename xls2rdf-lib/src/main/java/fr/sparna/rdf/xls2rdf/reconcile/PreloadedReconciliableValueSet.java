@@ -1,7 +1,5 @@
 package fr.sparna.rdf.xls2rdf.reconcile;
 
-import static fr.sparna.rdf.xls2rdf.ExcelHelper.getCellValue;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,10 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellReference;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.slf4j.Logger;
@@ -21,6 +15,10 @@ import org.slf4j.LoggerFactory;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
+import fr.sparna.rdf.xls2rdf.model.Cell;
+import fr.sparna.rdf.xls2rdf.model.Row;
+import fr.sparna.rdf.xls2rdf.model.Sheet;
+import fr.sparna.rdf.xls2rdf.model.ExcelRefs;
 
 public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc {
 
@@ -52,7 +50,7 @@ public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc 
 	}
 	
 	public static Map<String, List<String>> extractDistinctValues(Sheet sheet, int columnIndex, int headerRowIndex) {
-		log.debug("Extracting distinct values from column index "+CellReference.convertNumToColString(columnIndex)+".");
+		log.debug("Extracting distinct values from column index "+ExcelRefs.colIndexToLetters(columnIndex)+".");
 		
 		Map<String, List<String>> result = new HashMap<String, List<String>>();
 		for (int rowIndex = (headerRowIndex + 1); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
@@ -61,21 +59,21 @@ public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc 
 				Cell cell = row.getCell(columnIndex);
 				
 				if(cell != null) {
-					String value = getCellValue(cell);			
+					String value = cell.getCellValue();            
 					if(!value.equals("")) {
 						if(!result.containsKey(value)) {
 							List<String> cells = new ArrayList<String>();
-							cells.add(new CellReference(cell).formatAsString());
+							cells.add(cell.getCellExcelReference());
 							result.put(value, cells);
 						} else {
-							result.get(value).add(new CellReference(cell).formatAsString());
+							result.get(value).add(cell.getCellExcelReference());
 						}
 					}
 				}
 			}
 		}
 		
-		log.debug("Extracted "+result.size()+" distinct values from column "+CellReference.convertNumToColString(columnIndex));
+		log.debug("Extracted "+result.size()+" distinct values from column "+ExcelRefs.colIndexToLetters(columnIndex));
 		return result;
 	}
 	
@@ -136,5 +134,8 @@ public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc 
 		return result;
 	}
 	
+ 
 	
 }
+
+
