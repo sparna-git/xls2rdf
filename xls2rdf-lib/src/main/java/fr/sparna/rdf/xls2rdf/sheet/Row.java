@@ -1,5 +1,9 @@
-package fr.sparna.rdf.xls2rdf.model;
+package fr.sparna.rdf.xls2rdf.sheet;
 
+/**
+ * Represents a row in a sheet. A row is identified by its zero-based index (row number) and contains cells at various column indices.
+ * A row may be hidden (zero height).
+ */
 public interface Row {
     /**
      * @param columnIndex zero-based column index.

@@ -1,10 +1,10 @@
-package fr.sparna.rdf.xls2rdf.model.excel;
+package fr.sparna.rdf.xls2rdf.sheet.excel;
 
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
-import fr.sparna.rdf.xls2rdf.model.Cell;
-import fr.sparna.rdf.xls2rdf.model.CellType;
-import fr.sparna.rdf.xls2rdf.model.Row;
-import fr.sparna.rdf.xls2rdf.model.Sheet;
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import fr.sparna.rdf.xls2rdf.sheet.CellType;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 
 public class ExcelCell implements Cell {
     private final org.apache.poi.ss.usermodel.Cell delegate;

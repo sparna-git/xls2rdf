@@ -1,8 +1,8 @@
-package fr.sparna.rdf.xls2rdf.model.excel;
+package fr.sparna.rdf.xls2rdf.sheet.excel;
 
-import fr.sparna.rdf.xls2rdf.model.Cell;
-import fr.sparna.rdf.xls2rdf.model.Row;
-import fr.sparna.rdf.xls2rdf.model.Sheet;
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 
 public class ExcelRow implements Row {
     private final org.apache.poi.ss.usermodel.Row delegate;

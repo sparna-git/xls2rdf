@@ -40,12 +40,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import fr.sparna.rdf.xls2rdf.model.Cell;
-import fr.sparna.rdf.xls2rdf.model.Row;
-import fr.sparna.rdf.xls2rdf.model.Sheet;
-import fr.sparna.rdf.xls2rdf.model.Workbook;
-import fr.sparna.rdf.xls2rdf.model.excel.ExcelWorkbookFactory;
-import fr.sparna.rdf.xls2rdf.model.ExcelRefs;
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+import fr.sparna.rdf.xls2rdf.sheet.Workbook;
+import fr.sparna.rdf.xls2rdf.sheet.excel.ExcelWorkbookFactory;
+import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
 
 
 

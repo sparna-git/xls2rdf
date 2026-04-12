@@ -1,8 +1,13 @@
-package fr.sparna.rdf.xls2rdf.model;
+package fr.sparna.rdf.xls2rdf.sheet;
 
+/**
+ * Represents a sheet in a workbook. A sheet may be identified by its name and contains rows at various indices.
+ */
 public interface Sheet extends Iterable<Row> {
+    
     /**
      * @return the display name of this sheet.
+     * This can return null depending on the implementation, e.g. a CSV implementation may choose to return null.
      */
     String getSheetName();
 
@@ -22,4 +27,5 @@ public interface Sheet extends Iterable<Row> {
      * @return true if the column is hidden.
      */
     boolean isColumnHidden(int columnIndex);
+
 }

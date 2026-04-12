@@ -56,6 +56,11 @@ public class PrefixManager {
 		prefixes.put("skosthes", "http://purl.org/iso25964/skos-thes#");
 		prefixes.put("xls2rdf", XLS2RDF.NAMESPACE);
 	}
+
+	public PrefixManager(Map<String, String> prefixes) {
+		this();
+		this.prefixes.putAll(prefixes);
+	}
 	
 	public void register(String prefix, String uri) {
 		// store both in all prefixes and explicitely declared prefixes

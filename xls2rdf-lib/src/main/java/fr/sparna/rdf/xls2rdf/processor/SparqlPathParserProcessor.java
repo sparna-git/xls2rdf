@@ -2,7 +2,6 @@ package fr.sparna.rdf.xls2rdf.processor;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import fr.sparna.rdf.xls2rdf.model.Cell;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -15,6 +14,7 @@ import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
 
 public class SparqlPathParserProcessor implements ValueProcessorIfc {
 

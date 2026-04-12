@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.RdfizableSheet;
-import fr.sparna.rdf.xls2rdf.model.excel.ExcelSheet;
-import fr.sparna.rdf.xls2rdf.model.excel.ExcelWorkbook;
+import fr.sparna.rdf.xls2rdf.sheet.excel.ExcelSheet;
+import fr.sparna.rdf.xls2rdf.sheet.excel.ExcelWorkbook;
 
 
 public class MergeCsvToXls {

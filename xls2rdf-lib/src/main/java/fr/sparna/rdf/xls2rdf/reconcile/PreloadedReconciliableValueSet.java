@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
-import fr.sparna.rdf.xls2rdf.model.Cell;
-import fr.sparna.rdf.xls2rdf.model.Row;
-import fr.sparna.rdf.xls2rdf.model.Sheet;
-import fr.sparna.rdf.xls2rdf.model.ExcelRefs;
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 
 public class PreloadedReconciliableValueSet implements ReconciliableValueSetIfc {
 

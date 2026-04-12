@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf.model;
+package fr.sparna.rdf.xls2rdf.sheet;
 
 public interface Cell {
     /**

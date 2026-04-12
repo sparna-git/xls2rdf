@@ -1,17 +1,22 @@
-package fr.sparna.rdf.xls2rdf.model.excel;
+package fr.sparna.rdf.xls2rdf.sheet.excel;
 
 import java.util.Iterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.model.Row;
-import fr.sparna.rdf.xls2rdf.model.Sheet;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 
 public class ExcelSheet implements Sheet {
+
+    static Logger log = LoggerFactory.getLogger(ExcelSheet.class.getName());
+
     private final org.apache.poi.ss.usermodel.Sheet delegate;
     private final ExcelWorkbook parentWorkbook;
 
     public ExcelSheet(org.apache.poi.ss.usermodel.Sheet delegate, ExcelWorkbook parentWorkbook) {
         this.delegate = delegate;
-        this.parentWorkbook = parentWorkbook;
+        this.parentWorkbook = parentWorkbook;      
     }
 
     @Override
@@ -47,7 +52,7 @@ public class ExcelSheet implements Sheet {
         };
     }
 
-    ExcelWorkbook getWorkbook() {
+    public ExcelWorkbook getWorkbook() {
         return parentWorkbook;
     }
 

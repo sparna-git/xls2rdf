@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import fr.sparna.rdf.xls2rdf.model.Cell;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -46,6 +45,7 @@ import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
 import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
 
 public class ManchesterClassExpressionParserProcessor implements ValueProcessorIfc {
 

@@ -7,19 +7,17 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.DateUtil;
-import fr.sparna.rdf.xls2rdf.model.Cell;
-import fr.sparna.rdf.xls2rdf.model.Row;
-import fr.sparna.rdf.xls2rdf.model.Sheet;
-import fr.sparna.rdf.xls2rdf.model.ExcelRefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 
 public class ExcelHelper {
 
 	private static Logger log = LoggerFactory.getLogger(ExcelHelper.class.getName());
-	
-	private ExcelHelper() {
-	}
 
 	// getCellValue methods are no longer needed; value retrieval is provided by model.Cell
 	

@@ -7,8 +7,8 @@ import java.util.Optional;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import fr.sparna.rdf.xls2rdf.model.Cell;
-import fr.sparna.rdf.xls2rdf.model.ExcelRefs;
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
 
 
 public class ColumnHeader {

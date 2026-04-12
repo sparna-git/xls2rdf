@@ -1,13 +1,20 @@
-package fr.sparna.rdf.xls2rdf.model.excel;
+package fr.sparna.rdf.xls2rdf.sheet.excel;
 
 import java.util.Iterator;
-import java.util.List;
 
-import fr.sparna.rdf.xls2rdf.model.Sheet;
-import fr.sparna.rdf.xls2rdf.model.Workbook;
+import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+import fr.sparna.rdf.xls2rdf.sheet.Workbook;
+
+import org.slf4j.Logger;
 
 public class ExcelWorkbook implements Workbook {
+
+    static Logger log = LoggerFactory.getLogger(ExcelWorkbook.class.getName());
+
     private final org.apache.poi.ss.usermodel.Workbook delegate;
+
 
     public ExcelWorkbook(org.apache.poi.ss.usermodel.Workbook delegate) {
         this.delegate = delegate;
@@ -36,7 +43,8 @@ public class ExcelWorkbook implements Workbook {
         };
     }
 
-    org.apache.poi.ss.usermodel.Workbook getPoiWorkbook() {
+    public org.apache.poi.ss.usermodel.Workbook getPoiWorkbook() {
         return delegate;
     }
+
 }

@@ -1,6 +1,9 @@
-package fr.sparna.rdf.xls2rdf.model;
+package fr.sparna.rdf.xls2rdf.sheet;
 
-
+/**
+ * Represents a workbook containing sheets.
+ * A workbook may be identified by its file name or source, and contains sheets at various indices.
+ */
 public interface Workbook extends Iterable<Sheet> {
 
     /**
