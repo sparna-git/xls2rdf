@@ -14,15 +14,45 @@
     <packaging>war</packaging>
     <version>4.0.0</version>
 
+
     <name>Excel2RDF Web application</name>
     <description>Web application for xls2rdf</description>
-
+    
     <organization>
         <name>Sparna</name>
         <url>http://www.sparna.fr/</url>
     </organization>
 
+    <!-- see http://stackoverflow.com/questions/12426723/displaying-version-and-date-of-build-in-the-xhtml-page -->
+    <properties>
+        <timestamp>${maven.build.timestamp}</timestamp>
+    </properties>
+
+    
   <build>
+  <!-- Resources -->
+  <resources>
+      <!-- Filtering for version.properties -->
+      <resource>
+          <directory>src/main/resources</directory>
+          <filtering>true</filtering>
+          <includes>
+              <include>version.properties</include>
+          </includes>
+      </resource>
+
+      <!-- No filtering -->
+      <resource>
+          <directory>src/main/resources</directory>
+          <filtering>false</filtering>
+          <includes>
+              <include>application.properties</include>
+              <!-- Add Bundle.properties Directory-->
+              <include>fr/sparna/rdf/xls2rdf/i18n/**/*.properties</include>
+          </includes>
+      </resource>
+    </resources>
+    <!-- Plugins List -->
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -37,6 +67,18 @@
               <release>${java.version}</release>
           </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <delimiters>
+            <delimiter>${*}</delimiter>
+          </delimiters>
+          <fileNameFiltering>true</fileNameFiltering>
+        </configuration>
+      </plugin>
+
     </plugins>
   </build>
 
@@ -79,6 +121,16 @@
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>jakarta.servlet.jsp.jstl</groupId>
+          <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>org.glassfish.web</groupId>
+          <artifactId>jakarta.servlet.jsp.jstl</artifactId>
       </dependency>
 
       <dependency>

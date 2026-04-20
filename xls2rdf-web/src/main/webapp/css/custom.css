@@ -1,0 +1,44 @@
+.navbar-nav .nav-link{
+  transition: all 0.5s ease;
+}
+.nav-link:hover{
+  background-color:  #df6919;
+  border-radius: 5px;
+}
+select, #file, #url, #submit{
+  border-radius: 4px !important;
+  
+}
+.navbar, #submit:hover{
+  -webkit-box-shadow: 0px 10px 15px 5px #000000; 
+  box-shadow: 0px 10px 15px 5px #000000;
+  background-color: #df6919;
+}
+#submit-wrapper{
+  background-color: #df6919;
+}
+#footer{
+  -webkit-box-shadow: 0px 0px 15px 15px #000000; 
+  box-shadow: 0px 0px 15px 15px #000000;
+}
+a{
+  color: rgba(255, 255, 255, 0.854) !important;
+  font-weight: bold;
+}
+#footer-logo{
+  filter: brightness(400%);
+}
+#fieldset-source, #fieldset-language{
+  -webkit-box-shadow: 0px 0px 15px 15px #000000; 
+  box-shadow: 0px 0px 15px 15px #000000;
+  padding: 10px !important;
+  border-left: solid #df6919;
+}
+.accordion-item{
+  -webkit-box-shadow: 0px 0px 15px 15px #000000; 
+  box-shadow: 0px 0px 15px 15px #000000;
+}
+
+.anchorjs-link{
+  color: #df6919 !important;
+}

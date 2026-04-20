@@ -1,0 +1,17 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" 	prefix="fmt" 	%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" 	prefix="c" 		%>
+
+<!-- setup the locale for the messages based on the language in the session -->
+<fmt:setLocale value="${sessionScope['fr.sparna.rdf.skosplay.SessionData'].userLocale.language}"/>
+<fmt:setBundle basename="fr.sparna.rdf.xls2rdf.i18n.Bundle"/>
+
+      	<footer id="footer" style="margin-top:30px;">
+      	SKOS Play! by <a href="http://blog.sparna.fr" target="_blank">Thomas Francart</a>, <a href="http://sparna.fr" target="_blank"><img src="images/sparna.png" /></a>
+      	&nbsp;|&nbsp;
+      	<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.fr"><img alt="Licence Creative Commons" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a>
+      	&nbsp;|&nbsp;
+      	version : ${applicationData.buildVersion} (${applicationData.buildTimestamp})
+      	<br />
+      	<br />
+      	</footer>

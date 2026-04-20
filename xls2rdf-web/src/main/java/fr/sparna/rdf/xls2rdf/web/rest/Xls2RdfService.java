@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf.rest;
+package fr.sparna.rdf.xls2rdf.web.rest;
 
 import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;

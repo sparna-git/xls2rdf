@@ -1,0 +1,50 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "fr.sparna.rdf.xls2rdf.app.Main",
+            "projectName": "xls2rdf-app"
+        },
+        {
+            "type": "java",
+            "name": "SparqlPropertyPathToShaclPropertyPathConverter",
+            "request": "launch",
+            "mainClass": "fr.sparna.rdf.xls2rdf.SparqlPropertyPathToShaclPropertyPathConverter",
+            "projectName": "xls2rdf-lib"
+        },
+        {
+            "type": "java",
+            "name": "TurtleParserTest",
+            "request": "launch",
+            "mainClass": "fr.sparna.rdf.xls2rdf.TurtleParserTest",
+            "projectName": "xls2rdf-lib"
+        },
+        {
+            "type": "java",
+            "name": "Xls2RdfConverter",
+            "request": "launch",
+            "mainClass": "fr.sparna.rdf.xls2rdf.Xls2RdfConverter",
+            "projectName": "xls2rdf-lib"
+        },
+        {
+            "type": "java",
+            "name": "Xls2rdfServiceApplication",
+            "request": "launch",
+            "mainClass": "fr.sparna.rdf.xls2rdf.Xls2rdfServiceApplication",
+            "projectName": "xls2rdf-web"
+        }
+    ]
+}

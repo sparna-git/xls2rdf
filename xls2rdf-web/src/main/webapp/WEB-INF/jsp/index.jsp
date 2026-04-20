@@ -1,31 +1,25 @@
-<html lang="en">
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+
 
 <head>
 	<title>Excel 2 RDF API</title>
 
-	<link href="css/bootstrap.min.css" rel="stylesheet">
-	<link rel="canonical" href="https://xls2rdf.sparna.fr/rest/" />
+	<!--FONTAWSEOME CDN-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!--Add Boostrap min.css and Boostrap bundle.min.js // version > 5.3.8-->
+	<link href="bootstrap/bootstrap.min.css" rel="stylesheet">
+    <script src="bootstrap/bootstrap.bundle.min.js"></script>
+	<!--Custom CSS-->
+    <link href="css/custom.css" rel="stylesheet">
 
 </head>
 
 <body>
 
-	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div class="container">
-        <a class="navbar-brand" href="#">Excel 2 RDF</a>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" href="index.html">API</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="doc.html">Excel structure documentation</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-
+	<jsp:include page="includeTag/headerRemade.jsp"/>
 
 	<div class="container" style="margin-top:30px;">
 		<div class="row">
@@ -114,6 +108,8 @@
       anchors.options.placement = 'left';
       anchors.add("h2,h3,h4");
     </script>
+
+	<jsp:include page="includeTag/footerRemade.jsp"/>
 
 </body>
 

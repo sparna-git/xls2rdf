@@ -1,4 +1,16 @@
-package fr.sparna.rdf.xls2rdf.rest;
+package fr.sparna.rdf.xls2rdf.web.rest;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriterRegistry;
@@ -13,19 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class Xls2RdfRestController {
@@ -35,7 +34,7 @@ public class Xls2RdfRestController {
 	@Autowired
 	private Xls2RdfService xls2RdfService;	
 
-	@RequestMapping(value = "/convert", method = RequestMethod.GET, params = {"url"})
+	@RequestMapping(value = "/api/convert", method = RequestMethod.GET, params = {"url"})
 	public ResponseEntity<ByteArrayResource> convertRDF(
 			@RequestParam(value="lang", required=false) String language,
 			@RequestParam(value="url", required=true) String url,
@@ -104,12 +103,6 @@ public class Xls2RdfRestController {
 			throw new RuntimeException(e);
 		}
 	}
-
-	@RequestMapping(value = "/convert", method = RequestMethod.GET)
-	public ModelAndView home() {
-		return new ModelAndView("forward:/index.html");
-	}
-
 
 
 	static ResponseEntity<ByteArrayResource> transformToByteArrayResource(
