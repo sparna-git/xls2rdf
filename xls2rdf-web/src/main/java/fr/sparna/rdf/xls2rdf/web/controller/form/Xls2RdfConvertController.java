@@ -94,7 +94,7 @@ public class Xls2RdfConvertController {
 			HttpServletRequest request,
 			// the response
 			HttpServletResponse response
-	) throws Exception {
+	){
 
 		log.debug("convert(source="+sourceString+",file="+file+"format="+format+",usexl="+useskosxl+",broaderTransitive="+broaderTransitive+",useZip="+useZip+",language="+language+",url="+url+",ex="+example+")");
 		//source, it can be: file, example, url or google
@@ -102,110 +102,81 @@ public class Xls2RdfConvertController {
 		// format
 		RDFFormat theFormat = RDFWriterRegistry.getInstance().getFileFormatForMIMEType(format).orElse(RDFFormat.RDFXML);
 
-		URL baseURL = new URL("http://"+request.getServerName()+((request.getServerPort() != 80)?":"+request.getServerPort():"")+request.getContextPath());
-		log.debug("Base URL is "+ baseURL.toString());
-		/**************************CONVERSION RDF**************************/
-		InputStream in = null;
-		String resultFileName = "skos-play-convert"; //Voir pour changer le nom du fichier?
+		URL exampleUrl = null;
+		URL urls = null;
+		String resultFileName = null;
 
-		switch(source) {
-
-		case EXAMPLE -> {
-			log.debug("*Conversion à partir d'un fichier d'exemple : " + example);
-			URL exampleUrl = new URL(example);
-			InputStream urlInputStream = exampleUrl.openStream(); // throws an IOException
-			in = new DataInputStream(new BufferedInputStream(urlInputStream));
-			// set the output file name to the name of the example
-			resultFileName = (!exampleUrl.getPath().equals(""))?exampleUrl.getPath():resultFileName;
-			// keep only latest file, after final /
-			resultFileName = (resultFileName.contains("/"))?resultFileName.substring(resultFileName.lastIndexOf("/")+1):resultFileName;
-		}
-		case FILE -> {
-			log.debug("*Conversion à partir d'un fichier uploadé : " + file.getOriginalFilename());
-			if(file.isEmpty()) ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.FILE_MISSING);
-
-	
-				in = file.getInputStream();
+		try(InputStream in = switch(source){
+			case EXAMPLE -> {
+				log.debug("*Conversion à partir d'un fichier d'exemple : " + example);
+				exampleUrl = new URL(example);
+				InputStream urlInputStream = exampleUrl.openStream(); // throws an IOException
+				// set the output file name to the name of the example
+				resultFileName = (!exampleUrl.getPath().equals(""))?exampleUrl.getPath():resultFileName;
+				// keep only latest file, after final /
+				resultFileName = (resultFileName.contains("/"))?resultFileName.substring(resultFileName.lastIndexOf("/")+1):resultFileName;
+				yield new DataInputStream(new BufferedInputStream(urlInputStream));
+			}
+			case FILE -> {
+				log.debug("*Conversion à partir d'un fichier uploadé : " + file.getOriginalFilename());
+				if(file.isEmpty()) ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.FILE_MISSING);
 				// set the output file name to the name of the input file
 				resultFileName = (file.getOriginalFilename().contains("."))?file.getOriginalFilename().substring(0, file.getOriginalFilename().lastIndexOf('.')):file.getOriginalFilename();	
-	
-			
-		}
-		case URL -> {
-			log.debug("*Conversion à partir d'une URL : " + url);
-			if(url.isEmpty()) ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.URL_MISSING);
-
-			try {
-				URL urls = new URL(url);
+				yield file.getInputStream();
+			}
+			case URL -> {
+				log.debug("*Conversion à partir d'une URL : " + url);
+				if(url.isEmpty()) ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.URL_MISSING);
+				urls = new URL(url);
 				InputStream urlInputStream = urls.openStream(); // throws an IOException
-				in = new DataInputStream(new BufferedInputStream(urlInputStream));
-
 				// set the output file name to the final part of the URL
 				resultFileName = (!urls.getPath().equals(""))?urls.getPath():resultFileName;
 				// keep only latest file, after final /
 				resultFileName = (resultFileName.contains("/"))?resultFileName.substring(0, resultFileName.lastIndexOf("/")):resultFileName;
-			} catch(IOException e) {
-				e.printStackTrace();
-				ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.INVALID_URL);
+				yield new DataInputStream(new BufferedInputStream(urlInputStream));
 			}
+		}){
+
+			System.out.println("in2 = " + in);
+					URL baseURL = new URL("http://"+request.getServerName()+((request.getServerPort() != 80)?":"+request.getServerPort():"")+request.getContextPath());
+					log.debug("Base URL is "+ baseURL.toString());
+					/**************************CONVERSION RDF**************************/
+							System.setProperty("org.eclipse.rdf4j.rio.turtle.abbreviate_numbers", "false");			
+							log.debug("*Lancement de la conversion avec lang="+language+" et usexl="+useskosxl);
+							// le content type est toujours positionné à "application/zip" si on nous a demandé un zip, sinon il dépend du format de retour demandé
+							response.setContentType((useZip)?"application/zip":theFormat.getDefaultMIMEType());
+							// set response charset corresponding to the format, if applicable
+							if(theFormat.hasCharset()) {
+								response.setCharacterEncoding(theFormat.getCharset().name());
+							}
+							// le nom du fichier de retour
+							// strip extension, if any
+							resultFileName = (resultFileName.contains("."))?resultFileName.substring(0, resultFileName.lastIndexOf('.')):resultFileName;
+							String extension = (useZip)?"zip":theFormat.getDefaultFileExtension();
+						
+							// add the date in the filename
+							String dateString = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+						
+							response.setHeader("Content-Disposition", "inline; filename=\""+resultFileName+"-"+dateString+"."+extension+"\"");
+						
+							List<String> identifiant = runConversion(
+									new ModelWriterFactory(useZip, theFormat).buildNewModelWriter(response.getOutputStream()),
+									in,
+									language.equals("")?null:language,
+									useskosxl,
+									broaderTransitive,
+									ignorePostProc
+							);
+						
+							// sort to garantee order
+							List<String> uri=new ArrayList<>(identifiant);
+							Collections.sort(uri);
+		}catch(IOException io){
+			ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.IO_EXCEPTION);
 		}
-		default -> {
-			//VOIR pour rajouter une comportement par défaut car rien avant il y avait juste un break;
-		}
-		}
-
-
-		try {
-			// Always disable use of scientific annotation on numbers 
-			System.setProperty("org.eclipse.rdf4j.rio.turtle.abbreviate_numbers", "false");			
-			
-			log.debug("*Lancement de la conversion avec lang="+language+" et usexl="+useskosxl);
-			// le content type est toujours positionné à "application/zip" si on nous a demandé un zip, sinon il dépend du format de retour demandé
-			response.setContentType((useZip)?"application/zip":theFormat.getDefaultMIMEType());
-			// set response charset corresponding to the format, if applicable
-			if(theFormat.hasCharset()) {
-				response.setCharacterEncoding(theFormat.getCharset().name());
-			}
-			// le nom du fichier de retour
-			// strip extension, if any
-			resultFileName = (resultFileName.contains("."))?resultFileName.substring(0, resultFileName.lastIndexOf('.')):resultFileName;
-			String extension = (useZip)?"zip":theFormat.getDefaultFileExtension();
-
-			// add the date in the filename
-			String dateString = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-
-			response.setHeader("Content-Disposition", "inline; filename=\""+resultFileName+"-"+dateString+"."+extension+"\"");
-
-			List<String> identifiant = runConversion(
-					new ModelWriterFactory(useZip, theFormat).buildNewModelWriter(response.getOutputStream()),
-					in,
-					language.equals("")?null:language,
-					useskosxl,
-					broaderTransitive,
-					ignorePostProc
-			);
-
-			// sort to garantee order
-			List<String> uri=new ArrayList<>(identifiant);
-			Collections.sort(uri);
-
-		} catch (Xls2RdfException e) {
-			e.printStackTrace();
-			response.reset();
-			ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.INVALID_FILE_FORMAT);
-		} finally {
-			try {
-				if(in != null) {
-					in.close();
-				}
-			} catch (IOException ioe) { 
-				ioe.printStackTrace();
-				ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.GENRERIC);
-			}
-		}
-
 		return null;
 	}
+
 
 	
 	private List<String> runConversion(ModelWriterIfc writer, InputStream filefrom, String lang, boolean generatexl, boolean broaderTransitive, boolean ignorePostProc) {

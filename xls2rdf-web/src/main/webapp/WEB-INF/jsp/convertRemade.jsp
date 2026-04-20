@@ -24,22 +24,12 @@
     <!--event Listener-->
    
 		<script>
-			function enabledInput(selected) {
-							document.getElementById('source-' + selected).checked = true;
-							document.getElementById('url').disabled = selected != 'url';
-							document.getElementById('example').disabled = selected != 'example';
-							document.getElementById('file').disabled = selected != 'file';
-							if((selected!='url')) {
-								document.formulaire.google.style.borderColor = "gray";
-								document.formulaire.url.style.borderColor = "gray";
-								$('#length').hide();
-							}
-							
-						if(selected==='google')
-							verifID();			
-						}	
-
-
+		      function enabledInput(selected) {
+		      				document.getElementById('source-' + selected).checked = true;
+		      				document.getElementById('url').disabled = selected != 'url';
+		      				document.getElementById('example').disabled = selected != 'example';
+		      				document.getElementById('file').disabled = selected != 'file';		
+		      			}	
 
 					function handleDownloadExample(select, downloadLink) {
                const selectedOption = select.options[select.selectedIndex];
@@ -52,12 +42,10 @@
           }
 
           document.addEventListener("DOMContentLoaded", () => {
-            const DOWNLOAD_LINK_ID = "lien";
-            const downloadLink = document.getElementById(DOWNLOAD_LINK_ID);
-                      
+            const downloadLink = document.getElementById("lien");
+                
             document.addEventListener("change", (event) => {
               const target = event.target;
-            
               if (target.id === "example") {
                 handleDownloadExample(target, downloadLink);
               }

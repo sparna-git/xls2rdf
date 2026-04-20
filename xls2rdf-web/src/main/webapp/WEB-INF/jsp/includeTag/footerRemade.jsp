@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+
+
 <div id="footer" class="container-fluid bg-dark">
     <div class="row justify-content-center text-center p-2">
       <div class="col-auto text-secondary text-center">
