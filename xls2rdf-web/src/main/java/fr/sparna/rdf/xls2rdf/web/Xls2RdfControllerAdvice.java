@@ -56,9 +56,10 @@ public class Xls2RdfControllerAdvice {
 	public String xls2RdfConvertExceptionHandler(Xls2RdfConvertException ex, Model model){
 		this.requestData.setErrorMessage(ex.getMessage());
 		model.addAllAttributes(convertFormData());
-		return "convertRemade";
+		return "convert";
 	}
 
+	//Gérer les exceptions pour convertForm
 	//Gérer les exceptions pour Xls2RdfException
 	@ExceptionHandler(exception={Xls2RdfException.class})
 	public String xls2RdfConvertExceptionHandler(Xls2RdfException ex, RedirectAttributes redirect){

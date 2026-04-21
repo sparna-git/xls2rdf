@@ -30,7 +30,7 @@
 
 <body>
 
-	<jsp:include page="includeTag/headerRemade.jsp"/>
+	<jsp:include page="includeTag/header.jsp"/>
 
 	<div class="container" style="margin-top:30px;">
 		<div class="row">
@@ -405,7 +405,7 @@
       anchors.add("h2,h3,h4");
     </script>
 
-	<jsp:include page="includeTag/footerRemade.jsp"/>
+	<jsp:include page="includeTag/footer.jsp"/>
 
 	
 </body>

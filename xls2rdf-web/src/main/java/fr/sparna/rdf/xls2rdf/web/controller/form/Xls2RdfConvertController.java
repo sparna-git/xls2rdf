@@ -65,7 +65,7 @@ public class Xls2RdfConvertController {
 			ModelMap model,
 			HttpSession session
 			) throws IOException  {	
-		return "convertRemade";
+		return "convert";
 	}
 
 	//Traitement du formulaire de conversion en POST
@@ -174,7 +174,7 @@ public class Xls2RdfConvertController {
 		InputStream in = switch(src){
 			case EXAMPLE -> {yield url.openStream();}
 			case URL     -> {yield url.openStream();}
-			default      -> {throw new Xls2RdfConvertException();}
+			default      -> {throw new Xls2RdfConvertException(ExceptionManager.NULL_POINTER.getMessage());}
 		};
 		return in;
 	}

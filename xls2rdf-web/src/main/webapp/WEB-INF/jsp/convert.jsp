@@ -2,353 +2,329 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" 	prefix="fmt" 	%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" 	prefix="c" 		%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
-
 <!DOCTYPE html>
-
 <!-- setup the locale for the messages based on the language in the session -->
 <fmt:setLocale value="${sessionData.userLocale.language}"/>
 <fmt:setBundle basename="fr.sparna.rdf.xls2rdf.i18n.Bundle"/>
 
-
 <html>
-	<head>
-		<title>${applicationData.applicationTitle}</title>
-		<link rel="canonical" href="https://xls2rdf.sparna.fr/convert" />
+  <head>
+
+    <title>TITRE A METTRE</title>
+    <link rel="canonical" href="https://xls2rdf.sparna.fr/web/" />
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-
-		<!--Add Boostrap min.css and Boostrap bundle.min.js // version > 5.3.8-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!--FONTAWSEOME CDN-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!--Add Boostrap min.css and Boostrap bundle.min.js // version > 5.3.8-->
 		<link href="bootstrap/bootstrap.min.css" rel="stylesheet">
-    	<script src="bootstrap/bootstrap.bundle.min.js"></script>
-		
-
-		<!-- Jasny css + javascript Bootstrap -->
-		<link href="jasny-boostrap-fileupload/jasny-bootstrap.min.css" rel="stylesheet">
-		<script src="jasny-boostrap-fileupload/jasny-bootstrap.min.js"></script>
-
-		<!-- Custom CSS -->
-		<link href="css/skos-play.css" rel="stylesheet">
-
-		<!-- Jquery dependencies -->
-		<link href="jquery/jquery-editable-select.min.css" rel="stylesheet">
-		<script src="jquery/jquery.min.js"></script>
-
+    <script src="bootstrap/bootstrap.bundle.min.js"></script>
+    <!--Custom CSS-->
+    <link href="css/custom.css" rel="stylesheet">
+    <!--event Listener-->
+   
 		<script>
-			function enabledInput(selected) {
-							document.getElementById('source-' + selected).checked = true;
-							document.getElementById('url').disabled = selected != 'url';
-							document.getElementById('example').disabled = selected != 'example';
-							document.getElementById('file').disabled = selected != 'file';
-							if((selected!='url')) {
-								document.formulaire.google.style.borderColor = "gray";
-								document.formulaire.url.style.borderColor = "gray";
-								$('#length').hide();
-							}
-							
-						if(selected==='google')
-							verifID();			
-						}	
-						
-						function dowloadExample(){
-							var urlExample= $('#example option:selected').val();
-							var exampleText= $('#example option:selected').text();
-							$('#lien').attr('href', urlExample);
-							$('a#lien').text(exampleText);
-						}		
+		      function enabledInput(selected) {
+		      				document.getElementById('source-' + selected).checked = true;
+		      				document.getElementById('url').disabled = selected != 'url';
+		      				document.getElementById('example').disabled = selected != 'example';
+		      				document.getElementById('file').disabled = selected != 'file';		
+		      			}	
+
+					function handleDownloadExample(select, downloadLink) {
+               const selectedOption = select.options[select.selectedIndex];
+
+               const valueHref  = selectedOption.value;
+               const optionText = selectedOption.text;
+
+               downloadLink.textContent = optionText;
+               downloadLink.href = valueHref;
+          }
+
+          document.addEventListener("DOMContentLoaded", () => {
+            const downloadLink = document.getElementById("lien");
+                
+            document.addEventListener("change", (event) => {
+              const target = event.target;
+              if (target.id === "example") {
+                handleDownloadExample(target, downloadLink);
+              }
+            });
+          });
+
 		</script>
+  
+  </head>
+    <body>
 
-	</head>
-	<body>
+    <jsp:include page="includeTag/header.jsp"/>
 
-		<jsp:include page="includeTag/header.jsp" />
 
-		<!-- start container -->
-		<div class="container" style="margin-top:30px;">
-			<div class="messages">
-				<c:if test="${formData.errorMessagefile!= null}">
-					<div class="alert alert-danger" style="border-radius: 4px !important;">
-						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-						<h4><fmt:message key="error" /></h4>
-						${formData.errorMessagefile}
-					</div>
-				</c:if>
-			</div>	
-					
-			<form id="upload_form" action="/convert" method="post" name="formulaire" enctype="multipart/form-data" class="form-horizontal">	
-			
-			<fieldset>
-				<legend><fmt:message key="convert.form.legend" /></legend>
-				 
-				<div class="form-group">
-					<input
-							class="col-sm-1"
-							type="radio"
-							name="source"
-							id="source-example"
-							value="example"
-							checked="checked"
-					/>					
-					<label class="col-sm-2 control-label">
-							<fmt:message key="convert.form.providedExample" />
-					</label>
-					<div class="col-sm-9" >
-						<select style=" width:40%;" name="example" id="example" onchange="dowloadExample()">
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-1.xlsx" selected>Example 1 (simple exemple, in english)</option>
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-2.xlsx">Example 2 (prefixes)</option>
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-3.xlsx">Example 3 (multilingual columns and deprecation)</option>
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-4.xlsx">Example 4 (schema.org, datatypes, multiple sheets)</option>
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-5.xlsx">Example 5 (skos:Collection, inverse columns)</option>
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-6.xlsx">Example 6 (skos:OrderedCollection, dealing with rdf:Lists)</option>
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-7.xlsx">Example 7 (different subjects with subjectColumn parameter)</option>
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-8.xlsx">Example 8 (ease references with lookupColumn parameter)</option>
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-use-case-1.xlsx">Use-case 1 (real-world thesaurus : maintaining concept hierarchy in Excel)</option>
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-use-case-2.xlsx">Use-case 2 (real-world person authority file)</option>  
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-use-case-3.xlsx">Use-case 3 (real-world SHACL constraints)</option>
-							<option value="${sessionData.baseUrl}/excel_test/excel2skos-use-case-4.xlsx">Use-case 4 (Metadata template from fairdatacollective.com)</option>    
-						</select>						
-						<span class="help-block"><i><fmt:message key="convert.form.Example.download" />&nbsp;<a id="lien" href="${sessionData.baseUrl}/excel_test/excel2skos-exemple-1.xlsx">Example 1 (simple exemple, in english)</a></i></span>
-					</div>
-			    </div>	
-			
-				
-				<div class="form-group">
-					<input
-								
-								class="col-sm-1"
-								type="radio"
-								name="source"
-								id="source-file"
-								value="file"
-								onchange="enabledInput('file')" />
-					
-					<label class="col-sm-2 con trol-label">
-							<fmt:message key="convert.form.localFile" />
-					</label>
-					<div class="col-sm-9" >
-						<div class="fileinput fileinput-new input-group"  data-provides="fileinput" id="fileupload" style="width:80%;">
-						  <div class="form-control" data-trigger="fileinput">
-						  	<i class="glyphicon glyphicon-file fileinput-exists"></i> 
-						  	<span class="fileinput-filename"></span>
-						  </div>
-						  <span class="input-group-addon btn btn-default btn-file">
-						  	<span class="fileinput-new">
-						  		<fmt:message key="convert.form.localFile.select" />
-						  	</span>
-						  	<span class="fileinput-exists">
-						  		<fmt:message key="convert.form.localFile.change" />
-						  	</span>
-						  	<input type="file"  name="file" id="file" onchange="enabledInput('file')" >
-						  </span>
-						  <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput"><fmt:message key="convert.form.localFile.remove" /></a>
-						</div>
-						
-						
-						<span class="help-block"><i><fmt:message key="convert.form.localFile.help" /></i></span>
-					</div>
-				</div>
-				<div class="form-group">
-					<input
-							class="col-sm-1"
-							type="radio"
-							name="source"
-							id="source-url"
-							value="url"
-							onchange="enabledInput('url')" />
-					<label class="col-sm-2 control-label">						
-						<fmt:message key="convert.form.remoteUrl" />
-					</label>
-					<div class="col-sm-9" >
-						<input							
-							type="text"
-							id="url"
-							name="url"
-							value=""
-							placeholder="http://..."
-							class="form-control"
-							onkeypress="enabledInput('url');" style="width:80%;"/>
-						<span class="help-block"><i><fmt:message key="convert.form.remoteUrl.help" /></i></span>
-					</div>
-					</div>
-					
-			</fieldset>
-			
-			<!-- Choix de la langue -->		
-			<fieldset>
-				<legend><fmt:message key="convert.form.legend.language" /></legend>
-				<div class="form-group" style="margin-left:105px; ">					
-					<label class="col-sm-2 control-label">
-							<fmt:message key="convert.form.language.legend" />
-					</label>
-					<div class="col-sm-10">
-						<select id="choice_Language" class="ui-select" name="language" id="lg" style="width:4em;">
-							<option value="" selected></option>	
-							<option value="de">de</option>
-							<option value="en">en</option>
-							<option value="es">es</option>	
-							<option value="fr">fr</option>
-							<option value="it">it</option>
-							<option value="ru">ru</option>					 
-						</select>
-					</div>
-				</div>	
-			</fieldset>
-			
-			<br />
-			<br />
-
-			<div class="panel-group" id="myAccordion">
-				<div class="panel panel-default">
-	   				<div class="panel-heading">
-	   					<a class="accordion-toggle" data-toggle="collapse" data-parent="#myAccordion" href="#collapse1"><h4><fmt:message key="convert.form.advanced.legend" /></h4></a>
-	   				</div>
-	   				<div id="collapse1" class="panel-collapse collapse in"><div class="panel-body">
-						
-						<div class="form-group">
-							<div class="col-sm-4">							
-								<label>
-										<fmt:message key="convert.form.outputFormat.legend" />
-								</label>
-							</div>
-							<div class="col-sm-1">
-								<select  required name="output" >						
-									<option value="text/turtle" selected="selected">Turtle</option>
-									<option value="application/rdf+xml">RDF/XML</option>	 
-									<option value="text/plain">N-Triples</option>
-									<option value="text/x-nquads">N-Quads</option>
-									<option value="text/n3">N3</option>
-									<option value="application/x-trig">TriG</option>							 
-								</select>
-							</div>						
-						</div>	
-						<div class="form-group">
-							<label class="col-sm-4">
-								<fmt:message key="convert.form.useskosxl" />
-							</label>
-							<div class="col-sm-1">
-								<input
-									type="checkbox"
-									id="useskosxl"
-									name="useskosxl" />
-								<span class="help-block"><i></i></span>
-							</div>													
-						</div>
-						<div class="form-group">
-							<label class="col-sm-4">
-								<fmt:message key="convert.form.broaderTransitive" />
-							</label>
-							<div class="col-sm-1">
-								<input
-									type="checkbox"
-									id="broaderTransitive"
-									name="broaderTransitive" />
-								<span class="help-block"><i></i></span>
-							</div>
-						</div>
-
-						<div class="form-group">
-							<label class="col-sm-4">
-								<fmt:message key="convert.form.usezip" />
-							</label>
-							<div class="col-sm-1">
-								<!-- check it by default -->
-								<input
-									type="checkbox"
-									id="usezip"
-									name="usezip" />
-								<span class="help-block"><i></i></span>
-							</div>														
-						</div>
-						<!-- ****GENERATE GRAPH****** -->
-						
-						<div class="form-group">
-							<label class="col-sm-4">
-								<fmt:message key="convert.form.usegraph" />
-							</label>
-							<div class="col-sm-8">
-								<input
-									type="checkbox"
-									id="usegraph"
-									name="usegraph" />
-								<span class="help-block"><i></i></span>
-							</div>	
-						</div>
-						
-						<div class="form-group">
-							<label class="col-sm-4">
-								<fmt:message key="convert.form.ignorepostproc" />
-							</label>
-							<div class="col-sm-1">
-								<input
-									type="checkbox"
-									id="ignorePostProc"
-									name="ignorePostProc" />
-								<span class="help-block"><i></i></span>
-							</div>														
-						</div>
-						
-	   				</div></div>
-	   			</div><!-- end accordion-group : Advanced options -->
-   			</div>			
-			<div class="form-actions">
-				<div class="col-sm-offset-1 col-sm-4">
-					<button type="submit"   id="submit-button" class="btn btn-info btn-lg "><fmt:message key="convert" /></button>
-					<img src="images/ajax-loader.gif" id="loading" hidden="hidden" />
-					<p><em>03/05/2022 : The converter is now available as an <code><a href="http://xls2rdf.sparna.fr/rest">API</a></code> !</em></p>
-				</div>
-				<div class="col-sm-offset-2 col-sm-4">
-					<img src="images/logo-luxembourg.png"/>
-					<br />
-					<span class="help-block" style="font-size:85%;">&nbsp;<i><fmt:message key="convert.form.luxembourg" /></i></span>
-				</div>
+    
+		<!-- Error block -->
+			<div class="container mt-4">
+			  <div class="messages">
+			    <c:if test="${formData.errorMessage != null || error != null}">
+			      <div class="fw-bold alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #df6919; border-radius: 5px;">
+			        <h5 class="alert-heading">
+			          <fmt:message key="error" />
+			        </h5>
+              <!--Si l'exception Xls2RdfException est levée l'attribut ${error} s'affiche sinon ${formData.errorMessage} pour Xls2RdfConverSION-->
+			        ${formData.errorMessage}${error}
+			        <button type="button"
+			                class="btn-close"
+			                data-bs-dismiss="alert"
+			                aria-label="Close">
+			        </button>
+			      </div>
+			    </c:if>	
+			  </div>
 			</div>
-			
-			</form>
-			
-			<!-- Documentation -->		
-			<fieldset id="documentation" style="margin-top:10em;">
-				<legend><a href="#documentation" id="documentation"><span class="glyphicon glyphicon-link" aria-hidden="true"></span></a>&nbsp;General Documentation</legend>
-				
-				<p/><strong>/!\</strong> The documentation has moved to the <a href="https://xls2rdf.sparna.fr/rest/doc.html">xls2rdf online API service</a>.
-			</fieldset>
-      	</div>
-		<!-- end container -->
-      	
-      	<jsp:include page="includeTag/footer.jsp" />
-      	
-      	
-      	
-      	<script src="jquery/jquery.min.js"></script>
-		<script src="jquery/jquery-editable-select.min.js"></script>
-      	<script>
-	      	$(document).ready(function() {	      		
-	      		 
-	      		// activate example choice
-	      		$('.exampleEntry').click(function() {
-	      			$('#example').val($(this).attr('data-value'));
-	      			$('#exampleLabel').html($(this).html());
-	      		});
-	      		
-	      		$('#usegraph').click(function() {
-	      			if($(this).is(':checked')) {
-		      			$('#usezip').attr('checked', true);
-	      			}
-	      		});
-	      		
-				// disable submit button on click
-			    $('#upload_form').submit(function() {
-			    	$('#submit-button').attr('disabled', true);
-			        $('#loading').show();
-			    });
-				
-			    $(window).on('beforeunload', function(){
-			    	$('#loading').hide();
-				    $('#submit-button').attr('disabled', false);
-			    });
-			    
-				$(function(){	 
-					$('#choice_Language').editableSelect();
-				});
-	      	});
-		</script>
-	</body>
+      
+  
+    <div class="container mt-5">
+      <form action="convert" method="post" enctype="multipart/form-data">
+        <!--START FIELSET = SOURCE-->
+        <fieldset id="fieldset-source" class="row">
+          <h2 class="fs-5">
+            <i class="fa-solid fa-upload" style="color: #df6919; font-size: 25px"></i> &nbsp;<fmt:message key="convert.form.legend" />
+          </h2>
+          <!--START PARTIES RADIO BUTTON + LABEL + INPUT-->
+          <div class="row gy-3">
+            <!--START SOURCE RADIO/INPUT = EXAMPLE-->
+              <div class="col-4 form-check">
+                <input
+                class="form-check-input"
+                type="radio"
+                id="source-example"
+                name="source"
+                checked="checked"
+                onchange="enabledInput('example')"
+                value="example">
+                <label class="form-label fw-bold"for="example">
+                  <fmt:message key="convert.form.providedExample" />
+                </label>
+              </div>
+              <div class="col-6">
+                <select class="form-select" name="example" id="example" onchange="enabledInput('example')">
+                    <option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-1.xlsx" selected>Example 1 (simple exemple, in english)</option>
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-2.xlsx">Example 2 (prefixes)</option>
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-3.xlsx">Example 3 (multilingual columns and deprecation)</option>
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-4.xlsx">Example 4 (schema.org, datatypes, multiple sheets)</option>
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-5.xlsx">Example 5 (skos:Collection, inverse columns)</option>
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-6.xlsx">Example 6 (skos:OrderedCollection, dealing with rdf:Lists)</option>
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-7.xlsx">Example 7 (different subjects with subjectColumn parameter)</option>
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-exemple-8.xlsx">Example 8 (ease references with lookupColumn parameter)</option>
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-use-case-1.xlsx">Use-case 1 (real-world thesaurus : maintaining concept hierarchy in Excel)</option>
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-use-case-2.xlsx">Use-case 2 (real-world person authority file)</option>  
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-use-case-3.xlsx">Use-case 3 (real-world SHACL constraints)</option>
+							      <option value="${sessionData.baseUrl}/excel_test/excel2skos-use-case-4.xlsx">Use-case 4 (Metadata template from fairdatacollective.com)</option>
+                </select>
+                  <div class="form-text fst-italic"><fmt:message key="convert.form.Example.download"/>&nbsp;
+                      <a id="lien" href="${sessionData.baseUrl}/excel_test/excel2skos-exemple-1.xlsx">Example 1 (simple exemple, in english)</a>
+                  </div>
+              </div>
+            <!--END SOURCE RADIO/INPUT = EXAMPLE-->
+            <!--START SOURCE RADIO/INPUT = LOCALFILE-->
+              <div class="col-4 form-check">
+                <input
+                class="form-check-input"
+                type="radio"
+                id="source-file"
+                name="source"
+                value="file"
+                onchange="enabledInput('file')">
+                <label class="form-label fw-bold"for="file">
+                  <fmt:message key="convert.form.localFile"/>
+                </label>
+              </div>
+              <div class="col-6">
+                
 
+                
+                 <input
+                  class="form-control"
+                  type="file"
+                  name="file" 
+                  id="file"
+                  onchange="enabledInput('file')"/>
+                  <div class="
+                  form-text 
+                  fst-italic">
+                  <fmt:message key="convert.form.localFile.help"/>
+                  </div>
+              </div>
+            <!--END SOURCE RADIO/INPUT = LOCALFILE--> 
+            <!--START SOURCE RADIO/INPUT = WEB-->
+              <div class="col-4 form-check">
+                <input
+                class="form-check-input"
+                type="radio"
+                id="source-url"
+                name="source"
+                value="url"
+                onchange="enabledInput('url')"/>
+                <label class="form-label fw-bold" for="url">
+                  <fmt:message key="convert.form.remoteUrl"/>
+                </label>
+              </div>
+              <div class="col-6">
+                  <input
+                  class="form-control"
+                  type="url"
+                  name="url" 
+                  id="url" 
+                  onchange="enabledInput('url')"
+                  placeholder="http://..."/>
+                      <div class="text-wrap text-break form-text fst-italic">
+                        <fmt:message key="convert.form.remoteUrl.help"/>
+                      </div>
+              </div>
+            <!--END SOURCE RADIO/INPUT = WEB-->
+          </div>
+          <!--END PARTIES RADIO BUTTON + LABEL + INPUT-->
+        
+        </fieldset>
+        <!--END FIELSET = SOURCE-->
+        <!--FIELDSET=LANGUAGE-->
+        <fieldset id="fieldset-language" class="row mt-5 align-items-baseline justify-content-around">
+          <h2 class="col-12 fs-5 mb-5">
+            <i class="fa-solid fa-language" style="color: #df6919; font-size: 25px"></i> &nbsp;<fmt:message key="convert.form.legend.language"/>
+          </h2>
+          <label class="col-4 fw-bold text-center text-sm-start" for="choice_Language">
+            <fmt:message key="convert.form.language.legend"/>
+          </label>
+            <div class="col-4">
+              <select class="col-3 form-select" id="choice_Language" name="language">
+                <option value="" selected></option>	
+							  <option value="de">de</option>
+							  <option value="en">en</option>
+							  <option value="es">es</option>	
+							  <option value="fr">fr</option>
+							  <option value="it">it</option>
+							  <option value="ru">ru</option>
+              </select>
+            </div>
+          
+        </fieldset>
+        <!--FIELDSET=OPTIONS-->
+        <fieldset id="fieldset-option" class="row mt-5">
+          <div class="accordion" id="accordionOptions">
+            <div class="accordion-item" style="border-radius: 5px;">
+              <h2 class="accordion-header" id="headingOne">
+                
+                <button class="accordion-button fw-bold bg-dark" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapseOne"
+                        aria-expanded="true"
+                        aria-controls="collapseOne" style="border-radius: 4px;">
+                <i class="fa-solid fa-screwdriver-wrench" style="color: #df6919; font-size: 25px"></i> &nbsp;<fmt:message key="convert.form.advanced.legend"/>
+                </button>
+              </h2>
+                <div id="collapseOne"
+                          class="accordion-collapse collapse show"
+                          aria-labelledby="headingOne"
+                          data-bs-parent="#accordionOptions">
+                  <div class="
+                  row 
+                  accordion-body">
+                  <!--START FORMAT OUTPUT-->
+                  <div class="row mb-4">
+                    <label class="col-6 form-label fw-bold" for="output">
+                      <fmt:message key="convert.form.outputFormat.legend"/>
+                    </label>
+                    <div class="col-4">
+                      <select class="form-select" required id="output" name="output" >						
+									      <option value="text/turtle" selected>Turtle</option>
+									      <option value="application/rdf+xml">RDF/XML</option>	 
+									      <option value="text/plain">N-Triples</option>
+									      <option value="text/x-nquads">N-Quads</option>
+									      <option value="text/n3">N3</option>
+									      <option value="application/x-trig">TriG</option>							 
+								      </select>
+                    </div>
+                  </div>
+                  <!--END FORMAT OUTPUT--> 
+                  <!--START LABELS OUTPUT-->
+                  <div class="row mb-4 fw-bold">
+                    <label class="col-6 form-label" for="useskosxl">
+                      <fmt:message key="convert.form.useskosxl"/>
+                    </label>
+                    <div class="col-4 form-check ms-3">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="useskosxl"
+                          name="useskosxl"/>
+                    </div>
+                  </div>
+                  <!--END LABELS OUTPUT--> 
+                  <!--START TRANSITIVE OUTPUT-->
+                  <div class="row mb-4">
+                    <label class="col-6 form-label fw-bold" for="broaderTransitive">
+                      <fmt:message key="convert.form.broaderTransitive"/>
+                    </label>
+                    <div class="col-4 form-check ms-3">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="broaderTransitive"
+                          name="broaderTransitive"/>
+                    </div>
+                  </div>
+                  <!--END TRANSITIVE OUTPUT--> 
+                  <!--START ZIP OUTPUT-->
+                  <div class="row mb-4">
+                    <label class="col-6 form-label fw-bold" for="usezip">
+                      <fmt:message key="convert.form.usezip"/>
+                    </label>
+                    <div class="col-4 form-check ms-3">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="usezip"
+                          name="usezip"/>
+                    </div>
+                  </div>
+                  <!--END ZIP OUTPUT-->
+                  <!--START ZIP OUTPUT-->
+                  <div class="row">
+                    <label class="col-6 form-label fw-bold" for="ignorePostProc">
+                      <fmt:message key="convert.form.ignorepostproc"/>
+                    </label>
+                    <div class="col-4 form-check ms-3">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="ignorePostProc"
+                          name="useignorePostProczip"/>
+                    </div>
+                  </div>
+                  <!--END ZIP OUTPUT--> 
+                  </div>
+                </div>
+                <!--END FORMAT OUTPUT-->
+                </div>
+            </div>
+
+        </fieldset>
+
+        <div class="row justify-content-center mt-5">
+            <div class="col-auto mb-5">
+              <button class="
+              btn
+              btn-lg
+              btn-info" 
+              type="submit" id="submit">
+              <fmt:message key="convert"/>
+            </button>
+            </div>
+        </div>
+      </form>
+    </div>
+
+    <jsp:include page="includeTag/footer.jsp"/>
+
+
+  </body>
 </html>
