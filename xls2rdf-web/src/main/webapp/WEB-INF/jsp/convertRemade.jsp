@@ -64,12 +64,13 @@
 		<!-- Error block -->
 			<div class="container mt-4">
 			  <div class="messages">
-			    <c:if test="${formData.errorMessage != null}">
+			    <c:if test="${formData.errorMessage != null || error != null}">
 			      <div class="fw-bold alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #df6919; border-radius: 5px;">
 			        <h5 class="alert-heading">
 			          <fmt:message key="error" />
 			        </h5>
-			        ${formData.errorMessage}
+              <!--Si l'exception Xls2RdfException est levée l'attribut ${error} s'affiche sinon ${formData.errorMessage} pour Xls2RdfConvertException-->
+			        ${formData.errorMessage}${error}
 			        <button type="button"
 			                class="btn-close"
 			                data-bs-dismiss="alert"
@@ -327,6 +328,7 @@
     </div>
 
     <jsp:include page="includeTag/footerRemade.jsp"/>
+
 
   </body>
 </html>

@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -156,7 +157,7 @@ public class Xls2RdfConverter {
 			return processWorkbook(workbook);
 		} catch (Exception e) {
 			throw Xls2RdfException.rethrow(e);
-		}			
+		}	
 	}
 	
 	/**

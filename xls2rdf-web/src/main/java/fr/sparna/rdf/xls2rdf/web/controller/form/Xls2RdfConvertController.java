@@ -22,8 +22,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -35,7 +33,7 @@ import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosXlPostProcessor;
 import fr.sparna.rdf.xls2rdf.web.ExceptionManager;
-import fr.sparna.rdf.xls2rdf.web.exception.Xls2RdfConvertException;
+import fr.sparna.rdf.xls2rdf.web.form.convert.Xls2RdfConvertException;
 import fr.sparna.rdf.xls2rdf.write.ModelWriterFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,6 +50,9 @@ public class Xls2RdfConvertController {
 	//Logger
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
+
+	private final static String DEFAULT_FILE_NAME = "xls-2-rdf-convert";
+
 	//Enumération des types de sources possibles pour la conversion
 	private enum SOURCE_TYPE {
 		FILE,
@@ -59,7 +60,7 @@ public class Xls2RdfConvertController {
 		EXAMPLE
 	}
 	
-	@GetMapping(value = "/convert", produces = "text/html")
+	@GetMapping(value = "/convert")
 	public String convertRemade(
 			ModelMap model,
 			HttpSession session
@@ -102,42 +103,31 @@ public class Xls2RdfConvertController {
 		// format
 		RDFFormat theFormat = RDFWriterRegistry.getInstance().getFileFormatForMIMEType(format).orElse(RDFFormat.RDFXML);
 
-		URL exampleUrl = null;
-		URL urls = null;
 		String resultFileName = null;
 
 		try(InputStream in = switch(source){
 			case EXAMPLE -> {
 				log.debug("*Conversion à partir d'un fichier d'exemple : " + example);
-				exampleUrl = new URL(example);
-				InputStream urlInputStream = exampleUrl.openStream(); // throws an IOException
-				// set the output file name to the name of the example
-				resultFileName = (!exampleUrl.getPath().equals(""))?exampleUrl.getPath():resultFileName;
-				// keep only latest file, after final /
-				resultFileName = (resultFileName.contains("/"))?resultFileName.substring(resultFileName.lastIndexOf("/")+1):resultFileName;
+				URL exampleUrl = new URL(example);
+				InputStream urlInputStream = createInFromUrl(exampleUrl, source);
+				resultFileName = createFileNameFromUrl(exampleUrl, source);
 				yield new DataInputStream(new BufferedInputStream(urlInputStream));
 			}
 			case FILE -> {
 				log.debug("*Conversion à partir d'un fichier uploadé : " + file.getOriginalFilename());
-				if(file.isEmpty()) ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.FILE_MISSING);
-				// set the output file name to the name of the input file
-				resultFileName = (file.getOriginalFilename().contains("."))?file.getOriginalFilename().substring(0, file.getOriginalFilename().lastIndexOf('.')):file.getOriginalFilename();	
-				yield file.getInputStream();
+				if(file.isEmpty()) ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.FILE_MISSING.getMessage());
+				resultFileName = createFileNameFromFile(file, source);
+				yield createInFromFile(file, source);
 			}
 			case URL -> {
 				log.debug("*Conversion à partir d'une URL : " + url);
-				if(url.isEmpty()) ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.URL_MISSING);
-				urls = new URL(url);
-				InputStream urlInputStream = urls.openStream(); // throws an IOException
-				// set the output file name to the final part of the URL
-				resultFileName = (!urls.getPath().equals(""))?urls.getPath():resultFileName;
-				// keep only latest file, after final /
-				resultFileName = (resultFileName.contains("/"))?resultFileName.substring(0, resultFileName.lastIndexOf("/")):resultFileName;
+				if(url.isEmpty()) ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.URL_MISSING.getMessage());
+				URL urls = new URL(url);
+				InputStream urlInputStream = createInFromUrl(urls, source);
+				resultFileName = createFileNameFromUrl(urls, source);
 				yield new DataInputStream(new BufferedInputStream(urlInputStream));
 			}
 		}){
-
-			System.out.println("in2 = " + in);
 					URL baseURL = new URL("http://"+request.getServerName()+((request.getServerPort() != 80)?":"+request.getServerPort():"")+request.getContextPath());
 					log.debug("Base URL is "+ baseURL.toString());
 					/**************************CONVERSION RDF**************************/
@@ -171,12 +161,61 @@ public class Xls2RdfConvertController {
 							// sort to garantee order
 							List<String> uri=new ArrayList<>(identifiant);
 							Collections.sort(uri);
-		}catch(IOException io){
-			ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.IO_EXCEPTION);
+		}catch(IOException | NullPointerException io){
+			ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.IO_EXCEPTION.getMessage());
+		}catch(Xls2RdfException appEx){
+			Xls2RdfException.rethrow(appEx);
 		}
 		return null;
 	}
 
+
+	private InputStream createInFromUrl(URL url, SOURCE_TYPE src) throws IOException{
+		InputStream in = switch(src){
+			case EXAMPLE -> {yield url.openStream();}
+			case URL     -> {yield url.openStream();}
+			default      -> {throw new Xls2RdfConvertException();}
+		};
+		return in;
+	}
+
+		private InputStream createInFromFile(MultipartFile file, SOURCE_TYPE src) throws IOException{
+		InputStream in = switch(src){
+			case FILE    -> {yield file.getInputStream();}
+			default      -> {throw new Xls2RdfConvertException(ExceptionManager.NULL_POINTER.getMessage());}
+		};
+		return in;
+	}
+
+	private String createFileNameFromUrl(URL url, SOURCE_TYPE src){
+		String fileName = switch(src){
+			case EXAMPLE -> {
+				// set the output file name to the name of the example
+				String buffer = (!url.getPath().equals(""))?url.getPath():DEFAULT_FILE_NAME;
+				// keep only latest file, after final /
+				yield (buffer.contains("/"))?buffer.substring(buffer.lastIndexOf("/")+1):buffer;
+			}
+			case URL     -> {
+				// set the output file name to the final part of the URL
+				String buffer = (!url.getPath().equals(""))?url.getPath():DEFAULT_FILE_NAME;
+				// keep only latest file, after final /
+				yield (buffer.contains("/"))?buffer.substring(0, buffer.lastIndexOf("/")):buffer;
+			}
+			default      -> {throw new Xls2RdfConvertException(ExceptionManager.NULL_POINTER.getMessage());}
+		};
+		return fileName;
+	}
+
+	private String createFileNameFromFile(MultipartFile file, SOURCE_TYPE src){
+		String fileName = switch(src){
+			case FILE    -> {
+				// set the output file name to the name of the input file
+				yield (file.getOriginalFilename().contains("."))?file.getOriginalFilename().substring(0, file.getOriginalFilename().lastIndexOf('.')):file.getOriginalFilename();	
+			}
+			default      -> {throw new Xls2RdfConvertException(ExceptionManager.NULL_POINTER.getMessage());}
+		};
+		return fileName;
+	}
 
 	
 	private List<String> runConversion(ModelWriterIfc writer, InputStream filefrom, String lang, boolean generatexl, boolean broaderTransitive, boolean ignorePostProc) {

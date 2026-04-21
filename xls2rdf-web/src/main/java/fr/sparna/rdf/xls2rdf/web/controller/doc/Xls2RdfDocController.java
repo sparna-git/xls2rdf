@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class Xls2RdfDocController {
 
 
-    @GetMapping(value = "/doc", produces="text/html")
+    @GetMapping(value = "/doc")
     public String doc(){
         return "doc";
     }

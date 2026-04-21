@@ -7,8 +7,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import fr.sparna.rdf.xls2rdf.web.exception.Xls2RdfConvertException;
+import fr.sparna.rdf.xls2rdf.Xls2RdfException;
+import fr.sparna.rdf.xls2rdf.web.form.convert.ConvertFormModelKey;
+import fr.sparna.rdf.xls2rdf.web.form.convert.Xls2RdfConvertException;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 /**
@@ -18,7 +22,7 @@ import fr.sparna.rdf.xls2rdf.web.exception.Xls2RdfConvertException;
 public class Xls2RdfControllerAdvice {
 
     private RequestData requestData;
-	private ApplicationData applicationData;
+	private final ApplicationData applicationData;
 	private SessionData sessionData;
 
 
@@ -47,12 +51,19 @@ public class Xls2RdfControllerAdvice {
 
 
 	//Gestion des expcetions selon le type
-	//Gérer les exceptions pour convertForm
-	@ExceptionHandler(exception={Xls2RdfConvertException.class}, produces="text/html")
+	//Gérer les exceptions pour Xls2RdfConvertException
+	@ExceptionHandler(exception={Xls2RdfConvertException.class})
 	public String xls2RdfConvertExceptionHandler(Xls2RdfConvertException ex, Model model){
 		this.requestData.setErrorMessage(ex.getMessage());
 		model.addAllAttributes(convertFormData());
 		return "convertRemade";
+	}
+
+	//Gérer les exceptions pour Xls2RdfException
+	@ExceptionHandler(exception={Xls2RdfException.class})
+	public String xls2RdfConvertExceptionHandler(Xls2RdfException ex, RedirectAttributes redirect){
+		redirect.addFlashAttribute(ConvertFormModelKey.ERROR.getKey(), ex.getMessage());
+		return "redirect:/convert";
 	}
 
 	

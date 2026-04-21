@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class Xls2RdfHomeController {
     
-    @GetMapping(value = "/", produces = "text/html")
+    @GetMapping(value = "/")
     public String home(){
         return "index";
     }

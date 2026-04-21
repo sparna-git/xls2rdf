@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf.web.exception;
+package fr.sparna.rdf.xls2rdf.web.form.convert;
 
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 

@@ -1,11 +1,12 @@
-package fr.sparna.rdf.xls2rdf.web;
+package fr.sparna.rdf.xls2rdf.web.form.convert;
 
 //Enumération des clés utilisées pour stocker les données dans le modèle des vues
 public enum ConvertFormModelKey {
 
         FORM_DATA("formData"),
 		APPLICATION_DATA("applicationData"),
-		SESSION_DATA("sessionData");
+		SESSION_DATA("sessionData"),
+		ERROR("error");
 
 		private final String key;
 

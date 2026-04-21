@@ -17,7 +17,7 @@ public class SessionData implements Serializable {
 	protected String baseUrl;
 
 	public Locale getUserLocale() {
-		return userLocale;
+		return this.userLocale;
 	}
 
 	public void setUserLocale(Locale userLocale) {
