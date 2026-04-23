@@ -58,14 +58,9 @@ select, #file, #url, #submit, #input_Language{
   border-left: solid #00c851;
 }
 
-#fieldset-language{
-  padding: 10px !important;
-  border-left: solid #4285f4 ;
-}
-
 #fieldset-options{
   padding: 10px !important;
-  border-left: solid #fb3;
+  border-left: solid #4285f4 ;
 }
 
 .anchorjs-link{

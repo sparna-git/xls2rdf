@@ -88,10 +88,10 @@
       <div class="row justify-content-center">
       <form class="col-10" action="convert" method="post" enctype="multipart/form-data">
         <!--START FIELSET = SOURCE-->
-         <h3>
+        <fieldset id="fieldset-source" class="row">
+          <h3 class="mb-3">
             <i class="fa-solid fa-upload" style="color: #df6919; font-size: 25px"></i> &nbsp;<fmt:message key="convert.form.legend" />
           </h3>
-        <fieldset id="fieldset-source" class="row">
           <!--START PARTIES RADIO BUTTON + LABEL + INPUT-->
           <div class="row gy-3">
             <!--START SOURCE RADIO/INPUT = EXAMPLE-->
@@ -187,10 +187,10 @@
         </fieldset>
         <!--END FIELSET = SOURCE-->
         <!--FIELDSET=LANGUAGE-->
-         <h3 class="mb-5 mt-5">
+        <fieldset id="fieldset-options" class="row mt-5 align-items-baseline">
+          <h3 class="mb-5">
             <i class="fa-solid fa-language" style="color: #df6919; font-size: 25px"></i> &nbsp;<fmt:message key="convert.form.legend.language"/>
-         </h3>
-        <fieldset id="fieldset-language" class="row mt-5 align-items-baseline">
+          </h3>
           <div class="row">
             <label class="col-6" for="choice_Language">
             <fmt:message key="convert.form.language.legend"/>
@@ -208,14 +208,12 @@
               </datalist>
             </div>
           </div>
-        </fieldset>
-        <!--START FIELDSET OPTIONS-->
-         <h3 class="mb-5 mt-5">
+
+            <h3 class="mt-5 mb-5">
               <i class="fa-solid fa-screwdriver-wrench" style="color: #df6919; font-size: 25px;"></i> 
               &nbsp;<fmt:message key="convert.form.advanced.legend"/>
             </h3>
-        <fieldset id="fieldset-options" class="row mt-5 align-items-baseline">
-            <!--START FORMAT OUTPUT-->
+              <!--START FORMAT OUTPUT-->
                   <div class="row mb-4">
                     <label class="col-6 form-label" for="output">
                       <fmt:message key="convert.form.outputFormat.legend"/>
@@ -288,6 +286,7 @@
                     </div>
                   </div>
                   <!--END ZIP OUTPUT-->
+          </div>
         </fieldset>
         </div>
    
