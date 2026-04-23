@@ -32,6 +32,7 @@ import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosXlPostProcessor;
 import fr.sparna.rdf.xls2rdf.web.ExceptionManager;
+import fr.sparna.rdf.xls2rdf.web.form.convert.ConvertFormModelKey;
 import fr.sparna.rdf.xls2rdf.web.form.convert.Xls2RdfConvertException;
 import fr.sparna.rdf.xls2rdf.write.ModelWriterFactory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,7 +51,6 @@ public class Xls2RdfConvertController {
 
 
 	private final static String DEFAULT_FILE_NAME = "xls-2-rdf-convert";
-	private static final String VIEW_NAME = "convert";
 
 	//Enumération des types de sources possibles pour la conversion
 	private enum SOURCE_TYPE {
@@ -61,7 +61,7 @@ public class Xls2RdfConvertController {
 	
 	@GetMapping(value = "/convert")
 	public String convertRemade(Model model) {	
-		model.addAttribute("view", VIEW_NAME);
+		model.addAttribute(ConvertFormModelKey.VIEW_NAME.getKey(), ConvertFormModelKey.VIEW_NAME.getKey());
 		return "convert";
 	}
 

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import fr.sparna.rdf.xls2rdf.web.form.convert.ConvertFormModelKey;
+
 /**
  * <p>Controller for the home page of the application and the documentation page.</p>
  * @author Arthur Leroux
@@ -12,10 +14,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class Xls2RdfHomeController {
     
-    private static final String VIEW_NAME = "api";
     @GetMapping(value = "/")
     public String home(Model model){
-        model.addAttribute("view", VIEW_NAME);
+        model.addAttribute(ConvertFormModelKey.VIEW_NAME.getKey(), ConvertFormModelKey.VIEW_NAME.getKey());
         return "index";
     }
 }

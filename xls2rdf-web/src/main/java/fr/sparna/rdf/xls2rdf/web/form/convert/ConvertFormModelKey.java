@@ -6,8 +6,9 @@ public enum ConvertFormModelKey {
         FORM_DATA("formData"),
 		APPLICATION_DATA("applicationData"),
 		SESSION_DATA("sessionData"),
-		ERROR("error");
-
+		ERROR("error"),
+		VIEW_NAME("view");
+		
 		private final String key;
 
 		public String getKey() {
