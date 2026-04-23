@@ -41,8 +41,10 @@
                downloadLink.href = valueHref;
           }
 
+
           document.addEventListener("DOMContentLoaded", () => {
-            const downloadLink = document.getElementById("lien");
+            const EXAMPLE_DOWNLOAD_LINK_ID = "lien";
+            const downloadLink  = document.getElementById(EXAMPLE_DOWNLOAD_LINK_ID);
                 
             document.addEventListener("change", (event) => {
               const target = event.target;
@@ -65,10 +67,10 @@
 			<div class="container mt-4">
 			  <div class="messages">
 			    <c:if test="${formData.errorMessage != null || error != null}">
-			      <div class="fw-bold alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #df6919; border-radius: 5px;">
-			        <h5 class="alert-heading">
+			      <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #df6919; border-radius: 5px;">
+			        <h3 class="alert-heading display-5 fs-3 fw-normal">
 			          <fmt:message key="error" />
-			        </h5>
+			        </h3>
               <!--Si l'exception Xls2RdfException est levée l'attribut ${error} s'affiche sinon ${formData.errorMessage} pour Xls2RdfConverSION-->
 			        ${formData.errorMessage}${error}
 			        <button type="button"
@@ -83,12 +85,13 @@
       
   
     <div class="container mt-5">
-      <form action="convert" method="post" enctype="multipart/form-data">
+      <div class="row justify-content-center">
+      <form class="col-10" action="convert" method="post" enctype="multipart/form-data">
         <!--START FIELSET = SOURCE-->
-        <fieldset id="fieldset-source" class="row">
-          <h2 class="fs-5">
+         <h3>
             <i class="fa-solid fa-upload" style="color: #df6919; font-size: 25px"></i> &nbsp;<fmt:message key="convert.form.legend" />
-          </h2>
+          </h3>
+        <fieldset id="fieldset-source" class="row">
           <!--START PARTIES RADIO BUTTON + LABEL + INPUT-->
           <div class="row gy-3">
             <!--START SOURCE RADIO/INPUT = EXAMPLE-->
@@ -101,7 +104,7 @@
                 checked="checked"
                 onchange="enabledInput('example')"
                 value="example">
-                <label class="form-label fw-bold"for="example">
+                <label class="form-label" for="example">
                   <fmt:message key="convert.form.providedExample" />
                 </label>
               </div>
@@ -134,14 +137,11 @@
                 name="source"
                 value="file"
                 onchange="enabledInput('file')">
-                <label class="form-label fw-bold"for="file">
+                <label class="form-label" for="file">
                   <fmt:message key="convert.form.localFile"/>
                 </label>
               </div>
               <div class="col-6">
-                
-
-                
                  <input
                   class="form-control"
                   type="file"
@@ -164,7 +164,7 @@
                 name="source"
                 value="url"
                 onchange="enabledInput('url')"/>
-                <label class="form-label fw-bold" for="url">
+                <label class="form-label" for="url">
                   <fmt:message key="convert.form.remoteUrl"/>
                 </label>
               </div>
@@ -187,50 +187,37 @@
         </fieldset>
         <!--END FIELSET = SOURCE-->
         <!--FIELDSET=LANGUAGE-->
-        <fieldset id="fieldset-language" class="row mt-5 align-items-baseline justify-content-around">
-          <h2 class="col-12 fs-5 mb-5">
+         <h3 class="mb-5 mt-5">
             <i class="fa-solid fa-language" style="color: #df6919; font-size: 25px"></i> &nbsp;<fmt:message key="convert.form.legend.language"/>
-          </h2>
-          <label class="col-4 fw-bold text-center text-sm-start" for="choice_Language">
+         </h3>
+        <fieldset id="fieldset-language" class="row mt-5 align-items-baseline">
+          <div class="row">
+            <label class="col-6" for="choice_Language">
             <fmt:message key="convert.form.language.legend"/>
           </label>
             <div class="col-4">
-              <select class="col-3 form-select" id="choice_Language" name="language">
-                <option value="" selected></option>	
+              <input class="form-control" list="choice_Language" name="language" placeholder="Type to search..." id="input_Language">
+              <datalist id="choice_Language" name="language">
+                <option value=""></option>	
 							  <option value="de">de</option>
 							  <option value="en">en</option>
 							  <option value="es">es</option>	
 							  <option value="fr">fr</option>
 							  <option value="it">it</option>
 							  <option value="ru">ru</option>
-              </select>
+              </datalist>
             </div>
-          
+          </div>
         </fieldset>
-        <!--FIELDSET=OPTIONS-->
-        <fieldset id="fieldset-option" class="row mt-5">
-          <div class="accordion" id="accordionOptions">
-            <div class="accordion-item" style="border-radius: 5px;">
-              <h2 class="accordion-header" id="headingOne">
-                
-                <button class="accordion-button fw-bold bg-dark" type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseOne"
-                        aria-expanded="true"
-                        aria-controls="collapseOne" style="border-radius: 4px;">
-                <i class="fa-solid fa-screwdriver-wrench" style="color: #df6919; font-size: 25px"></i> &nbsp;<fmt:message key="convert.form.advanced.legend"/>
-                </button>
-              </h2>
-                <div id="collapseOne"
-                          class="accordion-collapse collapse show"
-                          aria-labelledby="headingOne"
-                          data-bs-parent="#accordionOptions">
-                  <div class="
-                  row 
-                  accordion-body">
-                  <!--START FORMAT OUTPUT-->
+        <!--START FIELDSET OPTIONS-->
+         <h3 class="mb-5 mt-5">
+              <i class="fa-solid fa-screwdriver-wrench" style="color: #df6919; font-size: 25px;"></i> 
+              &nbsp;<fmt:message key="convert.form.advanced.legend"/>
+            </h3>
+        <fieldset id="fieldset-options" class="row mt-5 align-items-baseline">
+            <!--START FORMAT OUTPUT-->
                   <div class="row mb-4">
-                    <label class="col-6 form-label fw-bold" for="output">
+                    <label class="col-6 form-label" for="output">
                       <fmt:message key="convert.form.outputFormat.legend"/>
                     </label>
                     <div class="col-4">
@@ -246,7 +233,7 @@
                   </div>
                   <!--END FORMAT OUTPUT--> 
                   <!--START LABELS OUTPUT-->
-                  <div class="row mb-4 fw-bold">
+                  <div class="row mb-4">
                     <label class="col-6 form-label" for="useskosxl">
                       <fmt:message key="convert.form.useskosxl"/>
                     </label>
@@ -261,7 +248,7 @@
                   <!--END LABELS OUTPUT--> 
                   <!--START TRANSITIVE OUTPUT-->
                   <div class="row mb-4">
-                    <label class="col-6 form-label fw-bold" for="broaderTransitive">
+                    <label class="col-6 form-label" for="broaderTransitive">
                       <fmt:message key="convert.form.broaderTransitive"/>
                     </label>
                     <div class="col-4 form-check ms-3">
@@ -275,7 +262,7 @@
                   <!--END TRANSITIVE OUTPUT--> 
                   <!--START ZIP OUTPUT-->
                   <div class="row mb-4">
-                    <label class="col-6 form-label fw-bold" for="usezip">
+                    <label class="col-6 form-label" for="usezip">
                       <fmt:message key="convert.form.usezip"/>
                     </label>
                     <div class="col-4 form-check ms-3">
@@ -289,7 +276,7 @@
                   <!--END ZIP OUTPUT-->
                   <!--START ZIP OUTPUT-->
                   <div class="row">
-                    <label class="col-6 form-label fw-bold" for="ignorePostProc">
+                    <label class="col-6 form-label" for="ignorePostProc">
                       <fmt:message key="convert.form.ignorepostproc"/>
                     </label>
                     <div class="col-4 form-check ms-3">
@@ -300,15 +287,11 @@
                           name="useignorePostProczip"/>
                     </div>
                   </div>
-                  <!--END ZIP OUTPUT--> 
-                  </div>
-                </div>
-                <!--END FORMAT OUTPUT-->
-                </div>
-            </div>
-
+                  <!--END ZIP OUTPUT-->
         </fieldset>
-
+        </div>
+   
+        <!--SUBMIT BUTTON-->
         <div class="row justify-content-center mt-5">
             <div class="col-auto mb-5">
               <button class="
@@ -323,6 +306,7 @@
       </form>
     </div>
 
+    <!--FOOTER-->
     <jsp:include page="includeTag/footer.jsp"/>
 
 

@@ -2,6 +2,7 @@ package fr.sparna.rdf.xls2rdf.web.controller.home;
 
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
@@ -11,8 +12,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class Xls2RdfHomeController {
     
+    private static final String VIEW_NAME = "api";
     @GetMapping(value = "/")
-    public String home(){
+    public String home(Model model){
+        model.addAttribute("view", VIEW_NAME);
         return "index";
     }
 }

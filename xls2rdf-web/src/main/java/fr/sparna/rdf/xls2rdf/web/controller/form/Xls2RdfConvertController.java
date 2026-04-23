@@ -19,13 +19,12 @@ import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-
 import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
@@ -37,7 +36,6 @@ import fr.sparna.rdf.xls2rdf.web.form.convert.Xls2RdfConvertException;
 import fr.sparna.rdf.xls2rdf.write.ModelWriterFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 /**
  *
@@ -52,6 +50,7 @@ public class Xls2RdfConvertController {
 
 
 	private final static String DEFAULT_FILE_NAME = "xls-2-rdf-convert";
+	private static final String VIEW_NAME = "convert";
 
 	//Enumération des types de sources possibles pour la conversion
 	private enum SOURCE_TYPE {
@@ -61,10 +60,8 @@ public class Xls2RdfConvertController {
 	}
 	
 	@GetMapping(value = "/convert")
-	public String convertRemade(
-			ModelMap model,
-			HttpSession session
-			) throws IOException  {	
+	public String convertRemade(Model model) {	
+		model.addAttribute("view", VIEW_NAME);
 		return "convert";
 	}
 
@@ -161,10 +158,11 @@ public class Xls2RdfConvertController {
 							// sort to garantee order
 							List<String> uri=new ArrayList<>(identifiant);
 							Collections.sort(uri);
-		}catch(IOException | NullPointerException io){
+		}catch(Xls2RdfConvertException appEx){
 			ExceptionManager.throwException(Xls2RdfConvertException.class, ExceptionManager.IO_EXCEPTION.getMessage());
-		}catch(Xls2RdfException appEx){
-			Xls2RdfException.rethrow(appEx);
+		}
+		catch(IOException | NullPointerException io){
+			Xls2RdfException.rethrow(io);
 		}
 		return null;
 	}
