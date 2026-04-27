@@ -437,8 +437,8 @@ public class Xls2RdfConverter {
 					} else {
 						String iriPossiblyNull = prefixManager.uri(value, false);
 						// this can be null in the case column A does not contain a valid full or prefixed IRI
-						if(iriPossiblyNull != null)
-							subjectResource = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(value, false));
+						if(iriPossiblyNull != null) {
+							subjectResource = SimpleValueFactory.getInstance().createIRI(iriPossiblyNull);
 						}
 					}
 				}
