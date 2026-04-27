@@ -45,6 +45,7 @@ public class FormatsTest {
 		this.converter.processFile(input);
 		
 		System.out.println(this.messageListener.getMessages());
+		
 	}
 	
 

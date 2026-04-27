@@ -14,7 +14,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a id="api" class="nav-link active ${view eq 'api' ? 'highlight' : ''}" href="${sessionData.baseUrl}/">API</a>
+              <a id="api" class="nav-link active ${view eq 'api' ? 'highlight' : ''}" href="${sessionData.baseUrl}/">Home</a>
             </li>
             <li class="nav-item">
               <a id="doc" class="nav-link active ${view eq 'doc' ? 'highlight' : ''}" href="${sessionData.baseUrl}/doc">Excel structure documentation</a>

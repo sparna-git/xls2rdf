@@ -429,7 +429,21 @@ public class Xls2RdfConverter {
 				}
 				// create the RowBuilder with the URI in the first column
 				// the URI could be null
-				rowBuilder = new RowBuilder(model, prefixManager.uri(value, false));
+
+				Resource subjectResource = null;
+				if(value != null) {
+					if(value.startsWith("_:")) {
+						subjectResource = SimpleValueFactory.getInstance().createBNode(value.substring(2));
+					} else {
+						String iriPossiblyNull = prefixManager.uri(value, false);
+						// this can be null in the case column A does not contain a valid full or prefixed IRI
+						if(iriPossiblyNull != null) {
+							subjectResource = SimpleValueFactory.getInstance().createIRI(iriPossiblyNull);
+						}
+					}
+				}
+
+				rowBuilder = new RowBuilder(model, subjectResource);
 				continue;
 			}
 			
@@ -641,10 +655,10 @@ public class Xls2RdfConverter {
 		private Resource rowMainResource;
 		private Resource currentSubject;
 		
-		public RowBuilder(Model model, String uri) {
+		public RowBuilder(Model model, Resource rowMainResource) {
 			this.model = model;
-			if(uri != null) {
-				rowMainResource = SimpleValueFactory.getInstance().createIRI(uri);
+			if(rowMainResource != null) {
+				this.rowMainResource = rowMainResource;
 				// set the current subject to the main resource by default
 				currentSubject = rowMainResource;
 			}

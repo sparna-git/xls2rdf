@@ -10,3 +10,7 @@ pom.xml.releaseBackup
 *.log
 
 xls2rdf-lib/src/test/resources/suite/_42_xsddecimal/output.ttl
+
+config_sparnatural_HN.ttl
+
+config_sparnatural_HN.xlsx

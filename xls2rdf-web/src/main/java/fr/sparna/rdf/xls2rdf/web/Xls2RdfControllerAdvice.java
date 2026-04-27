@@ -63,6 +63,7 @@ public class Xls2RdfControllerAdvice {
 	//Gérer les exceptions pour Xls2RdfException
 	@ExceptionHandler(exception={Xls2RdfException.class})
 	public String xls2RdfConvertExceptionHandler(Xls2RdfException ex, RedirectAttributes redirect){
+		ex.printStackTrace();
 		redirect.addFlashAttribute(ConvertFormModelKey.ERROR.getKey(), ex.getMessage());
 		return "redirect:/convert";
 	}
