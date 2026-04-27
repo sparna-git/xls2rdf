@@ -86,7 +86,7 @@
   
     <div class="container mt-5">
       <div class="row justify-content-center">
-      <form class="col-10" action="convert" method="post" enctype="multipart/form-data">
+      <form class="col-12" action="convert" method="post" enctype="multipart/form-data">
         <!--START FIELSET = SOURCE-->
         <fieldset id="fieldset-source" class="row">
           <h3 class="mb-3">
