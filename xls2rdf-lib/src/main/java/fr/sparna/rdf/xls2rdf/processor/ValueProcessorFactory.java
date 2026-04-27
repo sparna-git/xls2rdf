@@ -324,6 +324,7 @@ public final class ValueProcessorFactory {
 	}
 
 	public ValueProcessorIfc turtleParsing(IRI property, PrefixManager prefixManager) {
+		String BLANK_NODE_TEMP_IRI = "http://blanknode.com";
 		return (model, subject, value, cell, language) -> {
 			// create a small piece of Turtle by concatenating...
 			StringBuffer turtle = new StringBuffer();
@@ -333,7 +334,8 @@ public final class ValueProcessorFactory {
 			if(subject.isIRI()) {
 				turtle.append("<"+subject.stringValue()+">"+" "+"<"+property.stringValue()+"> ");
 			} else {
-				turtle.append("_:"+((BNode)subject).getID()+" "+"<"+property.stringValue()+"> ");
+				// turtle.append("_:"+((BNode)subject).getID()+" "+"<"+property.stringValue()+"> ");
+				turtle.append("<"+BLANK_NODE_TEMP_IRI+">"+" "+"<"+property.stringValue()+"> ");
 			}
 			// ... the value (blank node or list or value with datatype or language)
 			turtle.append(value);
@@ -351,9 +353,33 @@ public final class ValueProcessorFactory {
 			parser.setRDFHandler(collector);
 			try {
 				parser.parse(new StringReader(turtle.toString()), RDF.NS.toString());
+
+				// process the content of the collector to replace the BLANK_NODE_TEMP_IRI with the
+				// actual blank node resource
+				// replace all statements where BLANK_NODE_TEMP_IRI appears as subject with a statement
+				// with the blank node itself
+				BNode actualBlankNode = (BNode) subject;
+				IRI tempIri = SimpleValueFactory.getInstance().createIRI(BLANK_NODE_TEMP_IRI);
+				List<Statement> processedStatements = new ArrayList<>();
+				
+				for (Statement stmt : collector.getStatements()) {
+					if (stmt.getSubject().equals(tempIri)) {
+						// Replace the temp IRI subject with the actual blank node
+						Statement newStmt = SimpleValueFactory.getInstance().createStatement(
+							actualBlankNode,
+							stmt.getPredicate(),
+							stmt.getObject(),
+							stmt.getContext()
+						);
+						processedStatements.add(newStmt);
+					} else {
+						processedStatements.add(stmt);
+					}
+				}
+
 				// then add all the resulting statements to the final Model
-				model.addAll(collector.getStatements());
-				return collector.getStatements().stream().collect(Collectors.toList());
+				model.addAll(processedStatements);
+				return processedStatements;
 			} catch (Exception e) {
 				// if anything goes wrong, default to creating a literal
 				log.error("Error in parsing Turtle :\n"+turtle);
