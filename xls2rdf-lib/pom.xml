@@ -73,12 +73,13 @@
 		    <version>1.10.0</version>
 		</dependency>
 
-   
-           <dependency>
-            <groupId>org.jopendocument</groupId>
-            <artifactId>jOpenDocument</artifactId>
-            <version>1.5</version>
+        <!--ODF TOOL KIT https://odftoolkit.org/odfdom/index.html-->
+        <dependency>
+            <groupId>org.odftoolkit</groupId>
+            <artifactId>odfdom-java</artifactId>
+            <version>0.13.0</version>
         </dependency>
+
 
 
     </dependencies>

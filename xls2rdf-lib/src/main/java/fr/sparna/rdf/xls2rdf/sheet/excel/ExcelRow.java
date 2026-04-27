@@ -5,6 +5,7 @@ import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 
 public class ExcelRow implements Row {
+
     private final org.apache.poi.ss.usermodel.Row delegate;
     private final ExcelSheet parentSheet;
 

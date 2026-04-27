@@ -2,6 +2,7 @@ package fr.sparna.rdf.xls2rdf.sheet.excel;
 
 import java.util.Iterator;
 
+import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument;
 import org.slf4j.LoggerFactory;
 
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
@@ -14,7 +15,6 @@ public class ExcelWorkbook implements Workbook {
     static Logger log = LoggerFactory.getLogger(ExcelWorkbook.class.getName());
 
     private final org.apache.poi.ss.usermodel.Workbook delegate;
-
 
     public ExcelWorkbook(org.apache.poi.ss.usermodel.Workbook delegate) {
         this.delegate = delegate;
@@ -44,7 +44,8 @@ public class ExcelWorkbook implements Workbook {
     }
 
     public org.apache.poi.ss.usermodel.Workbook getPoiWorkbook() {
-        return delegate;
+        return this.delegate;
     }
+
 
 }
