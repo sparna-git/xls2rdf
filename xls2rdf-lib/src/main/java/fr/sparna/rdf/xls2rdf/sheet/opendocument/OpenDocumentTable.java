@@ -15,7 +15,7 @@ public class OpenDocumentTable implements Sheet {
 
     static Logger log = LoggerFactory.getLogger(OpenDocumentTable.class);
 
-    public final static String HIDDEN_ATTRIBUTE = "table:visibility";
+    public final static String VISIBILITY_ATTRIBUTE = "table:visibility";
     public final static String HIDDEN_VALUE     = "collapse";
 
     private final OdfTable delegate;
@@ -43,7 +43,7 @@ public class OpenDocumentTable implements Sheet {
 
     @Override
     public boolean isColumnHidden(int columnIndex) {
-        return HIDDEN_VALUE.equals(this.delegate.getColumnByIndex(columnIndex).getOdfElement().getAttribute(HIDDEN_ATTRIBUTE));
+        return HIDDEN_VALUE.equals(this.delegate.getColumnByIndex(columnIndex).getOdfElement().getTableVisibilityAttribute());
     }
 
     @NotNull

@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 
+import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheet;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheetFactory;
 import org.junit.After;
@@ -54,17 +55,17 @@ public class OpenDocumentSpreadSheetFactoryTest {
 
     @Test
     public void openDocumentFactoryIn() throws Exception {
-       OpenDocumentSpreadSheet doc = OpenDocumentSpreadSheetFactory.open(odsAsInputStream);
+        Workbook doc = OpenDocumentSpreadSheetFactory.open(odsAsInputStream);
        Assert.assertNotNull("openDocumentFactoryIn doc is null.", doc);
     }
     @Test
     public void openDocumentFactoryFile() throws Exception {
-        OpenDocumentSpreadSheet doc = OpenDocumentSpreadSheetFactory.open(odsAsFile);
+        Workbook doc = OpenDocumentSpreadSheetFactory.open(odsAsFile);
         Assert.assertNotNull("openDocumentFactoryFile doc is null.", doc);
     }
     @Test
     public void openDocumentFactoryDoc() throws Exception {
-        OpenDocumentSpreadSheet doc = OpenDocumentSpreadSheetFactory.open(OdfSpreadsheetDocument.loadDocument(PATH_NAME));
+        Workbook doc = OpenDocumentSpreadSheetFactory.open(OdfSpreadsheetDocument.loadDocument(PATH_NAME));
         Assert.assertNotNull("openDocumentFactoryDoc doc is null.", doc);
     }
 }

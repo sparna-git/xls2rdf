@@ -17,7 +17,7 @@ public enum CellType {
     ODS_TIME("time");
 
 
-    private String typeName;
+    private final String typeName;
     public String getTypeName(){
         return this.typeName;
     }

@@ -1,5 +1,6 @@
 package fr.sparna.rdf.xls2rdf.sheet.opendocument;
 
+import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument;
 
 import java.io.File;
@@ -9,15 +10,15 @@ public class OpenDocumentSpreadSheetFactory {
 
     private OpenDocumentSpreadSheetFactory(){}
 
-    public static OpenDocumentSpreadSheet open(OdfSpreadsheetDocument document){
+    public static Workbook open(OdfSpreadsheetDocument document){
         return new OpenDocumentSpreadSheet(document);
     }
 
-    public static OpenDocumentSpreadSheet open(File file) throws Exception {
+    public static Workbook open(File file) throws Exception {
         return new OpenDocumentSpreadSheet(OdfSpreadsheetDocument.loadDocument(file));
     }
 
-    public static OpenDocumentSpreadSheet open(InputStream in) throws Exception {
+    public static Workbook open(InputStream in) throws Exception {
         return new OpenDocumentSpreadSheet(OdfSpreadsheetDocument.loadDocument(in));
     }
 }

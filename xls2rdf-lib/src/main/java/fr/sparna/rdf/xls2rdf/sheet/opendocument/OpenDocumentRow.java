@@ -3,6 +3,7 @@ package fr.sparna.rdf.xls2rdf.sheet.opendocument;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import org.odftoolkit.odfdom.doc.table.OdfTableRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,7 @@ public class OpenDocumentRow implements Row {
 
     static Logger log = LoggerFactory.getLogger(OpenDocumentRow.class);
 
-    public final static String HIDDEN_ATTRIBUTE = "table:visibility";
+    public final static String VISIBILITY_ATTRIBUTE = "table:visibility";
     public final static String HIDDEN_VALUE     = "collapse";
 
     private final OdfTableRow delegate;
@@ -45,14 +46,14 @@ public class OpenDocumentRow implements Row {
 
     @Override
     public boolean isHidden() {
-        return HIDDEN_VALUE.equals(this.delegate.getOdfElement().getAttribute(HIDDEN_ATTRIBUTE));
+        return HIDDEN_VALUE.equals(this.delegate.getOdfElement().getTableVisibilityAttribute());
     }
 
     public OdfTableRow getRow() {
         return this.delegate;
     }
 
-    public OpenDocumentSpreadSheet getSpreadSheet(){
+    public Workbook getSpreadSheet(){
         return this.parentTable.getParentSpreadSheet();
     }
 

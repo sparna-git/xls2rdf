@@ -6,6 +6,7 @@ import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import org.odftoolkit.odfdom.doc.table.OdfTableCell;
 import org.odftoolkit.odfdom.doc.table.OdfTableRow;
+import org.odftoolkit.odfdom.dom.element.style.StyleTextPropertiesElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ public class OpenDocumentCell implements Cell{
 
     static Logger log = LoggerFactory.getLogger(OpenDocumentCell.class);
 
-    public final static String LINE_THROUGH_ATTRIBUTE = "style:text-line-through-style";
+    public final static String LINE_THROUGH_ATTRIBUTE = "text-line-through-style";
     public final static String LINE_THROUGH_VALUE     = "solid";
 
     private final OdfTableCell delegate;
@@ -29,7 +30,7 @@ public class OpenDocumentCell implements Cell{
     @Override
     public CellType getCellType() {
         //FROM JAVADOC
-        /**
+        /*
          * Get the value type of this cell.
          * The returned value can be
          * "boolean",
@@ -41,10 +42,12 @@ public class OpenDocumentCell implements Cell{
          * "time".
          * If no value type is set, null will be returned.
          */
-       return mapType(this.delegate.getValueType());
+        return mapType(this.delegate.getValueType());
     }
 
     private CellType mapType(String type){
+        if(type == null) return BLANK;
+
         switch (CellType.valueOf("ODS_" + type.toUpperCase())){
             case ODS_DATE -> {return ODS_DATE;}
             case ODS_PERCENTAGE -> {return ODS_PERCENTAGE;}
@@ -83,7 +86,7 @@ public class OpenDocumentCell implements Cell{
 
     @Override
     public boolean isStruckThrough() {
-        return LINE_THROUGH_VALUE.equals(this.delegate.getOdfElement().getDocumentStyle().getAttribute(LINE_THROUGH_ATTRIBUTE));
+       return LINE_THROUGH_VALUE.equals(this.delegate.getOdfElement().getOrCreateUnqiueAutomaticStyle().getAttribute(LINE_THROUGH_ATTRIBUTE));
     }
 
     @Override
