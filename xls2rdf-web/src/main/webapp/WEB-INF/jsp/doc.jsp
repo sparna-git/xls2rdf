@@ -3,10 +3,12 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
+<fmt:setLocale value="${sessionData.userLocale.language}"/>
+<fmt:setBundle basename="fr.sparna.rdf.xls2rdf.i18n.Bundle"/>
 
 <head>
 	<meta charset="UTF-8">
-	<title>Excel 2 RDF Converter documentation</title>
+	<title><fmt:message key="page.doc"/></title>
 	<link rel="canonical" href="https://xls2rdf.sparna.fr/doc" />
 	<!--FONTAWSEOME CDN-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -92,7 +94,7 @@
 		</div>
 		
 		<div class="row">
-			< class="col-lg-12">
+			<div class="col-lg-12">
 				<h2>Excel File structure</h2>
 				<p>Your excel file <strong>MUST</strong> follow the structure described below to be converted to RDF. Otherwise you will get an exception or an empty RDF file.
 				Download and look at <a href="#source-example">the examples above</a>.</p>
@@ -403,7 +405,6 @@
 	<script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
         
     <script>
-      anchors.options.visible = 'always';
       anchors.options.placement = 'left';
       anchors.add("h2,h3,h4");
     </script>

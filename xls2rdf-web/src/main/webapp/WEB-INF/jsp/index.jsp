@@ -8,7 +8,7 @@
 <!DOCTYPE html>
 
 <head>
-	<title>Excel 2 RDF API</title>
+	<title><fmt:message key="page.api"/></title>
 
 	<!--FONTAWSEOME CDN-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -112,7 +112,6 @@
 	<script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
         
     <script>
-      anchors.options.visible = 'always';
       anchors.options.placement = 'left';
       anchors.add("h2,h3,h4");
     </script>

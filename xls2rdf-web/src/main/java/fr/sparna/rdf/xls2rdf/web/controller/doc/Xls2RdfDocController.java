@@ -11,7 +11,7 @@ public class Xls2RdfDocController {
 
     @GetMapping(value = "/doc")
     public String doc(Model model){
-        model.addAttribute(ConvertFormModelKey.VIEW_NAME.getKey(), ConvertFormModelKey.VIEW_NAME.getKey());
+        model.addAttribute(ConvertFormModelKey.VIEW_NAME.getKey(), ConvertFormModelKey.DOC.getKey());
         return "doc";
     }
     

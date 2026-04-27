@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+
 import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
@@ -61,7 +62,7 @@ public class Xls2RdfConvertController {
 	
 	@GetMapping(value = "/convert")
 	public String convertRemade(Model model) {	
-		model.addAttribute(ConvertFormModelKey.VIEW_NAME.getKey(), ConvertFormModelKey.VIEW_NAME.getKey());
+		model.addAttribute(ConvertFormModelKey.VIEW_NAME.getKey(), ConvertFormModelKey.CONVERT.getKey());
 		return "convert";
 	}
 

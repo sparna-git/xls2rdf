@@ -3,7 +3,7 @@
   <parent>
     <artifactId>xls2rdf-pom</artifactId>
     <groupId>fr.sparna.rdf.xls2rdf</groupId>
-    <version>4.0.0</version>
+    <version>4.0.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>fr.sparna.rdf.xls2rdf</groupId>

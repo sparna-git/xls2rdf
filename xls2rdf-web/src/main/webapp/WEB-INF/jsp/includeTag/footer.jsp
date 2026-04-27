@@ -23,14 +23,3 @@
      </div>
 </div>
 
-	<script>
-		const h1 = document.querySelectorAll("h1");
-		const h2 = document.querySelectorAll("h2");
-		const h3 = document.querySelectorAll("h3");
-		const h4 = document.querySelectorAll("h4");
-
-		Array.from(h1).forEach(h => {h.classList.add("display-3")});
-		Array.from(h2).forEach(h => {h.classList.add("display-3")});
-		Array.from(h3).forEach(h => {h.classList.add("display-6")});
-		Array.from(h4).forEach(h => {h.classList.add("display-4")});
-	</script>

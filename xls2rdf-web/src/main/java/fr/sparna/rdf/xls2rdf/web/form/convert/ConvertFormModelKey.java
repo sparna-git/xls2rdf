@@ -7,7 +7,10 @@ public enum ConvertFormModelKey {
 		APPLICATION_DATA("applicationData"),
 		SESSION_DATA("sessionData"),
 		ERROR("error"),
-		VIEW_NAME("view");
+		VIEW_NAME("view"),
+		API("api"),
+		DOC("doc"),
+		CONVERT("convert");
 		
 		private final String key;
 

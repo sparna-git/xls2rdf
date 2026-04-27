@@ -16,7 +16,7 @@ public class Xls2RdfHomeController {
     
     @GetMapping(value = "/")
     public String home(Model model){
-        model.addAttribute(ConvertFormModelKey.VIEW_NAME.getKey(), ConvertFormModelKey.VIEW_NAME.getKey());
+        model.addAttribute(ConvertFormModelKey.VIEW_NAME.getKey(), ConvertFormModelKey.API.getKey());
         return "index";
     }
 }

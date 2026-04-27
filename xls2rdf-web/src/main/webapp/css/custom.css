@@ -65,7 +65,13 @@ select, #file, #url, #submit, #input_Language{
 
 .anchorjs-link{
   color: #df6919 !important;
+  visibility: hidden !important;
 }
+
+.anchorjs-link:hover{
+  visibility: visible !important;
+}
+
 
 .highlight{
    background-color: #0f2537 !important;
