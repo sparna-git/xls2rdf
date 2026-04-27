@@ -330,7 +330,11 @@ public final class ValueProcessorFactory {
 			// ... the prefixes				
 			turtle.append(prefixManager.getPrefixesTurtleHeader());
 			// ... the subject and the predicate
-			turtle.append("<"+subject.stringValue()+">"+" "+"<"+property.stringValue()+"> ");
+			if(subject.isIRI()) {
+				turtle.append("<"+subject.stringValue()+">"+" "+"<"+property.stringValue()+"> ");
+			} else {
+				turtle.append("_:"+((BNode)subject).getID()+" "+"<"+property.stringValue()+"> ");
+			}
 			// ... the value (blank node or list or value with datatype or language)
 			turtle.append(value);
 			// ... and a final dot if there is not one already at the end
