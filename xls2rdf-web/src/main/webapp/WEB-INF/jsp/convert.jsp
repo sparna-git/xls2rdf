@@ -296,7 +296,7 @@
               <button class="
               btn
               btn-lg
-              btn-info" 
+              btn-primary" 
               type="submit" id="submit">
               <fmt:message key="convert"/>
             </button>

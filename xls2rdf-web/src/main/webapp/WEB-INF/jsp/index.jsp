@@ -1,8 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<!DOCTYPE html>
 
+<fmt:setLocale value="${sessionData.userLocale.language}"/>
+<fmt:setBundle basename="fr.sparna.rdf.xls2rdf.i18n.Bundle"/>
+
+<!DOCTYPE html>
 
 <head>
 	<title>Excel 2 RDF API</title>
@@ -24,12 +27,22 @@
 	<div class="container" style="margin-top:30px;">
 		<div class="row">
 			<div class="col-lg-12">
-				<h1>Excel 2 RDF API</h1>
-				<p>This is an API that converts an Excel file available at a given URL into RDF, following the template rules described <a href=""https://skos-play.sparna.fr/play/convert">here</a>.</p>
+				<h1>Excel 2 RDF</h1>
+				<p>
+					This is an application that converts Excel files to RDF, following the template rules described <a href=""https://skos-play.sparna.fr/play/convert">here</a>.
+					It comes in 2 variants : an <a href="${sessionData.baseUrl}/convert">input form</a>, and an API.
+				</p>
+				<h2>Human input form</h2>
+				<p>
+					The RDF converter is integrated in <a href="${sessionData.baseUrl}/convert">this input form</a> where you will find a form to upload an Excel file, enter a URL
+					or test one of the provided example files. It contains a few options such as getting the result in ZIP, etc.
+					<br />
+					By default the converter will apply SKOS post-processings, check the corresponding checkbox to disable this.
+				</p>
 				<h2>API endpoint</h2>
-				<p>The API is available at <a href="https://xls2rdf.sparna.fr/rest/convert"><code>https://xls2rdf.sparna.fr/rest/convert</code></a></p>
+				<p>The API is available at <a href="https://xls2rdf.sparna.fr/web/api/convert"><code>https://xls2rdf.sparna.fr/web/api/convert</code></a></p>
 				<h2>API parameters reference</h2>
-				The synopsis for calling the API is <code>https://xls2rdf.sparna.fr/rest/convert?url=http://encoded.url.of.excel.file&noPostprocessings=true</code>. Full list of parameters is given below :
+				The synopsis for calling the API is <code>https://xls2rdf.sparna.fr/web/api/convert?url=http://encoded.url.of.excel.file&noPostprocessings=true</code>. Full list of parameters is given below :
 				<table class="table">
 					<thead>
 						<tr>
@@ -83,13 +96,8 @@
 				<ol>
 					<li>Google spreadsheet at <a href="https://docs.google.com/spreadsheets/d/1S5K7cl-8-JFyqnCZP2pVhI3-E4IK0XgCPElkr657jJg">https://docs.google.com/spreadsheets/d/1S5K7cl-8-JFyqnCZP2pVhI3-E4IK0XgCPElkr657jJg</a></li>
 					<li>Excel export of the spreadsheet at <a href="https://docs.google.com/spreadsheets/d/1S5K7cl-8-JFyqnCZP2pVhI3-E4IK0XgCPElkr657jJg/export?format=xlsx">https://docs.google.com/spreadsheets/d/1S5K7cl-8-JFyqnCZP2pVhI3-E4IK0XgCPElkr657jJg/export?format=xlsx</a></li>
-					<li>Result of RDF conversion at <a href="https://xls2rdf.sparna.fr/rest/convert?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1S5K7cl-8-JFyqnCZP2pVhI3-E4IK0XgCPElkr657jJg%2Fexport%3Fformat%3Dxlsx&noPostProcessings=true"><code>https://xls2rdf.sparna.fr/rest/convert?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1S5K7cl-8-JFyqnCZP2pVhI3-E4IK0XgCPElkr657jJg%2Fexport%3Fformat%3Dxlsx&noPostProcessings=true</code></a></li>
+					<li>Result of RDF conversion at <a href="https://xls2rdf.sparna.fr/web/api/convert?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1S5K7cl-8-JFyqnCZP2pVhI3-E4IK0XgCPElkr657jJg%2Fexport%3Fformat%3Dxlsx&noPostProcessings=true"><code>https://xls2rdf.sparna.fr/rest/convert?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1S5K7cl-8-JFyqnCZP2pVhI3-E4IK0XgCPElkr657jJg%2Fexport%3Fformat%3Dxlsx&noPostProcessings=true</code></a></li>
 				</ol>
-				
-				<h2>Human input form</h2>
-				<p>
-					The RDF converter is integrated in the <a href="https://skos-play.sparna.fr/play/convert">SKOS Play application</a> where you will find a form to upload an Excel file.
-				</p>
 				
 				<h2>Can I use this API in production ?</h2>
 				<p>
