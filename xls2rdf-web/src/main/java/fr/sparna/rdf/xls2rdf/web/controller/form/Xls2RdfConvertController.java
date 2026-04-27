@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf.web.controller.convert;
+package fr.sparna.rdf.xls2rdf.web.controller.form;
 
 /** SUPPRESION A VERIFIER 
 import fr.sparna.rdf.skosplay.log.LogEntry;

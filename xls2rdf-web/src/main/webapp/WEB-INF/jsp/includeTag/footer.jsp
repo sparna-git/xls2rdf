@@ -9,8 +9,7 @@
     <div class="row justify-content-center align-items-baseline text-center p-2">
       <div class="col-auto text-secondary text-center">
               <span>Xls2Rdf by</span> 
-                    <a class="text-decoration-none" href="http://blog.sparna.fr" target="_blank"><span style="color: #4285f4;">Thomas Francart</span></a>, 
-                    <a href="http://sparna.fr" target="_blank"><img id="footer-logo" src="images/sparna.png" /></a>
+                    <a href="https://sparna.fr" target="_blank"><img id="footer-logo" src="images/sparna.png" /></a>
               &nbsp;|&nbsp;
               <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.fr">
                 <img alt="Licence Creative Commons" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png"/>

@@ -435,7 +435,11 @@ public class Xls2RdfConverter {
 					if(value.startsWith("_:")) {
 						subjectResource = SimpleValueFactory.getInstance().createBNode(value.substring(2));
 					} else {
-						subjectResource = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(value, false));
+						String iriPossiblyNull = prefixManager.uri(value, false);
+						// this can be null in the case column A does not contain a valid full or prefixed IRI
+						if(iriPossiblyNull != null)
+							subjectResource = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(value, false));
+						}
 					}
 				}
 
