@@ -73,13 +73,6 @@
 		    <version>1.10.0</version>
 		</dependency>
 
-   
-           <dependency>
-            <groupId>org.jopendocument</groupId>
-            <artifactId>jOpenDocument</artifactId>
-            <version>1.5</version>
-        </dependency>
-
 
     </dependencies>
 
