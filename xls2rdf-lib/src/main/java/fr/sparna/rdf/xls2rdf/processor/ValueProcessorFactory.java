@@ -331,11 +331,12 @@ public final class ValueProcessorFactory {
 			// ... the prefixes				
 			turtle.append(prefixManager.getPrefixesTurtleHeader());
 			// ... the subject and the predicate
-			if(subject.isIRI()) {
-				turtle.append("<"+subject.stringValue()+">"+" "+"<"+property.stringValue()+"> ");
+			if(subject.isBNode()) {
+				// BNode
+				turtle.append("<"+BLANK_NODE_TEMP_IRI+">"+" "+"<"+property.stringValue()+"> ");				
 			} else {
-				// turtle.append("_:"+((BNode)subject).getID()+" "+"<"+property.stringValue()+"> ");
-				turtle.append("<"+BLANK_NODE_TEMP_IRI+">"+" "+"<"+property.stringValue()+"> ");
+				// normal IRI
+				turtle.append("<"+subject.stringValue()+">"+" "+"<"+property.stringValue()+"> ");
 			}
 			// ... the value (blank node or list or value with datatype or language)
 			turtle.append(value);
@@ -354,32 +355,39 @@ public final class ValueProcessorFactory {
 			try {
 				parser.parse(new StringReader(turtle.toString()), RDF.NS.toString());
 
-				// process the content of the collector to replace the BLANK_NODE_TEMP_IRI with the
-				// actual blank node resource
-				// replace all statements where BLANK_NODE_TEMP_IRI appears as subject with a statement
-				// with the blank node itself
-				BNode actualBlankNode = (BNode) subject;
-				IRI tempIri = SimpleValueFactory.getInstance().createIRI(BLANK_NODE_TEMP_IRI);
-				List<Statement> processedStatements = new ArrayList<>();
-				
-				for (Statement stmt : collector.getStatements()) {
-					if (stmt.getSubject().equals(tempIri)) {
-						// Replace the temp IRI subject with the actual blank node
-						Statement newStmt = SimpleValueFactory.getInstance().createStatement(
-							actualBlankNode,
-							stmt.getPredicate(),
-							stmt.getObject(),
-							stmt.getContext()
-						);
-						processedStatements.add(newStmt);
-					} else {
-						processedStatements.add(stmt);
+				if(subject.isBNode()) {
+					// process the content of the collector to replace the BLANK_NODE_TEMP_IRI with the
+					// actual blank node resource
+					// replace all statements where BLANK_NODE_TEMP_IRI appears as subject with a statement
+					// with the blank node itself
+					BNode actualBlankNode = (BNode) subject;
+					IRI tempIri = SimpleValueFactory.getInstance().createIRI(BLANK_NODE_TEMP_IRI);
+					List<Statement> processedStatements = new ArrayList<>();
+					
+					for (Statement stmt : collector.getStatements()) {
+						if (stmt.getSubject().equals(tempIri)) {
+							// Replace the temp IRI subject with the actual blank node
+							Statement newStmt = SimpleValueFactory.getInstance().createStatement(
+								actualBlankNode,
+								stmt.getPredicate(),
+								stmt.getObject(),
+								stmt.getContext()
+							);
+							processedStatements.add(newStmt);
+						} else {
+							processedStatements.add(stmt);
+						}
 					}
-				}
 
-				// then add all the resulting statements to the final Model
-				model.addAll(processedStatements);
-				return processedStatements;
+					// then add all the resulting statements to the final Model
+					model.addAll(processedStatements);
+					return processedStatements;
+				} else {
+					List<Statement> statements = new ArrayList(collector.getStatements());
+					model.addAll(statements);
+					return statements;
+				}
+				
 			} catch (Exception e) {
 				// if anything goes wrong, default to creating a literal
 				log.error("Error in parsing Turtle :\n"+turtle);
