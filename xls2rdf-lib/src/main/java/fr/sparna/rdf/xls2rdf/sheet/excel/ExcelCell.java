@@ -42,41 +42,18 @@ public class ExcelCell implements Cell {
     }
 
 	public String getCellValue(CellType type) {
-
-        //String test = switch(type){
-        //   case BLANK, ERROR -> "";
-        //   case STRING       -> this.delegate.getStringCellValue().trim();
-        //   case BOOLEAN      -> Boolean.toString(this.delegate.getBooleanCellValue());
-        //   case NUMERIC      -> {
-        //       Double numericValue = this.delegate.getNumericCellValue();
-        //       if(numericValue % 1 == 0) yield Integer.toString(numericValue.intValue());
-        //       else yield numericValue.toString();
-        //   }
-        //   case FORMULA      -> getCellValue(mapType(this.delegate.getCachedFormulaResultType()));
-        //   default           -> throw new Xls2RdfException("Cell type unknown or unsupported ({}) at Sheet '{}', row {}, column {}", type.name(), this.delegate.getSheet().getSheetName(), this.delegate.getRowIndex(), this.delegate.getColumnIndex());
-        //};
-
-		// blank or error cells give an empty value
-		if (type == CellType.BLANK || type == CellType.ERROR) {
-			return "";
-		} else if (type == CellType.STRING) {
-			return this.delegate.getStringCellValue().trim();
-        } else if (type == CellType.NUMERIC) {
-        	double d = this.delegate.getNumericCellValue();
-			if((d % 1) == 0) {
-				// return it as an int without the dot to avoid values like "1.0"
-				return "" + Double.valueOf(d).intValue();
-			} else {
-				return "" + d;
-			} 
-        } else if (type == CellType.BOOLEAN) {
-        	return Boolean.toString(this.delegate.getBooleanCellValue());
-        } else if (type == CellType.FORMULA) {
-            // Re-run based on the formula type
-            return getCellValue(mapType(this.delegate.getCachedFormulaResultType()));
-        } else {
-        	throw new Xls2RdfException("Cell type unknown or unsupported ({}) at Sheet '{}', row {}, column {}", type.name(), this.delegate.getSheet().getSheetName(), this.delegate.getRowIndex(), this.delegate.getColumnIndex());
-        }
+       return switch(type){
+          case BLANK, ERROR -> "";
+          case STRING       -> this.delegate.getStringCellValue().trim();
+          case BOOLEAN      -> Boolean.toString(this.delegate.getBooleanCellValue());
+          case NUMERIC      -> {
+              Double numericValue = this.delegate.getNumericCellValue();
+              if(numericValue % 1 == 0) yield Integer.toString(numericValue.intValue());
+              else yield numericValue.toString();
+          }
+          case FORMULA      -> getCellValue(mapType(this.delegate.getCachedFormulaResultType()));
+          default           -> throw new Xls2RdfException("Cell type unknown or unsupported ({}) at Sheet '{}', row {}, column {}", type.name(), this.delegate.getSheet().getSheetName(), this.delegate.getRowIndex(), this.delegate.getColumnIndex());
+       };
 	}
 
     @Override

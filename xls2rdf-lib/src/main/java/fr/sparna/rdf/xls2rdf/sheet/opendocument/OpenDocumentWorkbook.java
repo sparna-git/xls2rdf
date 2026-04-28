@@ -11,26 +11,26 @@ import org.slf4j.LoggerFactory;
 import java.util.Iterator;
 
 
-public class OpenDocumentSpreadSheet implements Workbook {
+public class OpenDocumentWorkbook implements Workbook {
 
-    static Logger log = LoggerFactory.getLogger(OpenDocumentSpreadSheet.class.getName());
+    static Logger log = LoggerFactory.getLogger(OpenDocumentWorkbook.class.getName());
 
     private final OdfSpreadsheetDocument delegate;
 
-    public OpenDocumentSpreadSheet(OdfSpreadsheetDocument delegate){
+    public OpenDocumentWorkbook(OdfSpreadsheetDocument delegate){
         this.delegate = delegate;
     }
 
 
     @Override
     public Sheet getSheet(int index) {
-        return new OpenDocumentTable(this.delegate.getSpreadsheetTables().get(index), this);
+        return new OpenDocumentSheet(this.delegate.getSpreadsheetTables().get(index), this);
     }
 
     @Override
     public Sheet getSheet(String name) {
         OdfTable table = this.delegate.getTableByName(name);
-        return table != null ? new OpenDocumentTable(table, this) : null;
+        return table != null ? new OpenDocumentSheet(table, this) : null;
     }
 
     @NotNull

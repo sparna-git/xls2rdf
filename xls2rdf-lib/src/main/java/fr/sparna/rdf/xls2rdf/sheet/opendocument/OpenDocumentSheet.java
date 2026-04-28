@@ -9,15 +9,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
-public class OpenDocumentTable implements Sheet {
+public class OpenDocumentSheet implements Sheet {
 
-    static Logger log = LoggerFactory.getLogger(OpenDocumentTable.class);
+    static Logger log = LoggerFactory.getLogger(OpenDocumentSheet.class);
     public final static String HIDDEN_VALUE     = "collapse";
 
     private final OdfTable delegate;
-    private final OpenDocumentSpreadSheet parentSpreadSheet;
+    private final OpenDocumentWorkbook parentSpreadSheet;
 
-    public OpenDocumentTable(OdfTable delegate, OpenDocumentSpreadSheet parentSpreadSheet){
+    public OpenDocumentSheet(OdfTable delegate, OpenDocumentWorkbook parentSpreadSheet){
         this.delegate = delegate;
         this.parentSpreadSheet = parentSpreadSheet;
     }
@@ -63,7 +63,7 @@ public class OpenDocumentTable implements Sheet {
         return this.delegate;
     }
 
-    public OpenDocumentSpreadSheet getParentSpreadSheet(){
+    public OpenDocumentWorkbook getParentSpreadSheet(){
         return this.parentSpreadSheet;
     }
 

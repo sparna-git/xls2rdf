@@ -3,23 +3,21 @@ package fr.sparna.rdf.xls2rdf.opendocument;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentRow;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheet;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheetFactory;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentTable;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbook;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbookFactory;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSheet;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.odftoolkit.odfdom.doc.table.OdfTable;
-import org.odftoolkit.odfdom.doc.table.OdfTableRow;
 
 import java.io.FileInputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-public class OpenDocumentTableTest {
+public class OpenDocumentSheetTest {
 
-    static final URL ODS_FILE_URL = OpenDocumentSpreadSheetFactoryTest.class.getResource("/opendocument/test.ods");
+    static final URL ODS_FILE_URL = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
     static final String PATH_NAME;
     static final String SHEET_NAME = "Sheet1";
     static final int ROW_COUNT = 7;
@@ -38,7 +36,7 @@ public class OpenDocumentTableTest {
 
     @Before
     public void initProperties() throws Exception {
-        this.cud = OpenDocumentSpreadSheetFactory.open(new FileInputStream(PATH_NAME)).getSheet(SHEET_NAME);
+        this.cud = OpenDocumentWorkbookFactory.open(new FileInputStream(PATH_NAME)).getSheet(SHEET_NAME);
         Assert.assertNotNull("class under test is null.", cud);
     }
 
@@ -74,16 +72,16 @@ public class OpenDocumentTableTest {
 
     @Test
     public void try_get_delegate_is_not_null(){
-        OdfTable delegate = ((OpenDocumentTable)this.cud).getOdfTable();
+        OdfTable delegate = ((OpenDocumentSheet)this.cud).getOdfTable();
         Assert.assertNotNull("delegate object is null.", delegate);
         Assert.assertSame("delegate class is not similar.", OdfTable.class, delegate.getClass());
     }
 
     @Test
     public void try_get_workboot_parent_is_not_null(){
-        Workbook parent = ((OpenDocumentTable)this.cud).getParentSpreadSheet();
+        Workbook parent = ((OpenDocumentSheet)this.cud).getParentSpreadSheet();
         Assert.assertNotNull("parent object is null.", parent);
-        Assert.assertSame("parent class is not similar.", OpenDocumentSpreadSheet.class, parent.getClass());
+        Assert.assertSame("parent class is not similar.", OpenDocumentWorkbook.class, parent.getClass());
     }
 
     @Test
@@ -98,7 +96,7 @@ public class OpenDocumentTableTest {
     @Test
     public void try_is_column_hidden_true(){
         for(int i = 0; i < COLUMN_COUNT; i++){
-            ((OpenDocumentTable)this.cud).getOdfTable().getColumnByIndex(i).getOdfElement().setTableVisibilityAttribute(OpenDocumentTable.HIDDEN_VALUE);
+            ((OpenDocumentSheet)this.cud).getOdfTable().getColumnByIndex(i).getOdfElement().setTableVisibilityAttribute(OpenDocumentSheet.HIDDEN_VALUE);
             boolean isColumnHidden = this.cud.isColumnHidden(i);
             Assert.assertTrue("Column is not hidden.", isColumnHidden);
         }

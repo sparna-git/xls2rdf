@@ -1,5 +1,13 @@
 package fr.sparna.rdf.xls2rdf.opendocument;
 
+import fr.sparna.rdf.xls2rdf.sheet.Workbook;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbookFactory;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,20 +15,9 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+public class OpenDocumentWorkbookFactoryTest {
 
-import fr.sparna.rdf.xls2rdf.sheet.Workbook;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheet;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheetFactory;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument;
-import org.odftoolkit.odfdom.doc.table.OdfTable;
-
-public class OpenDocumentSpreadSheetFactoryTest {
-
-    static final URL ODS_FILE_URL = OpenDocumentSpreadSheetFactoryTest.class.getResource("/opendocument/test.ods");
+    static final URL ODS_FILE_URL = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
     static final String PATH_NAME;
     static{
         try {
@@ -55,17 +52,17 @@ public class OpenDocumentSpreadSheetFactoryTest {
 
     @Test
     public void openDocumentFactoryIn() throws Exception {
-        Workbook doc = OpenDocumentSpreadSheetFactory.open(odsAsInputStream);
+        Workbook doc = OpenDocumentWorkbookFactory.open(odsAsInputStream);
        Assert.assertNotNull("openDocumentFactoryIn doc is null.", doc);
     }
     @Test
     public void openDocumentFactoryFile() throws Exception {
-        Workbook doc = OpenDocumentSpreadSheetFactory.open(odsAsFile);
+        Workbook doc = OpenDocumentWorkbookFactory.open(odsAsFile);
         Assert.assertNotNull("openDocumentFactoryFile doc is null.", doc);
     }
     @Test
     public void openDocumentFactoryDoc() throws Exception {
-        Workbook doc = OpenDocumentSpreadSheetFactory.open(OdfSpreadsheetDocument.loadDocument(PATH_NAME));
+        Workbook doc = OpenDocumentWorkbookFactory.open(OdfSpreadsheetDocument.loadDocument(PATH_NAME));
         Assert.assertNotNull("openDocumentFactoryDoc doc is null.", doc);
     }
 }

@@ -14,9 +14,9 @@ public class OpenDocumentRow implements Row {
     public final static String HIDDEN_VALUE = "collapse";
 
     private final OdfTableRow delegate;
-    private final OpenDocumentTable parentTable;
+    private final OpenDocumentSheet parentTable;
 
-    public OpenDocumentRow(OdfTableRow delegate, OpenDocumentTable parentTable){
+    public OpenDocumentRow(OdfTableRow delegate, OpenDocumentSheet parentTable){
         this.delegate = delegate;
         this.parentTable = parentTable;
     }

@@ -6,19 +6,19 @@ import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument;
 import java.io.File;
 import java.io.InputStream;
 
-public class OpenDocumentSpreadSheetFactory {
+public class OpenDocumentWorkbookFactory {
 
-    private OpenDocumentSpreadSheetFactory(){}
+    private OpenDocumentWorkbookFactory(){}
 
     public static Workbook open(OdfSpreadsheetDocument document){
-        return new OpenDocumentSpreadSheet(document);
+        return new OpenDocumentWorkbook(document);
     }
 
     public static Workbook open(File file) throws Exception {
-        return new OpenDocumentSpreadSheet(OdfSpreadsheetDocument.loadDocument(file));
+        return new OpenDocumentWorkbook(OdfSpreadsheetDocument.loadDocument(file));
     }
 
     public static Workbook open(InputStream in) throws Exception {
-        return new OpenDocumentSpreadSheet(OdfSpreadsheetDocument.loadDocument(in));
+        return new OpenDocumentWorkbook(OdfSpreadsheetDocument.loadDocument(in));
     }
 }

@@ -5,14 +5,12 @@ import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentRow;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheet;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheetFactory;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentTable;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbook;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbookFactory;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSheet;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.odftoolkit.odfdom.doc.table.OdfTable;
-import org.odftoolkit.odfdom.doc.table.OdfTableCell;
 import org.odftoolkit.odfdom.doc.table.OdfTableRow;
 
 import java.io.FileInputStream;
@@ -24,7 +22,7 @@ import java.util.List;
 public class OpenDocumentRowTest {
 
 
-    static final URL ODS_FILE_URL = OpenDocumentSpreadSheetFactoryTest.class.getResource("/opendocument/test.ods");
+    static final URL ODS_FILE_URL = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
     static final String PATH_NAME;
     static final String SHEET_NAME = "Sheet1";
     static final int ROW_COUNT = 7;
@@ -44,7 +42,7 @@ public class OpenDocumentRowTest {
     @Before
     public void initProperties() throws Exception {
         this.cud = new ArrayList<>();
-        Sheet sheet = OpenDocumentSpreadSheetFactory.open(new FileInputStream(PATH_NAME)).getSheet(SHEET_NAME);
+        Sheet sheet = OpenDocumentWorkbookFactory.open(new FileInputStream(PATH_NAME)).getSheet(SHEET_NAME);
         for(int i = 0; i < ROW_COUNT; i++){
             this.cud.add(sheet.getRow(i));
         }
@@ -85,7 +83,7 @@ public class OpenDocumentRowTest {
         for(Row r: cud){
             Sheet parent = r.getSheet();
             Assert.assertNotNull("parent is null,", parent);
-            Assert.assertSame("parent class is not similar.", OpenDocumentTable.class, parent.getClass());
+            Assert.assertSame("parent class is not similar.", OpenDocumentSheet.class, parent.getClass());
         }
     }
 
@@ -103,7 +101,7 @@ public class OpenDocumentRowTest {
         for(Row r: cud){
             Workbook workbookParent = ((OpenDocumentRow)r).getSpreadSheet();
             Assert.assertNotNull("delegate is null,", workbookParent);
-            Assert.assertSame("workbootParent class is not similar.", OpenDocumentSpreadSheet.class, workbookParent.getClass());
+            Assert.assertSame("workbootParent class is not similar.", OpenDocumentWorkbook.class, workbookParent.getClass());
         }
     }
 

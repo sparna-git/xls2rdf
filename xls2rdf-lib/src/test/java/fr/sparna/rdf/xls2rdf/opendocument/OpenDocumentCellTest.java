@@ -5,21 +5,17 @@ import fr.sparna.rdf.xls2rdf.sheet.CellType;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentCell;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentRow;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheetFactory;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentTable;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbookFactory;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSheet;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.odftoolkit.odfdom.doc.table.OdfTableCell;
 import org.odftoolkit.odfdom.dom.OdfDocumentNamespace;
-import org.odftoolkit.odfdom.dom.element.style.StyleTextPropertiesElement;
 import org.odftoolkit.odfdom.dom.style.OdfStyleFamily;
 import org.odftoolkit.odfdom.dom.style.props.OdfStylePropertiesSet;
 import org.odftoolkit.odfdom.dom.style.props.OdfStyleProperty;
 import org.odftoolkit.odfdom.incubator.doc.style.OdfStyle;
-import org.odftoolkit.odfdom.pkg.NamespaceName;
-import org.odftoolkit.odfdom.pkg.OdfAttribute;
 import org.odftoolkit.odfdom.pkg.OdfName;
 import org.odftoolkit.odfdom.pkg.OdfNamespace;
 
@@ -28,19 +24,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static fr.sparna.rdf.xls2rdf.sheet.CellType.*;
 
 public class OpenDocumentCellTest {
 
 
-    static final URL ODS_FILE_URL = OpenDocumentSpreadSheetFactoryTest.class.getResource("/opendocument/test.ods");
+    static final URL ODS_FILE_URL = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
     static final String PATH_NAME;
     static final String SHEET_NAME = "Sheet1";
     static final int ROW_COUNT = 7;
@@ -59,7 +50,7 @@ public class OpenDocumentCellTest {
     @Before
     public void initProperties() throws Exception {
         this.rows = new ArrayList<>();
-        Sheet sheet = OpenDocumentSpreadSheetFactory.open(new FileInputStream(PATH_NAME)).getSheet(SHEET_NAME);
+        Sheet sheet = OpenDocumentWorkbookFactory.open(new FileInputStream(PATH_NAME)).getSheet(SHEET_NAME);
         for(int i = 0; i < ROW_COUNT; i++){
             this.rows.add(sheet.getRow(i));
         }
@@ -135,7 +126,7 @@ public class OpenDocumentCellTest {
                 Cell cell = r.getCell(i);
                 Sheet parent = cell.getSheet();
                 Assert.assertNotNull("parent is null.", parent);
-                Assert.assertEquals(OpenDocumentTable.class, parent.getClass());
+                Assert.assertEquals(OpenDocumentSheet.class, parent.getClass());
             }
         }
     }

@@ -2,8 +2,8 @@ package fr.sparna.rdf.xls2rdf.opendocument;
 
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheet;
-import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheetFactory;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbook;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbookFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,11 +13,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
-public class OpenDocumentSpreadSheetTest {
+public class OpenDocumentWorkbookTest {
 
 
     static final List<String> SHEETS = List.of("Sheet1", "Sheet2", "Sheet3");
-    static final URL ODS_FILE_URL = OpenDocumentSpreadSheetFactoryTest.class.getResource("/opendocument/test.ods");
+    static final URL ODS_FILE_URL = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
     static final String PATH_NAME;
     static{
         try {
@@ -33,7 +33,7 @@ public class OpenDocumentSpreadSheetTest {
 
     @Before
     public void initProperties() throws Exception {
-        this.cud = OpenDocumentSpreadSheetFactory.open(new FileInputStream(PATH_NAME));
+        this.cud = OpenDocumentWorkbookFactory.open(new FileInputStream(PATH_NAME));
         Assert.assertNotNull("class under test is null.", cud);
     }
 
@@ -67,7 +67,7 @@ public class OpenDocumentSpreadSheetTest {
 
     @Test
     public void try_get_delegate_is_not_null(){
-        OdfSpreadsheetDocument delegate = ((OpenDocumentSpreadSheet)this.cud).getSpreadsheetDocument();
+        OdfSpreadsheetDocument delegate = ((OpenDocumentWorkbook)this.cud).getSpreadsheetDocument();
         Assert.assertNotNull("delegate object is null.", delegate);
     }
 
