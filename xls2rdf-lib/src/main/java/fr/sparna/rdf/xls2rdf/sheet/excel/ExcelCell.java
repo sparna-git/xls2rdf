@@ -24,12 +24,38 @@ public class ExcelCell implements Cell {
         return mapType(delegate.getCellType());
     }
 
+    private static CellType mapType(org.apache.poi.ss.usermodel.CellType t) {
+        return switch (t) {
+            case BLANK    -> CellType.BLANK;
+            case ERROR    -> CellType.ERROR;
+            case STRING   -> CellType.STRING;
+            case NUMERIC  -> CellType.NUMERIC;
+            case BOOLEAN  -> CellType.BOOLEAN;
+            case FORMULA  -> CellType.FORMULA;
+            default       -> CellType.ERROR;
+        };
+    }
+
     @Override
     public String getCellValue() {
 		return getCellValue(this.getCellType());
     }
 
 	public String getCellValue(CellType type) {
+
+        //String test = switch(type){
+        //   case BLANK, ERROR -> "";
+        //   case STRING       -> this.delegate.getStringCellValue().trim();
+        //   case BOOLEAN      -> Boolean.toString(this.delegate.getBooleanCellValue());
+        //   case NUMERIC      -> {
+        //       Double numericValue = this.delegate.getNumericCellValue();
+        //       if(numericValue % 1 == 0) yield Integer.toString(numericValue.intValue());
+        //       else yield numericValue.toString();
+        //   }
+        //   case FORMULA      -> getCellValue(mapType(this.delegate.getCachedFormulaResultType()));
+        //   default           -> throw new Xls2RdfException("Cell type unknown or unsupported ({}) at Sheet '{}', row {}, column {}", type.name(), this.delegate.getSheet().getSheetName(), this.delegate.getRowIndex(), this.delegate.getColumnIndex());
+        //};
+
 		// blank or error cells give an empty value
 		if (type == CellType.BLANK || type == CellType.ERROR) {
 			return "";
@@ -86,17 +112,5 @@ public class ExcelCell implements Cell {
 
     public org.apache.poi.ss.usermodel.Cell getPoiCell() {
         return delegate;
-    }
-
-    private static CellType mapType(org.apache.poi.ss.usermodel.CellType t) {
-        switch (t) {
-            case BLANK: return CellType.BLANK;
-            case ERROR: return CellType.ERROR;
-            case STRING: return CellType.STRING;
-            case NUMERIC: return CellType.NUMERIC;
-            case BOOLEAN: return CellType.BOOLEAN;
-            case FORMULA: return CellType.FORMULA;
-            default: return CellType.ERROR;
-        }
     }
 }

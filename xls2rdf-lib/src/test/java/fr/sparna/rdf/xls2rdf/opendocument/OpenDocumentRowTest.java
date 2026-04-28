@@ -5,7 +5,9 @@ import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentRow;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheet;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheetFactory;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentTable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,7 +66,7 @@ public class OpenDocumentRowTest {
         for(Row r: cud){
             for(int i = 0; i < COLUMN_COUNT; i++){
                 String cellValue = r.getColumnValue(i);
-                Assert.assertNotNull("Cell is null.", cellValue);
+                Assert.assertNotNull("Cell value is null.", cellValue);
             }
         }
     }
@@ -79,27 +81,29 @@ public class OpenDocumentRowTest {
     }
 
     @Test
-    public void try_get_sheet_parent(){
+    public void try_get_sheet_parent_is_not_null(){
         for(Row r: cud){
             Sheet parent = r.getSheet();
-            Assert.assertNotNull("Parent is null,", parent);
+            Assert.assertNotNull("parent is null,", parent);
+            Assert.assertSame("parent class is not similar.", OpenDocumentTable.class, parent.getClass());
         }
     }
 
     @Test
-    public void try_get_delegate(){
+    public void try_get_delegate_is_not_null(){
         for(Row r: cud){
             OdfTableRow delegate = ((OpenDocumentRow)r).getRow();
-            Assert.assertNotNull("Delegate is null,", delegate);
+            Assert.assertNotNull("delegate is null,", delegate);
             Assert.assertSame("delegate class is not similar.", OdfTableRow.class, delegate.getClass());
         }
     }
 
     @Test
-    public void try_get_workboot_parent(){
+    public void try_get_workboot_parent_is_not_null(){
         for(Row r: cud){
             Workbook workbookParent = ((OpenDocumentRow)r).getSpreadSheet();
-            Assert.assertNotNull("Delegate is null,", workbookParent);
+            Assert.assertNotNull("delegate is null,", workbookParent);
+            Assert.assertSame("workbootParent class is not similar.", OpenDocumentSpreadSheet.class, workbookParent.getClass());
         }
     }
 

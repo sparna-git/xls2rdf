@@ -1,16 +1,25 @@
 package fr.sparna.rdf.xls2rdf.sheet.opendocument;
 
+import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import fr.sparna.rdf.xls2rdf.sheet.CellType;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import org.odftoolkit.odfdom.doc.table.OdfTableCell;
-import org.odftoolkit.odfdom.doc.table.OdfTableRow;
-import org.odftoolkit.odfdom.dom.element.style.StyleTextPropertiesElement;
+import org.odftoolkit.odfdom.dom.OdfDocumentNamespace;
+import org.odftoolkit.odfdom.dom.style.OdfStyleFamily;
+import org.odftoolkit.odfdom.dom.style.props.OdfStylePropertiesSet;
+import org.odftoolkit.odfdom.dom.style.props.OdfStyleProperty;
+import org.odftoolkit.odfdom.incubator.doc.style.OdfStyle;
+import org.odftoolkit.odfdom.pkg.OdfName;
+import org.odftoolkit.odfdom.pkg.OdfNamespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static fr.sparna.rdf.xls2rdf.sheet.CellType.*;
+import java.util.function.Function;
+
+import static fr.sparna.rdf.xls2rdf.sheet.CellType.ERROR;
+import static fr.sparna.rdf.xls2rdf.sheet.CellType.FORMULA;
 
 public class OpenDocumentCell implements Cell{
 
@@ -29,40 +38,53 @@ public class OpenDocumentCell implements Cell{
 
     @Override
     public CellType getCellType() {
-        //FROM JAVADOC
-        /*
-         * Get the value type of this cell.
-         * The returned value can be
-         * "boolean",
-         * "currency",
-         * "date",
-         * "float",
-         * "percentage",
-         * "string" or
-         * "time".
-         * If no value type is set, null will be returned.
-         */
         return mapType(this.delegate.getValueType());
     }
 
     private CellType mapType(String type){
-        if(type == null) return BLANK;
-
-        switch (CellType.valueOf("ODS_" + type.toUpperCase())){
-            case ODS_DATE -> {return ODS_DATE;}
-            case ODS_PERCENTAGE -> {return ODS_PERCENTAGE;}
-            case ODS_FLOAT -> {return ODS_FLOAT;}
-            case ODS_STRING -> {return ODS_STRING;}
-            case ODS_TIME -> {return ODS_TIME;}
-            case ODS_CURRENCY -> {return ODS_CURRENCY;}
-            default -> {return null;}
-        }
+        /*
+         * Get the value type of this cell.
+         * The returned value can be
+         * "boolean", "currency", "date", "float", "percentage", "string" or "time". If no value type is set, null will be returned
+         */
+        if(type == null) return ERROR;
+        /*
+         *If the cell does not contain a formula, null will be returned
+         */
+        if(this.delegate.getFormula() != null) return FORMULA;
+        return this.strToType.apply(type);
     }
+
+    private Function<String, CellType> strToType = (type) -> {
+        return switch (type) {
+            case ""        -> CellType.BLANK;
+            case "string"  -> CellType.STRING;
+            case "float"   -> CellType.NUMERIC;
+            case "boolean" -> CellType.BOOLEAN;
+            default        -> CellType.ERROR;
+        };
+    };
 
     @Override
     public String getCellValue() {
-        return this.delegate.getStringValue().trim();
+        return this.getCellValue(this.getCellType());
     }
+
+    public String getCellValue(CellType type){
+        return switch(type){
+            case BLANK, ERROR -> "";
+            case STRING       -> this.delegate.getStringValue().trim();
+            case BOOLEAN      -> Boolean.toString(this.delegate.getBooleanValue());
+            case NUMERIC      -> {
+                Double numericValue = this.delegate.getDoubleValue();
+                if(numericValue % 1 == 0) yield Integer.toString(numericValue.intValue());
+                else yield numericValue.toString();
+            }
+            case FORMULA      -> this.getCellValue(this.strToType.apply(this.delegate.getValueType()));
+            default           -> throw new Xls2RdfException("Cell type unknown or unsupported ({}) at Sheet '{}', row {}, column {}", type.name(), this.getSheet().getSheetName(), this.delegate.getRowIndex(), this.delegate.getColumnIndex());
+        };
+    }
+
 
     @Override
     public Row getRow() {
@@ -86,12 +108,19 @@ public class OpenDocumentCell implements Cell{
 
     @Override
     public boolean isStruckThrough() {
-       return LINE_THROUGH_VALUE.equals(this.delegate.getOdfElement().getOrCreateUnqiueAutomaticStyle().getAttribute(LINE_THROUGH_ATTRIBUTE));
+        //On récupére le style courant de la cellule
+        OdfStyle cellStyle = this.delegate.getOdfElement().getAutomaticStyles().getStyle(this.delegate.getStyleName(), OdfStyleFamily.TableCell);
+        //On crée OdfStyleProperty associé à style:text-line-through-style
+        OdfStyleProperty styleProperty = OdfStyleProperty
+                .get(OdfStylePropertiesSet.TextProperties, OdfName.getOdfName(OdfNamespace.getNamespace(OdfDocumentNamespace.STYLE.getUri()), OpenDocumentCell.LINE_THROUGH_ATTRIBUTE));
+        //On récupére la valeur str associée à styleProperty->'style:text-line-through-style' soit SOLID soit NONE
+        String strPropertyValue = cellStyle.getStyleProperties().get(styleProperty);
+       return strPropertyValue.equals(LINE_THROUGH_VALUE);
     }
 
     @Override
     public String getCellExcelReference() {
-        return "";
+        return "row:" + this.delegate.getRowIndex() + "-" + "column:" + this.delegate.getColumnIndex();
     }
 
     public OdfTableCell getCell(){
