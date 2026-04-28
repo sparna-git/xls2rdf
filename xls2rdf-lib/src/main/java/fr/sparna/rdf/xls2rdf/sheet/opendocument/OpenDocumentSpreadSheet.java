@@ -1,17 +1,14 @@
 package fr.sparna.rdf.xls2rdf.sheet.opendocument;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import org.jetbrains.annotations.NotNull;
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument;
 import org.odftoolkit.odfdom.doc.table.OdfTable;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.sheet.Sheet;
-import fr.sparna.rdf.xls2rdf.sheet.Workbook;
+import java.util.Iterator;
 
 
 public class OpenDocumentSpreadSheet implements Workbook {
@@ -32,18 +29,15 @@ public class OpenDocumentSpreadSheet implements Workbook {
 
     @Override
     public Sheet getSheet(String name) {
-        Optional<OdfTable> table = this.delegate.getSpreadsheetTables()
-                .stream().
-                filter(odfTable -> odfTable.getTableName().equals(name))
-                .findFirst();
-        return table.map(odfTable -> new OpenDocumentTable(odfTable, this)).orElse(null);
+        OdfTable table = this.delegate.getTableByName(name);
+        return table != null ? new OpenDocumentTable(table, this) : null;
     }
 
     @NotNull
     @Override
     public Iterator<Sheet> iterator() {
         return new Iterator<Sheet>() {
-            private int index = 0;
+            private int index;
             @Override
             public boolean hasNext() {
                 return index < delegate.getSpreadsheetTables().size();

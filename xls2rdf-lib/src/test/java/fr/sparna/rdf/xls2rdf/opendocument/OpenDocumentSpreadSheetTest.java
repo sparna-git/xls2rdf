@@ -62,17 +62,17 @@ public class OpenDocumentSpreadSheetTest {
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void try_get_sheet_by_id_is_out_of_array(){
-        Sheet sheetFour = this.cud.getSheet(1_000_000);
+        Sheet sheetFour = this.cud.getSheet(1_000);
     }
 
     @Test
-    public void try_get_delegate(){
-        OdfSpreadsheetDocument ods = ((OpenDocumentSpreadSheet)this.cud).getSpreadsheetDocument();
-        Assert.assertNotNull("Delegate object is null.", ods);
+    public void try_get_delegate_is_not_null(){
+        OdfSpreadsheetDocument delegate = ((OpenDocumentSpreadSheet)this.cud).getSpreadsheetDocument();
+        Assert.assertNotNull("delegate object is null.", delegate);
     }
 
     @Test
-    public void try_iterator_on_sheets(){
+    public void try_iterator_on_sheets_are_not_null(){
         for(Sheet s: this.cud){
             Assert.assertNotNull("The iterator return null value for the sheet.", s);
         }

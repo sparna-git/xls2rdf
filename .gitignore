@@ -1,3 +1,4 @@
+
 .classpath
 .settings
 .project
@@ -14,3 +15,4 @@ xls2rdf-lib/src/test/resources/suite/_42_xsddecimal/output.ttl
 config_sparnatural_HN.ttl
 
 config_sparnatural_HN.xlsx
+.idea/

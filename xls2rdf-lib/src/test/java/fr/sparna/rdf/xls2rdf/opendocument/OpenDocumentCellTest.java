@@ -7,6 +7,7 @@ import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentCell;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentRow;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheetFactory;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentTable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static fr.sparna.rdf.xls2rdf.sheet.CellType.*;
 
@@ -64,20 +71,19 @@ public class OpenDocumentCellTest {
             for(int i = 0; i < COLUMN_COUNT; i++){
                 CellType type = r.getCell(i).getCellType();
                 switch(type){
-                    case BLANK -> Assert.assertEquals(BLANK, type);
-                    case ODS_DATE -> Assert.assertEquals(ODS_DATE, type);
-                    case ODS_CURRENCY -> Assert.assertEquals(ODS_CURRENCY, type);
-                    case ODS_PERCENTAGE -> Assert.assertEquals(ODS_PERCENTAGE, type);
-                    case ODS_FLOAT -> Assert.assertEquals(ODS_FLOAT, type);
-                    case ODS_TIME -> Assert.assertEquals(ODS_TIME, type);
-                    case ODS_STRING -> Assert.assertEquals(ODS_STRING, type);
+                    case BLANK   -> Assert.assertEquals(BLANK, type);
+                    case STRING  -> Assert.assertEquals(STRING, type);
+                    case NUMERIC -> Assert.assertEquals(NUMERIC, type);
+                    case BOOLEAN -> Assert.assertEquals(BOOLEAN, type);
+                    case FORMULA -> Assert.assertEquals(FORMULA, type);
+                    default      -> Assert.assertEquals(ERROR, type);
                 }
             }
         }
     }
 
     @Test
-    public void try_get_cell_value(){
+    public void try_get_cell_value_is_not_null(){
         for(Row r: this.rows){
             for(int i = 0; i < COLUMN_COUNT; i++){
                 String value = r.getCell(i).getCellValue();
@@ -87,18 +93,19 @@ public class OpenDocumentCellTest {
     }
 
     @Test
-    public void try_get_parent(){
+    public void try_get_parent_is_not_null(){
         for(Row r: this.rows){
             for(int i = 0; i < COLUMN_COUNT; i++){
                 Cell cell = r.getCell(i);
                 Row parent = cell.getRow();
-                Assert.assertTrue(parent == r);
+                Assert.assertNotNull("parent is null.", parent);
+                Assert.assertTrue("parent class is not similar.", parent == r);
             }
         }
     }
 
     @Test
-    public void try_get_row_index(){
+    public void try_get_row_index_is_equal(){
         int indexRow = 0;
         for(Row r: this.rows){
             for(int i = 0; i < COLUMN_COUNT; i++){
@@ -110,7 +117,7 @@ public class OpenDocumentCellTest {
     }
 
     @Test
-    public void try_get_column_index(){
+    public void try_get_column_index_is_equal(){
         for(Row r: this.rows){
             int indexColumn = 0;
             for(int i = 0; i < COLUMN_COUNT; i++){
@@ -121,16 +128,20 @@ public class OpenDocumentCellTest {
     }
 
     @Test
-    public void try_get_sheet_parent(){
+    public void try_get_sheet_parent_is_not_null(){
         Sheet sheetParent;
         for(Row r: this.rows){
-            sheetParent = r.getSheet();
-            Assert.assertNotNull("sheetParent is null.", sheetParent);
+            for(int i = 0; i < COLUMN_COUNT; i++){
+                Cell cell = r.getCell(i);
+                Sheet parent = cell.getSheet();
+                Assert.assertNotNull("parent is null.", parent);
+                Assert.assertEquals(OpenDocumentTable.class, parent.getClass());
+            }
         }
     }
 
     @Test
-    public void try_get_delegate(){
+    public void try_get_delegate_is_not_null(){
         for(Row r: this.rows){
             for(int i = 0; i < COLUMN_COUNT; i++){
                 Cell cell = r.getCell(i);
@@ -142,11 +153,13 @@ public class OpenDocumentCellTest {
         }
     }
 
+
     @Test
     public void try_is_cell_struck_through_false(){
         for(Row r: this.rows){
             for(int i = 0; i < COLUMN_COUNT; i++){
                 Cell cell = r.getCell(i);
+                applyStruckThrough.accept(cell, false);
                 Assert.assertFalse("Cell is struck.", cell.isStruckThrough());
             }
         }
@@ -157,12 +170,43 @@ public class OpenDocumentCellTest {
         for(Row r: this.rows){
             for(int i = 0; i < COLUMN_COUNT; i++){
                 Cell cell = r.getCell(i);
-                String styleName = ((OpenDocumentCell)cell).getCell().getStyleName();
-                OdfStyle style = ((OpenDocumentCell)cell).getCell().getOdfElement().getAutomaticStyles().getStyle(styleName, OdfStyleFamily.TableCell);
-                System.out.println(style.getProperty(OdfStyleProperty.get(OdfStylePropertiesSet.TextProperties, OdfName.newName("style:"+OpenDocumentCell.LINE_THROUGH_ATTRIBUTE))));
-                style.setAttribute(OpenDocumentCell.LINE_THROUGH_ATTRIBUTE, OpenDocumentCell.LINE_THROUGH_VALUE);
+                applyStruckThrough.accept(cell, true);
                 Assert.assertTrue("Cell is not struck.", cell.isStruckThrough());
             }
         }
     }
+
+    BiConsumer<Cell, Boolean> applyStruckThrough = (cell, b) -> {
+        OdfTableCell c = ((OpenDocumentCell)cell).getCell();
+        //On récupére le nom du style appliqué pour la cell courante
+        String styleName = c.getStyleName();
+        //On récupére l'objet OdfStyle associé à la cell courante
+        OdfStyle style = c.getOdfElement().getAutomaticStyles().getStyle(styleName, OdfStyleFamily.TableCell);
+        //On récupére l'objet OdfStyleProperty associé à text-line-through-style
+        OdfStyleProperty styleProperty = OdfStyleProperty
+                .get(OdfStylePropertiesSet.TextProperties, OdfName.getOdfName(
+                        OdfNamespace.getNamespace(OdfDocumentNamespace.STYLE.getUri()),
+                        "text-line-through-style"));
+        //On associe la propriété de style text-line-through-style, soit solid soit none
+        if (b) {
+            style.setProperty(styleProperty, "solid");
+        } else {
+            style.setProperty(styleProperty, "none");
+        }
+    };
+
+
+    @Test
+    public void display_cell_position_type_value() {
+        for (Row r : this.rows) {
+            System.out.println("Row : " + r.getRowNum());
+            for (int i = 0; i < COLUMN_COUNT; i++) {
+                Cell c = r.getCell(i);
+                System.out.println(c.getCellExcelReference() + " type = " + c.getCellType() + " value = " + c.getCellValue());
+            }
+            System.out.println("------------");
+        }
+    }
+
+
 }

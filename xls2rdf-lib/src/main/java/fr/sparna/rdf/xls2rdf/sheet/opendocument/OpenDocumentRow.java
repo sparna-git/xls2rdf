@@ -11,9 +11,7 @@ import org.slf4j.LoggerFactory;
 public class OpenDocumentRow implements Row {
 
     static Logger log = LoggerFactory.getLogger(OpenDocumentRow.class);
-
-    public final static String VISIBILITY_ATTRIBUTE = "table:visibility";
-    public final static String HIDDEN_VALUE     = "collapse";
+    public final static String HIDDEN_VALUE = "collapse";
 
     private final OdfTableRow delegate;
     private final OpenDocumentTable parentTable;

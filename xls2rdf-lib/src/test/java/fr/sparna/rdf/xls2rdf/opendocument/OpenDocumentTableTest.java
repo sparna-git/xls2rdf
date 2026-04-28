@@ -4,6 +4,7 @@ import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentRow;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheet;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSpreadSheetFactory;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentTable;
 import org.junit.Assert;
@@ -48,7 +49,7 @@ public class OpenDocumentTableTest {
 
     @Test
     public void try_get_sheet_name_is_not_equal(){
-        Assert.assertNotEquals("Sheet's name is the same.", SHEET_NAME + "/test another sheet name./", this.cud.getSheetName());
+        Assert.assertNotEquals("Sheet's name is the same.", "Test another sheet name which does not exist.", this.cud.getSheetName());
     }
 
     @Test
@@ -65,23 +66,24 @@ public class OpenDocumentTableTest {
     }
 
     @Test
-    public void try_iterator_on_rows(){
+    public void try_iterator_on_rows_are_not_null(){
         for(Row r : this.cud){
             Assert.assertNotNull("The iterator return null value for the row.", r);
         }
     }
 
     @Test
-    public void try_get_delegate(){
+    public void try_get_delegate_is_not_null(){
         OdfTable delegate = ((OpenDocumentTable)this.cud).getOdfTable();
-        Assert.assertNotNull("Delegate object is null.", delegate);
+        Assert.assertNotNull("delegate object is null.", delegate);
         Assert.assertSame("delegate class is not similar.", OdfTable.class, delegate.getClass());
     }
 
     @Test
-    public void try_get_workboot_parent(){
+    public void try_get_workboot_parent_is_not_null(){
         Workbook parent = ((OpenDocumentTable)this.cud).getParentSpreadSheet();
-        Assert.assertNotNull("Parent object is null.", parent);
+        Assert.assertNotNull("parent object is null.", parent);
+        Assert.assertSame("parent class is not similar.", OpenDocumentSpreadSheet.class, parent.getClass());
     }
 
     @Test
