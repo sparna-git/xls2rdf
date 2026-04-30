@@ -91,10 +91,14 @@ public class Xls2RdfConverterForOpenDocumentTest {
      @Test
      public void run() throws URISyntaxException {
 
+         // On itere sur le dossier de test pour trouver chaque sous-dossier
          try(DirectoryStream<Path> testFolder = Files.newDirectoryStream(Path.of(PATH_TO_FOLDER_FOR_TESTING.toURI()));){
              for(Path path: testFolder){
+                 //Si des fichiers sont présents on les ignores: ex: gitignore ou autre pour rechercher uniquement les sous-dossiers
                  if(path.toFile().isFile()) continue;
+                 //On itere sur chaque sous dossier un par un.
                  try(DirectoryStream<Path> currentTestFolder = Files.newDirectoryStream(path)){
+                     //On itere sur chaque fichier du sous-dossier
                      for(Path file: currentTestFolder){
                          // set external data for reconcile if present
                          File external = new File(path.toFile().getAbsoluteFile(), "/external.ttl");
@@ -110,7 +114,7 @@ public class Xls2RdfConverterForOpenDocumentTest {
                              this.converter.setReconcileService(new SparqlReconcileService(externalRepository));
                          }
 
-                         //Look for .ods file and run converter if present
+                         //On cherche le fichier .ods à essayer
                          if(file.toFile().getName().endsWith(".ods")){
                              System.out.println("Testing converter for " + file.toAbsolutePath() + ".");
                              this.models = this.converter.processFile(file.toFile());

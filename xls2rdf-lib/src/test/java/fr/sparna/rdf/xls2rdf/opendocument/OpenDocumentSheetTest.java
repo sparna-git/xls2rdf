@@ -20,7 +20,8 @@ public class OpenDocumentSheetTest {
     static final URL ODS_FILE_URL = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
     static final String PATH_NAME;
     static final String SHEET_NAME = "Sheet1";
-    static final int ROW_COUNT = 7;
+    //On retirer un car OdfToolKit retourne le numéro de la dernière ligne, non pas en partant en partant de 0.
+    static final int ROW_COUNT = 7 - 1;
     static final int COLUMN_COUNT = 6;
     static{
         try {

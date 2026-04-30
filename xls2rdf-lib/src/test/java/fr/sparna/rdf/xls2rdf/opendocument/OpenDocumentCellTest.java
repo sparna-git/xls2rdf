@@ -174,7 +174,7 @@ public class OpenDocumentCellTest {
         String styleName = c.getStyleName();
         //On récupére l'objet OdfStyle associé à la cell courante
         OdfStyle style = c.getOdfElement().getAutomaticStyles().getStyle(styleName, OdfStyleFamily.TableCell);
-        Assume.assumeTrue("No default style found on the cell. Test is stopped.", style == null);
+        Assume.assumeTrue("No default style found on the cell. Test is stopped.", style != null);
         //On récupére l'objet OdfStyleProperty associé à text-line-through-style
         OdfStyleProperty styleProperty = OdfStyleProperty
                 .get(OdfStylePropertiesSet.TextProperties, OdfName.getOdfName(
