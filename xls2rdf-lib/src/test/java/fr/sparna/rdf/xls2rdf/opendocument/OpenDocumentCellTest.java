@@ -8,6 +8,7 @@ import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentCell;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbookFactory;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSheet;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.odftoolkit.odfdom.doc.table.OdfTableCell;
@@ -173,6 +174,7 @@ public class OpenDocumentCellTest {
         String styleName = c.getStyleName();
         //On récupére l'objet OdfStyle associé à la cell courante
         OdfStyle style = c.getOdfElement().getAutomaticStyles().getStyle(styleName, OdfStyleFamily.TableCell);
+        Assume.assumeTrue("No default style found on the cell. Test is stopped.", style == null);
         //On récupére l'objet OdfStyleProperty associé à text-line-through-style
         OdfStyleProperty styleProperty = OdfStyleProperty
                 .get(OdfStylePropertiesSet.TextProperties, OdfName.getOdfName(

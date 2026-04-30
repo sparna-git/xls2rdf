@@ -29,7 +29,7 @@ public class OpenDocumentSheet implements Sheet {
 
     @Override
     public int getLastRowNum() {
-        return this.delegate.getRowCount();
+        return this.delegate.getRowCount() - 1;
     }
 
     @Override
@@ -39,7 +39,9 @@ public class OpenDocumentSheet implements Sheet {
 
     @Override
     public boolean isColumnHidden(int columnIndex) {
-        return HIDDEN_VALUE.equals(this.delegate.getColumnByIndex(columnIndex).getOdfElement().getTableVisibilityAttribute());
+        String strIsHidden = this.delegate.getColumnByIndex(columnIndex).getOdfElement().getTableVisibilityAttribute();
+        if(strIsHidden == null) return false;
+        return HIDDEN_VALUE.equals(strIsHidden);
     }
 
     @NotNull

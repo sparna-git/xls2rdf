@@ -2,7 +2,9 @@ package fr.sparna.rdf.xls2rdf.sheet.excel;
 
 import java.util.Iterator;
 
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentSheet;
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument;
+import org.odftoolkit.odfdom.doc.table.OdfTable;
 import org.slf4j.LoggerFactory;
 
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
@@ -27,7 +29,8 @@ public class ExcelWorkbook implements Workbook {
 
     @Override
     public Sheet getSheet(String name) {
-        return new ExcelSheet(delegate.getSheet(name), this);
+        org.apache.poi.ss.usermodel.Sheet sheet = this.delegate.getSheet(name);
+        return sheet != null ? new ExcelSheet(sheet, this) : null;
     }
 
     @Override

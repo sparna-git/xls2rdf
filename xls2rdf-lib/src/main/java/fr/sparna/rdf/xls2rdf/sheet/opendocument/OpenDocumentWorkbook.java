@@ -29,8 +29,8 @@ public class OpenDocumentWorkbook implements Workbook {
 
     @Override
     public Sheet getSheet(String name) {
-        OdfTable table = this.delegate.getTableByName(name);
-        return table != null ? new OpenDocumentSheet(table, this) : null;
+        OdfTable sheet = this.delegate.getTableByName(name);
+        return sheet != null ? new OpenDocumentSheet(sheet, this) : null;
     }
 
     @NotNull

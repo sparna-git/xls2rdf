@@ -7,7 +7,6 @@ import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import org.odftoolkit.odfdom.doc.table.OdfTableCell;
 import org.odftoolkit.odfdom.dom.OdfDocumentNamespace;
-import org.odftoolkit.odfdom.dom.style.OdfStyleFamily;
 import org.odftoolkit.odfdom.dom.style.props.OdfStylePropertiesSet;
 import org.odftoolkit.odfdom.dom.style.props.OdfStyleProperty;
 import org.odftoolkit.odfdom.incubator.doc.style.OdfStyle;
@@ -109,12 +108,15 @@ public class OpenDocumentCell implements Cell{
     @Override
     public boolean isStruckThrough() {
         //On récupére le style courant de la cellule
-        OdfStyle cellStyle = this.delegate.getOdfElement().getAutomaticStyles().getStyle(this.delegate.getStyleName(), OdfStyleFamily.TableCell);
+
+        OdfStyle cellStyle = this.delegate.getOdfElement().getOrCreateAutomaticStyles().getStyle(this.delegate.getStyleName(), this.delegate.getOdfElement().getStyleFamily());
+        if(cellStyle == null) return false;
         //On crée OdfStyleProperty associé à style:text-line-through-style
         OdfStyleProperty styleProperty = OdfStyleProperty
                 .get(OdfStylePropertiesSet.TextProperties, OdfName.getOdfName(OdfNamespace.getNamespace(OdfDocumentNamespace.STYLE.getUri()), OpenDocumentCell.LINE_THROUGH_ATTRIBUTE));
         //On récupére la valeur str associée à styleProperty->'style:text-line-through-style' soit SOLID soit NONE
         String strPropertyValue = cellStyle.getStyleProperties().get(styleProperty);
+        if(strPropertyValue == null) return false;
        return strPropertyValue.equals(LINE_THROUGH_VALUE);
     }
 

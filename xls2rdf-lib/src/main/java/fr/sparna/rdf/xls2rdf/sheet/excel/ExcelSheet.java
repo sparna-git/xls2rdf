@@ -1,11 +1,11 @@
 package fr.sparna.rdf.xls2rdf.sheet.excel;
 
-import java.util.Iterator;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.sheet.Row;
-import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+import java.util.Iterator;
 
 public class ExcelSheet implements Sheet {
 

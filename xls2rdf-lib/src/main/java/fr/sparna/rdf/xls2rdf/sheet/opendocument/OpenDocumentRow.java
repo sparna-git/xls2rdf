@@ -44,7 +44,9 @@ public class OpenDocumentRow implements Row {
 
     @Override
     public boolean isHidden() {
-        return HIDDEN_VALUE.equals(this.delegate.getOdfElement().getTableVisibilityAttribute());
+        String strIsHidden = this.delegate.getOdfElement().getTableVisibilityAttribute();
+        if(strIsHidden == null) return false;
+        return HIDDEN_VALUE.equals(strIsHidden);
     }
 
     public OdfTableRow getRow() {

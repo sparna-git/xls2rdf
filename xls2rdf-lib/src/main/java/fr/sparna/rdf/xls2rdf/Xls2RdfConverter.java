@@ -1,17 +1,17 @@
 package fr.sparna.rdf.xls2rdf;
 
 import ch.qos.logback.classic.BasicConfigurator;
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
 import fr.sparna.rdf.xls2rdf.postprocess.AsListPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.processor.SparqlPathParserProcessor;
 import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
-import fr.sparna.rdf.xls2rdf.reconcile.DynamicReconciliableValueSet;
-import fr.sparna.rdf.xls2rdf.reconcile.PreloadedReconciliableValueSet;
-import fr.sparna.rdf.xls2rdf.reconcile.ReconcileServiceIfc;
-import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
-import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
+import fr.sparna.rdf.xls2rdf.reconcile.*;
+import fr.sparna.rdf.xls2rdf.sheet.*;
+import fr.sparna.rdf.xls2rdf.sheet.excel.ExcelWorkbookFactory;
+import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbookFactory;
 import fr.sparna.rdf.xls2rdf.write.OutputStreamModelWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
@@ -27,27 +27,11 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.function.Predicate;
-
-import fr.sparna.rdf.xls2rdf.sheet.Cell;
-import fr.sparna.rdf.xls2rdf.sheet.Row;
-import fr.sparna.rdf.xls2rdf.sheet.Sheet;
-import fr.sparna.rdf.xls2rdf.sheet.Workbook;
-import fr.sparna.rdf.xls2rdf.sheet.excel.ExcelWorkbookFactory;
-import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Xls2RdfConverter {
@@ -139,7 +123,24 @@ public class Xls2RdfConverter {
 	public List<Model> processFile(File input) {
 		try {
 			log.info("Converting file "+input.getAbsolutePath()+"...");
-			Workbook workbook = ExcelWorkbookFactory.open(input);
+			Workbook workbook;
+			String extension = "";
+			//Le pattern récupére l'extension du fichier soit le dernier .xxx
+			Pattern p = Pattern.compile("\\.[^.]+$");
+			//On applique le pattern sur le nom du fichier
+			Matcher m = p.matcher(input.getName().trim());
+			//Si un bien un fichier on trouve une extension qu'on récupére
+			if(m.find()) extension = m.group();
+			switch (extension){
+				//Voir https://support.microsoft.com/fr-fr/office/formats-de-fichier-pris-en-charge-dans-excel-0943ff2c-6014-4e8d-aaea-b83d51d46247
+				case ".xls", ".xlsx", ".xlsm" -> {
+					workbook = ExcelWorkbookFactory.open(input);
+				}
+				case ".ods" -> {
+					workbook = OpenDocumentWorkbookFactory.open(input);
+				}
+				default -> workbook = null;
+			}
 			return processWorkbook(workbook);
 		} catch (Exception e) {
 			throw Xls2RdfException.rethrow(e);
@@ -751,7 +752,7 @@ public class Xls2RdfConverter {
 		// quick and dirty Log4J config
 		BasicConfigurator bc = new BasicConfigurator();
 		bc.configure((LoggerContext) LoggerFactory.getILoggerFactory());
-		((ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("org.eclipse.rdf4j")).setLevel(ch.qos.logback.classic.Level.INFO);
+		((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.eclipse.rdf4j")).setLevel(Level.INFO);
 		
 		runLikeInSkosPlay(new FileInputStream(args[0]), System.out, "en");
 		// Method 1 : save each scheme to a separate directory
