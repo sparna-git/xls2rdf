@@ -32,7 +32,7 @@ public class FormatsTest {
 	
 	@Test
 	public void test_formatsTest() {
-		File testFolder = new File("src/test/resources/suite/_30_formatsTest");
+		File testFolder = new File("src/test/resources/excel/suite/_30_formatsTest");
 		File input = new File(testFolder, "input.xls");
 		if(!input.exists()) {
 			input = new File(testFolder, "input.xlsx");

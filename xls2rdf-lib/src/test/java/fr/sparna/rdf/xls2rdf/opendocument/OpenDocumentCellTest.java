@@ -195,7 +195,7 @@ public class OpenDocumentCellTest {
             System.out.println("Row : " + r.getRowNum());
             for (int i = 0; i < COLUMN_COUNT; i++) {
                 Cell c = r.getCell(i);
-                System.out.println(c.getCellExcelReference() + " type = " + c.getCellType() + " value = " + c.getCellValue());
+                System.out.println(c.getCellExcelReference());
             }
             System.out.println("------------");
         }

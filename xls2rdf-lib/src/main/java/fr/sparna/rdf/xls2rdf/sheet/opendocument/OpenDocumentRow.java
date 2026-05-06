@@ -14,11 +14,11 @@ public class OpenDocumentRow implements Row {
     public final static String HIDDEN_VALUE = "collapse";
 
     private final OdfTableRow delegate;
-    private final OpenDocumentSheet parentTable;
+    private final OpenDocumentSheet parentSheet;
 
-    public OpenDocumentRow(OdfTableRow delegate, OpenDocumentSheet parentTable){
+    public OpenDocumentRow(OdfTableRow delegate, OpenDocumentSheet parentSheet){
         this.delegate = delegate;
-        this.parentTable = parentTable;
+        this.parentSheet = parentSheet;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class OpenDocumentRow implements Row {
 
     @Override
     public Sheet getSheet() {
-        return this.parentTable;
+        return this.parentSheet;
     }
 
     @Override
@@ -53,8 +53,8 @@ public class OpenDocumentRow implements Row {
         return this.delegate;
     }
 
-    public Workbook getSpreadSheet(){
-        return this.parentTable.getParentSpreadSheet();
+    public Workbook getWorkbook(){
+        return this.parentSheet.getWorkbook();
     }
 
 }

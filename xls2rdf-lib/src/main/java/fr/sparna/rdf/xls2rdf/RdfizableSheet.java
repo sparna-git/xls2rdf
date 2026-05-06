@@ -1,5 +1,14 @@
 package fr.sparna.rdf.xls2rdf;
 
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.rdf4j.model.IRI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -7,16 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.rdf4j.model.IRI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
-import fr.sparna.rdf.xls2rdf.sheet.Cell;
-import fr.sparna.rdf.xls2rdf.sheet.Row;
-import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 
 /**
  * A Sheet in a Workbook that can be turned into RDF.

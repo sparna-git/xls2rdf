@@ -1,13 +1,17 @@
 package fr.sparna.rdf.xls2rdf.sheet.excel;
 
+import fr.sparna.rdf.xls2rdf.sheet.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.InputStream;
 
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-
-import fr.sparna.rdf.xls2rdf.sheet.Workbook;
-
 public final class ExcelWorkbookFactory {
+
+    static Logger log = LoggerFactory.getLogger(ExcelWorkbookFactory.class.getName());
+
     private ExcelWorkbookFactory() {}
 
     public static Workbook open(org.apache.poi.ss.usermodel.Workbook wb) {

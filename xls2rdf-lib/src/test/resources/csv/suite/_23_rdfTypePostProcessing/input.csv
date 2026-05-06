@@ -1,0 +1,7 @@
+"uri","bibo:Document"
+"rdf:type","owl:Class"
+"PREFIX","opl","http://opl.culture.fr/ontology/"
+"PREFIX","bibo","http://purl.org/ontology/bibo/"
+"url du document dans HAL","langue sujet de la resource subproperty of dct:subject"
+"URI","opl:subjectLanguage"
+"https://halshs.archives-ouvertes.fr/hal-01530895v1","http://opl.culture.fr/vocabulary/language/442"

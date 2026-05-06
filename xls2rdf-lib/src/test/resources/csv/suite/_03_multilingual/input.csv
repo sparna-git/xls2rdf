@@ -1,0 +1,15 @@
+"ConceptScheme URI","http://data.sparna.fr/vocabularies/days",
+"PREFIX","days","http://data.sparna.fr/vocabularies/days#"
+"dct:title@en","Weekdays",
+"dct:title@fr","La semaine",
+"dct:description@en","The days of the week",
+"dct:description@fr","Les jours de la semaine",
+"This exemple illustrates multilingual columns"
+"URI","skos:prefLabel@en","skos:prefLabel@fr","skos:altLabel@en","skos:altLabel@en"
+"days:monday","Monday","Lundi","mon","1"
+"days:tuesday","Tuesday","Mardi","tue","2"
+"days:wednesday","Wednesday","Mercredi","wed","3"
+"days:thursday","Thursday","Jeudi","thu","4"
+"days:friday","Friday","Vendredi","fri","5"
+"days:saturday","Saturday","Samedi","sat","6"
+"days:sunday","Sunday","Dimanche","sun","7"

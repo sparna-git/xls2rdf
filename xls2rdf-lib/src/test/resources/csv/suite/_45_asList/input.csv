@@ -1,0 +1,5 @@
+"Graph URI","http://example.com/my-graph"
+"PREFIX","ex","http://example.com/"
+"URI","ex:value(asList='true')"
+"ex:TEST","ex:1"
+"ex:TEST","ex:2"

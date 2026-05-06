@@ -34,11 +34,12 @@ public class OpenDocumentWorkbookFactoryTest {
 
     @Before
     public void initProperties() throws Exception {
-        this.odsAsInputStream = new FileInputStream(PATH_NAME);
-        Assert.assertNotNull("odsAsInputStream document is null.", odsAsInputStream);
 
         this.odsAsFile        = new File(PATH_NAME);
         Assert.assertNotNull("odsAsFile document is null.", odsAsFile);
+
+        this.odsAsInputStream = new FileInputStream(PATH_NAME);
+        Assert.assertNotNull("odsAsInputStream document is null.", odsAsInputStream);
 
         this.odsDocument      = OdfSpreadsheetDocument.loadDocument(PATH_NAME);
         Assert.assertNotNull("odsDocument is null.", odsDocument);

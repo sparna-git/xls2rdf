@@ -99,7 +99,7 @@ public class OpenDocumentRowTest {
     @Test
     public void try_get_workboot_parent_is_not_null(){
         for(Row r: cud){
-            Workbook workbookParent = ((OpenDocumentRow)r).getSpreadSheet();
+            Workbook workbookParent = ((OpenDocumentRow)r).getWorkbook();
             Assert.assertNotNull("delegate is null,", workbookParent);
             Assert.assertSame("workbootParent class is not similar.", OpenDocumentWorkbook.class, workbookParent.getClass());
         }

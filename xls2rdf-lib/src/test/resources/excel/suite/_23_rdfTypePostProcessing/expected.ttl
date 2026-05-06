@@ -1,0 +1,13 @@
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix opl: <http://opl.culture.fr/ontology/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://purl.org/ontology/bibo/Document> a owl:Class .
+
+<https://halshs.archives-ouvertes.fr/hal-01530895v1> 
+	opl:subjectLanguage <http://opl.culture.fr/vocabulary/language/442> ;
+	rdf:type <http://purl.org/ontology/bibo/Document>
+	.

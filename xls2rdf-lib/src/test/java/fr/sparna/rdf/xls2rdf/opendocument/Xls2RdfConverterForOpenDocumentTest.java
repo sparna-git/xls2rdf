@@ -83,99 +83,79 @@ public class Xls2RdfConverterForOpenDocumentTest {
          this.converter.setPropertyValidator(new SimpleInvalidPropertyListValidator(Collections.singletonList(
                  SimpleValueFactory.getInstance().createIRI("http://labs.sparna.fr/skos-play/convert/invalidProperty")
          )));
-
-
      }
 
 
      @Test
-     public void run() throws URISyntaxException {
-
+     public void run() throws URISyntaxException, IOException {
          // On itere sur le dossier de test pour trouver chaque sous-dossier
          try(DirectoryStream<Path> testFolder = Files.newDirectoryStream(Path.of(PATH_TO_FOLDER_FOR_TESTING.toURI()));){
              for(Path path: testFolder){
                  //Si des fichiers sont présents on les ignores: ex: gitignore ou autre pour rechercher uniquement les sous-dossiers
                  if(path.toFile().isFile()) continue;
-                 //On itere sur chaque sous dossier un par un.
-                 try(DirectoryStream<Path> currentTestFolder = Files.newDirectoryStream(path)){
-                     //On itere sur chaque fichier du sous-dossier
-                     for(Path file: currentTestFolder){
-                         // set external data for reconcile if present
-                         File external = new File(path.toFile().getAbsoluteFile(), "/external.ttl");
-                         System.out.println("exnternal.ttl file : " + external);
-                         if(external.exists()){
-                             Repository externalRepository = new SailRepository(new MemoryStore());
-                             externalRepository.init();
-                             try(RepositoryConnection c = externalRepository.getConnection()) {
-                                 c.add(Rio.parse(new FileInputStream(external), external.toURI().toURL().toString(), RDFFormat.TURTLE));
-                             }catch (Exception e){
-                                 throw new IllegalArgumentException("Problem with external.ttl in unit test "+this.testFolder, e);
-                             }
-                             this.converter.setReconcileService(new SparqlReconcileService(externalRepository));
+                 File odsFile = new File(path.toAbsolutePath() + "/input.ods");
+                 System.err.println("Testing converter for " + odsFile.getAbsolutePath());
+                 // set external data for reconcile if present
+                 File external = new File(path.toFile().getAbsolutePath(), "/external.ttl");
+                 System.out.println("external.ttl file : " + external);
+                 if(external.exists()){
+                     Repository externalRepository = new SailRepository(new MemoryStore());
+                     externalRepository.init();
+                     try(RepositoryConnection c = externalRepository.getConnection()) {
+                         c.add(Rio.parse(new FileInputStream(external), external.toURI().toURL().toString(), RDFFormat.TURTLE));
+                     }catch (Exception e){
+                         throw new IllegalArgumentException("Problem with external.ttl in unit test "+this.testFolder, e);
+                     }
+                     this.converter.setReconcileService(new SparqlReconcileService(externalRepository));
+                 }
+                 this.models = this.converter.processFile(odsFile);
+                 // reput everything in flat repositories for proper comparisons without the graphs
+                 Repository outputRepositoryToCompare = new SailRepository(new MemoryStore());
+                 outputRepositoryToCompare.init();
+                 Model outputModel = new LinkedHashModelFactory().createEmptyModel();
+                 try(RepositoryConnection connection = outputRepository.getConnection()) {
+                     // print result in ttl (notes: prints all graphs)
+                     connection.export(new TriGWriter(System.out));
+                     connection.export(new StatementCollector(outputModel));
+                     try {
+                         File output = new File(path.toFile().getAbsolutePath(), "/output.trig");
+                         System.out.println("output.trig file : " + output);
+                         if(!output.exists()) {
+                             output.createNewFile();
                          }
-
-                         //On cherche le fichier .ods à essayer
-                         if(file.toFile().getName().endsWith(".ods")){
-                             System.out.println("Testing converter for " + file.toAbsolutePath() + ".");
-                             this.models = this.converter.processFile(file.toFile());
-
-                             // reput everything in flat repositories for proper comparisons without the graphs
-                             Repository outputRepositoryToCompare = new SailRepository(new MemoryStore());
-                             outputRepositoryToCompare.init();
-
-                             Model outputModel = new LinkedHashModelFactory().createEmptyModel();
-                             try(RepositoryConnection connection = outputRepository.getConnection()) {
-                                 // print result in ttl (notes: prints all graphs)
-                                 connection.export(new TriGWriter(System.out));
-                                 connection.export(new StatementCollector(outputModel));
-
-                                 try {
-                                     File output = new File(path.toFile().getAbsoluteFile(), "/output.trig");
-                                     System.out.println("output.trig file : " + output);
-                                     if(!output.exists()) {
-                                         output.createNewFile();
-                                     }
-                                     FileOutputStream out = new FileOutputStream(output);
-                                     connection.export(new TriGWriter(out));
-                                 } catch (Exception e) {
-                                     throw new IllegalArgumentException("Problem with output.trig in unit test "+this.testFolder, e);
-                                 }
-
-                                 try(RepositoryConnection connectionToCompare = outputRepositoryToCompare.getConnection()) {
-                                     connectionToCompare.add(outputModel, (Resource)null);
-                                     try {
-                                         File output = new File(path.toFile().getAbsoluteFile(), "/output.ttl");
-                                         System.out.println("output.ttl file : " + output);
-                                         if(!output.exists()) {
-                                             output.createNewFile();
-                                         }
-                                         FileOutputStream out = new FileOutputStream(output);
-                                         connection.export(new TurtleWriter(out));
-                                     } catch (Exception e) {
-                                         throw new IllegalArgumentException("Problem with output.ttl in unit test "+this.testFolder, e);
-                                     }
-                                 }
+                         FileOutputStream out = new FileOutputStream(output);
+                         connection.export(new TriGWriter(out));
+                     } catch (Exception e) {
+                         throw new IllegalArgumentException("Problem with output.trig in unit test "+this.testFolder, e);
+                     }
+                     try(RepositoryConnection connectionToCompare = outputRepositoryToCompare.getConnection()) {
+                         connectionToCompare.add(outputModel, (Resource)null);
+                         try {
+                             File output = new File(path.toFile().getAbsolutePath(), "/output.ttl");
+                             System.out.println("output.ttl file : " + output);
+                             if(!output.exists()) {
+                                 output.createNewFile();
                              }
-                             //Look for expected to compare
-                             File expected = new File(path.toFile().getAbsolutePath(), "/expected.ttl");
-                             System.out.println("Expected file : " + expected);
-                             if(expected.exists()) {
-                                 Repository expectedRepository = new SailRepository(new MemoryStore());
-                                 expectedRepository.init();
-                                 try(RepositoryConnection expectedConnection = expectedRepository.getConnection()) {
-                                     expectedConnection.add(Rio.parse(new FileInputStream(expected), expected.toURI().toURL().toString(), RDFFormat.TURTLE));
-                                 } catch (Exception e) {
-                                     throw new IllegalArgumentException("Problem with expected.ttl in unit test "+this.testFolder, e);
-                                 }
-                             }
+                             FileOutputStream out = new FileOutputStream(output);
+                             connection.export(new TurtleWriter(out));
+                         } catch (Exception e) {
+                             throw new IllegalArgumentException("Problem with output.ttl in unit test "+this.testFolder, e);
                          }
-
                      }
                  }
+                 //Look for expected to compare
+                 File expected = new File(path.toFile().getAbsolutePath(), "/expected.ttl");
+                 System.out.println("Expected file : " + expected);
+                 if(expected.exists()) {
+                     Repository expectedRepository = new SailRepository(new MemoryStore());
+                     expectedRepository.init();
+                     try(RepositoryConnection expectedConnection = expectedRepository.getConnection()) {
+                         expectedConnection.add(Rio.parse(new FileInputStream(expected), expected.toURI().toURL().toString(), RDFFormat.TURTLE));
+                     } catch (Exception e) {
+                         throw new IllegalArgumentException("Problem with expected.ttl in unit test "+this.testFolder, e);
+                     }
+                 }
+                 }
              }
-         } catch (IOException e) {
-             throw new RuntimeException(e);
-         }
-
      }
 }

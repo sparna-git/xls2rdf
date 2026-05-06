@@ -37,15 +37,15 @@ public class OpenDocumentWorkbook implements Workbook {
     @Override
     public Iterator<Sheet> iterator() {
         return new Iterator<Sheet>() {
-            private int index;
+            private int i;
             @Override
             public boolean hasNext() {
-                return index < delegate.getSpreadsheetTables().size();
+                return i < delegate.getSpreadsheetTables().size();
             }
 
             @Override
             public Sheet next() {
-                return getSheet(index++);
+                return getSheet(i++);
             }
         };
     }

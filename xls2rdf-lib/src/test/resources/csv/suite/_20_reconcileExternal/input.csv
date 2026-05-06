@@ -1,0 +1,3 @@
+"URI of ConceptScheme","http://labs.sparna.fr/skos-play/convert/test"
+"URI","skos:prefLabel@fr","skos:altLabel@fr","skos:related(reconcile='external')"
+"http://labs.sparna.fr/skos-play/convert/test/concept_1","Test","toto","titi"

@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument;
+
 import java.io.FileInputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -17,12 +18,12 @@ public class OpenDocumentWorkbookTest {
 
 
     static final List<String> SHEETS = List.of("Sheet1", "Sheet2", "Sheet3");
-    static final URL ODS_FILE_URL = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
+    static final URL ODS_FILE_URI = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
     static final String PATH_NAME;
     static{
         try {
-            Assert.assertNotNull(ODS_FILE_URL);
-            PATH_NAME = ODS_FILE_URL.toURI().getPath();
+            Assert.assertNotNull(ODS_FILE_URI);
+            PATH_NAME = ODS_FILE_URI.toURI().getPath();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -69,6 +70,7 @@ public class OpenDocumentWorkbookTest {
     public void try_get_delegate_is_not_null(){
         OdfSpreadsheetDocument delegate = ((OpenDocumentWorkbook)this.cud).getSpreadsheetDocument();
         Assert.assertNotNull("delegate object is null.", delegate);
+        Assert.assertSame("delegate class is not similar.", OdfSpreadsheetDocument.class, delegate.getClass());
     }
 
     @Test

@@ -5,8 +5,13 @@ import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import fr.sparna.rdf.xls2rdf.sheet.CellType;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExcelCell implements Cell {
+
+    static Logger log = LoggerFactory.getLogger(ExcelCell.class.getName());
+
     private final org.apache.poi.ss.usermodel.Cell delegate;
     private final ExcelRow parentRow;
 

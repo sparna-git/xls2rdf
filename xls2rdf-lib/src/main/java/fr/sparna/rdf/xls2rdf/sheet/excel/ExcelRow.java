@@ -3,8 +3,12 @@ package fr.sparna.rdf.xls2rdf.sheet.excel;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExcelRow implements Row {
+
+    static Logger log = LoggerFactory.getLogger(ExcelRow.class.getName());
 
     private final org.apache.poi.ss.usermodel.Row delegate;
     private final ExcelSheet parentSheet;

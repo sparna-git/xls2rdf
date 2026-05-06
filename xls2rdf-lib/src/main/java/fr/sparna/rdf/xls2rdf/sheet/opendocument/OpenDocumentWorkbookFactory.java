@@ -2,11 +2,15 @@ package fr.sparna.rdf.xls2rdf.sheet.opendocument;
 
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
 
 public class OpenDocumentWorkbookFactory {
+
+    static Logger log = LoggerFactory.getLogger(OpenDocumentWorkbookFactory.class.getName());
 
     private OpenDocumentWorkbookFactory(){}
 

@@ -15,11 +15,11 @@ public class OpenDocumentSheet implements Sheet {
     public final static String HIDDEN_VALUE     = "collapse";
 
     private final OdfTable delegate;
-    private final OpenDocumentWorkbook parentSpreadSheet;
+    private final OpenDocumentWorkbook parentWorkbook;
 
-    public OpenDocumentSheet(OdfTable delegate, OpenDocumentWorkbook parentSpreadSheet){
+    public OpenDocumentSheet(OdfTable delegate, OpenDocumentWorkbook parentWorkbook){
         this.delegate = delegate;
-        this.parentSpreadSheet = parentSpreadSheet;
+        this.parentWorkbook = parentWorkbook;
     }
 
     @Override
@@ -65,8 +65,8 @@ public class OpenDocumentSheet implements Sheet {
         return this.delegate;
     }
 
-    public OpenDocumentWorkbook getParentSpreadSheet(){
-        return this.parentSpreadSheet;
+    public OpenDocumentWorkbook getWorkbook(){
+        return this.parentWorkbook;
     }
 
 }

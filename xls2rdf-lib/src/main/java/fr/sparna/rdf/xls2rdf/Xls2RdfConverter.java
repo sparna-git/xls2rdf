@@ -10,9 +10,11 @@ import fr.sparna.rdf.xls2rdf.processor.SparqlPathParserProcessor;
 import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
 import fr.sparna.rdf.xls2rdf.reconcile.*;
 import fr.sparna.rdf.xls2rdf.sheet.*;
+import fr.sparna.rdf.xls2rdf.sheet.csv.CSVWorkbookFactory;
 import fr.sparna.rdf.xls2rdf.sheet.excel.ExcelWorkbookFactory;
 import fr.sparna.rdf.xls2rdf.sheet.opendocument.OpenDocumentWorkbookFactory;
 import fr.sparna.rdf.xls2rdf.write.OutputStreamModelWriter;
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -28,6 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -129,18 +133,15 @@ public class Xls2RdfConverter {
 			Pattern p = Pattern.compile("\\.[^.]+$");
 			//On applique le pattern sur le nom du fichier
 			Matcher m = p.matcher(input.getName().trim());
-			//Si un bien un fichier on trouve une extension qu'on récupére
+			//Si c'est bien un fichier on trouve une extension qu'on récupére
 			if(m.find()) extension = m.group();
-			switch (extension){
+			workbook = switch (extension){
 				//Voir https://support.microsoft.com/fr-fr/office/formats-de-fichier-pris-en-charge-dans-excel-0943ff2c-6014-4e8d-aaea-b83d51d46247
-				case ".xls", ".xlsx", ".xlsm" -> {
-					workbook = ExcelWorkbookFactory.open(input);
-				}
-				case ".ods" -> {
-					workbook = OpenDocumentWorkbookFactory.open(input);
-				}
-				default -> workbook = null;
-			}
+				case ".xls", ".xlsx", ".xlsm" -> ExcelWorkbookFactory.open(input);
+				case ".ods" -> OpenDocumentWorkbookFactory.open(input);
+				case ".csv" -> CSVWorkbookFactory.open(CSVFormat.DEFAULT, input, Files.newBufferedReader(Path.of(input.toURI())));
+				default -> null;
+			};
 			return processWorkbook(workbook);
 		} catch (Exception e) {
 			throw Xls2RdfException.rethrow(e);
@@ -222,7 +223,7 @@ public class Xls2RdfConverter {
 	 * @param sheet
 	 * @return
 	 */
-	private Model processSheet(Sheet sheet) {
+	private Model processSheet(Sheet sheet) throws IOException {
 		
 		// initialize target Model
 		Model model = new LinkedHashModelFactory().createEmptyModel();

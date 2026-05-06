@@ -20,8 +20,7 @@ public class OpenDocumentSheetTest {
     static final URL ODS_FILE_URL = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
     static final String PATH_NAME;
     static final String SHEET_NAME = "Sheet1";
-    //On retirer un car OdfToolKit retourne le numéro de la dernière ligne, non pas en partant en partant de 0.
-    static final int ROW_COUNT = 7 - 1;
+    static final int ROW_COUNT = 7;
     static final int COLUMN_COUNT = 6;
     static{
         try {
@@ -53,7 +52,7 @@ public class OpenDocumentSheetTest {
 
     @Test
     public void try_get_last_row_num_is_equal(){
-        Assert.assertEquals("Sheet's row count is different.", ROW_COUNT, this.cud.getLastRowNum());
+        Assert.assertEquals("Sheet's row count is different.", ROW_COUNT - 1, this.cud.getLastRowNum());
     }
 
     @Test
@@ -80,7 +79,7 @@ public class OpenDocumentSheetTest {
 
     @Test
     public void try_get_workboot_parent_is_not_null(){
-        Workbook parent = ((OpenDocumentSheet)this.cud).getParentSpreadSheet();
+        Workbook parent = ((OpenDocumentSheet)this.cud).getWorkbook();
         Assert.assertNotNull("parent object is null.", parent);
         Assert.assertSame("parent class is not similar.", OpenDocumentWorkbook.class, parent.getClass());
     }

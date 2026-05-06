@@ -1,10 +1,7 @@
 package fr.sparna.rdf.xls2rdf.sheet.opendocument;
 
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
-import fr.sparna.rdf.xls2rdf.sheet.Cell;
-import fr.sparna.rdf.xls2rdf.sheet.CellType;
-import fr.sparna.rdf.xls2rdf.sheet.Row;
-import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+import fr.sparna.rdf.xls2rdf.sheet.*;
 import org.odftoolkit.odfdom.doc.table.OdfTableCell;
 import org.odftoolkit.odfdom.dom.OdfDocumentNamespace;
 import org.odftoolkit.odfdom.dom.style.props.OdfStylePropertiesSet;
@@ -122,7 +119,7 @@ public class OpenDocumentCell implements Cell{
 
     @Override
     public String getCellExcelReference() {
-        return "row:" + this.delegate.getRowIndex() + "-" + "column:" + this.delegate.getColumnIndex();
+       return ExcelRefs.cellRef(this.delegate.getRowIndex(), this.delegate.getColumnIndex());
     }
 
     public OdfTableCell getCell(){
