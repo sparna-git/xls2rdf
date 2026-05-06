@@ -14,13 +14,13 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a id="api" class="nav-link active ${view eq 'api' ? 'highlight' : ''}" href="${sessionData.baseUrl}/">Home</a>
+              <a id="api" class="nav-link active ${view eq 'api' ? 'highlight' : ''}" href="${sessionData.baseUrl}/"><fmt:message key="home"/></a>
             </li>
             <li class="nav-item">
-              <a id="doc" class="nav-link active ${view eq 'doc' ? 'highlight' : ''}" href="${sessionData.baseUrl}/doc">Excel structure documentation</a>
+              <a id="doc" class="nav-link active ${view eq 'doc' ? 'highlight' : ''}" href="${sessionData.baseUrl}/doc"><fmt:message key="doc"/></a>
             </li>
             <li class="nav-item">
-              <a id="convert" class="nav-link active ${view eq 'convert' ? 'highlight' : ''}" href="${sessionData.baseUrl}/convert">Convert</a>
+              <a id="convert" class="nav-link active ${view eq 'convert' ? 'highlight' : ''}" href="${sessionData.baseUrl}/convert"><fmt:message key="convert"/></a>
             </li>
           </ul>
           <ul class="navbar-nav d-flex justify-content-end align-items-baseline">

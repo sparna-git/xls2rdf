@@ -176,7 +176,7 @@
                   id="url" 
                   onchange="enabledInput('url')"
                   placeholder="http://..."/>
-                      <div class="text-wrap text-break form-text fst-italic">
+                      <div class="text-break form-text fst-italic">
                         <fmt:message key="convert.form.remoteUrl.help"/>
                       </div>
               </div>
@@ -188,14 +188,15 @@
         <!--END FIELSET = SOURCE-->
         <!--FIELDSET=LANGUAGE-->
         <fieldset id="fieldset-options" class="row mt-5 align-items-baseline">
-          <h3 class="mb-5">
-            <i class="fa-solid fa-language" style="color: #df6919; font-size: 25px"></i> &nbsp;<fmt:message key="convert.form.legend.language"/>
-          </h3>
+            <h3 class="mb-5">
+              <i class="fa-solid fa-screwdriver-wrench" style="color: #df6919; font-size: 25px;"></i> 
+              &nbsp;<fmt:message key="convert.form.advanced.legend"/>
+            </h3>
           <div class="row">
             <label class="col-6" for="choice_Language">
             <fmt:message key="convert.form.language.legend"/>
           </label>
-            <div class="col-4">
+            <div class="col-4 mb-4">
               <input class="form-control" list="choice_Language" name="language" placeholder="Type to search..." id="input_Language">
               <datalist id="choice_Language" name="language">
                 <option value=""></option>	
@@ -208,16 +209,15 @@
               </datalist>
             </div>
           </div>
-
-            <h3 class="mt-5 mb-5">
-              <i class="fa-solid fa-screwdriver-wrench" style="color: #df6919; font-size: 25px;"></i> 
-              &nbsp;<fmt:message key="convert.form.advanced.legend"/>
-            </h3>
               <!--START FORMAT OUTPUT-->
                   <div class="row mb-4">
                     <label class="col-6 form-label" for="output">
                       <fmt:message key="convert.form.outputFormat.legend"/>
+                      <div class="fst-italic text-break form-text">
+                        <fmt:message key="help.output"/>
+                      </div> 
                     </label>
+
                     <div class="col-4">
                       <select class="form-select" required id="output" name="output" >						
 									      <option value="text/turtle" selected>Turtle</option>
@@ -229,11 +229,15 @@
 								      </select>
                     </div>
                   </div>
+
                   <!--END FORMAT OUTPUT--> 
                   <!--START LABELS OUTPUT-->
                   <div class="row mb-4">
                     <label class="col-6 form-label" for="useskosxl">
                       <fmt:message key="convert.form.useskosxl"/>
+                      <div class="fst-italic text-break form-text">
+                        <fmt:message key="help.label"/>
+                      </div>
                     </label>
                     <div class="col-4 form-check ms-3">
                         <input
@@ -248,6 +252,9 @@
                   <div class="row mb-4">
                     <label class="col-6 form-label" for="broaderTransitive">
                       <fmt:message key="convert.form.broaderTransitive"/>
+                      <div class="fst-italic form-text text-break">
+                        <fmt:message key="help.broader"/>
+                      </div>
                     </label>
                     <div class="col-4 form-check ms-3">
                         <input
@@ -272,10 +279,13 @@
                     </div>
                   </div>
                   <!--END ZIP OUTPUT-->
-                  <!--START ZIP OUTPUT-->
+                  <!--START POST PROCESSOR OUTPUT-->
                   <div class="row">
                     <label class="col-6 form-label" for="ignorePostProc">
                       <fmt:message key="convert.form.ignorepostproc"/>
+                      <div class="fst-italic form-text text-break">
+                        <fmt:message key="help.post.processor"/>
+                      </div>
                     </label>
                     <div class="col-4 form-check ms-3">
                         <input
@@ -285,7 +295,7 @@
                           name="useignorePostProczip"/>
                     </div>
                   </div>
-                  <!--END ZIP OUTPUT-->
+                  <!--END POST PROCESSOR OUTPUT-->
           </div>
         </fieldset>
         </div>
