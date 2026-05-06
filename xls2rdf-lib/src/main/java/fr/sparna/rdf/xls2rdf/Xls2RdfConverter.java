@@ -4,6 +4,8 @@ import ch.qos.logback.classic.BasicConfigurator;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMappingParser;
 import fr.sparna.rdf.xls2rdf.postprocess.AsListPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.processor.SparqlPathParserProcessor;
@@ -271,7 +273,7 @@ public class Xls2RdfConverter {
 		}
 		
 		// read the properties on the header by reading the top rows
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(prefixManager);
+		ColumnMappingParser headerParser = new ColumnMappingParser(prefixManager);
 		for (int rowIndex = 1; rowIndex < headerRowIndex; rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
 			Row row = sheet.getRow(rowIndex);
@@ -281,7 +283,7 @@ public class Xls2RdfConverter {
 			String value = (cell != null) ? cell.getCellValue() : null;
 				
 			// parse the property	
-			ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
+			ColumnMapping header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
 				if(
 						header != null
 						&&
@@ -299,10 +301,10 @@ public class Xls2RdfConverter {
 					);
 					
 					// support separator option in the header
-					if(header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR) != null) {
+					if(header.getParameters().get(ColumnMapping.PARAMETER_SEPARATOR) != null) {
 						cellProcessor = processorFactory.split(
 								cellProcessor,
-								header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR)
+								header.getParameters().get(ColumnMapping.PARAMETER_SEPARATOR)
 						);
 					} 
 					
@@ -319,18 +321,18 @@ public class Xls2RdfConverter {
 		}		
 
 		List<Resource> rowResources = new ArrayList<>();
-		List<ColumnHeader> columnNames = new ArrayList<>();
+		List<ColumnMapping> columnNames = new ArrayList<>();
 		if(rdfizableSheet.hasDataSection()) {
 			// read the column names from the header row
 			columnNames = rdfizableSheet.getColumnHeaders();
 			
 			log.debug("Converting data with these column headers: ");
-			for (ColumnHeader columnHeader : columnNames) {
+			for (ColumnMapping columnHeader : columnNames) {
 				log.debug(columnHeader.toString());
 			}
 			
 			// reconcile columns that need to be reconciled, and store result
-			for (ColumnHeader columnHeader : columnNames) {
+			for (ColumnMapping columnHeader : columnNames) {
 				if(columnHeader.isReconcileExternal() && this.reconcileService != null) {					
 					    PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
 							reconcileService,
@@ -404,7 +406,7 @@ public class Xls2RdfConverter {
 		return model;
 	}
 
-	private Resource handleRow(Model model, Resource headerResource, List<ColumnHeader> columnHeaders, PrefixManager prefixManager, Row row) {
+	private Resource handleRow(Model model, Resource headerResource, List<ColumnMapping> columnHeaders, PrefixManager prefixManager, Row row) {
 		RowBuilder rowBuilder = null;
 		for (int colIndex = 0; colIndex < columnHeaders.size(); colIndex++) {
 			// skip hidden columns
@@ -412,7 +414,7 @@ public class Xls2RdfConverter {
 				continue;
 			}
 
-			ColumnHeader header = columnHeaders.get(colIndex);
+			ColumnMapping header = columnHeaders.get(colIndex);
 			
 			Cell cell = row.getCell(colIndex);            
 			String value = (cell != null)?cell.getCellValue():null;
@@ -459,8 +461,8 @@ public class Xls2RdfConverter {
 				continue;
 			}
 			// test if cell should be ignored
-			if(header.getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF) != null) {
-				if(value.equals(header.getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF))) {
+			if(header.getParameters().get(ColumnMapping.PARAMETER_IGNORE_IF) != null) {
+				if(value.equals(header.getParameters().get(ColumnMapping.PARAMETER_IGNORE_IF))) {
 					// skip cell
 					continue;
 				}
@@ -471,20 +473,20 @@ public class Xls2RdfConverter {
 			
 			
 			
-			if(header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN) != null) {
+			if(header.getParameters().get(ColumnMapping.PARAMETER_LOOKUP_COLUMN) != null) {
 				// finds the index of the column corresponding to lookupColumn reference
-				String lookupColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN);
-				int lookupColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, lookupColumnRef);
+				String lookupColumnRef = header.getParameters().get(ColumnMapping.PARAMETER_LOOKUP_COLUMN);
+				int lookupColumnIndex = ColumnMapping.idRefOrPropertyRefToColumnIndex(columnHeaders, lookupColumnRef);
 				if(lookupColumnIndex == -1) {
 					throw new Xls2RdfException("Unable to find lookupColumn reference '"+lookupColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 				
 				// now find the subject at which the lookupColumn property is attached
-				ColumnHeader lookupColumnHeader = ColumnHeader.findByColumnIndex(columnHeaders, lookupColumnIndex);
+				ColumnMapping lookupColumnHeader = ColumnMapping.findByColumnIndex(columnHeaders, lookupColumnIndex);
 				int lookupSubjectColumn = 0;
-				if(header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN) != null) {
-					String subjectColumnRef = lookupColumnHeader.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
-					lookupSubjectColumn = ColumnHeader.idRefToColumnIndex(columnHeaders, subjectColumnRef);
+				if(header.getParameters().get(ColumnMapping.PARAMETER_SUBJECT_COLUMN) != null) {
+					String subjectColumnRef = lookupColumnHeader.getParameters().get(ColumnMapping.PARAMETER_SUBJECT_COLUMN);
+					lookupSubjectColumn = ColumnMapping.idRefToColumnIndex(columnHeaders, subjectColumnRef);
 					if(lookupSubjectColumn == -1) {
 						throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+lookupColumnHeader.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+", while processing lookupColumn in header "+header.getOriginalValue());
 					}
@@ -499,8 +501,8 @@ public class Xls2RdfConverter {
 				);
 			}
 			
-			else if(header.getParameters().get(ColumnHeader.PARAMETER_RECONCILE) != null) {
-				String reconcileParameterValue = header.getParameters().get(ColumnHeader.PARAMETER_RECONCILE);					
+			else if(header.getParameters().get(ColumnMapping.PARAMETER_RECONCILE) != null) {
+				String reconcileParameterValue = header.getParameters().get(ColumnMapping.PARAMETER_RECONCILE);					
 				
 				if(reconcileParameterValue.equals("local")) {						
 					cellProcessor = processorFactory.reconcile(
@@ -560,8 +562,8 @@ public class Xls2RdfConverter {
 				cellProcessor = processorFactory.copyTo(header.getCopyTo(), cellProcessor);
 			}
 			
-			if(header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR) != null) {
-				cellProcessor = processorFactory.split(cellProcessor, header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR));
+			if(header.getParameters().get(ColumnMapping.PARAMETER_SEPARATOR) != null) {
+				cellProcessor = processorFactory.split(cellProcessor, header.getParameters().get(ColumnMapping.PARAMETER_SEPARATOR));
 				// use a default comma separator for cells that contain URI references
 			} else if(
 				// if it is a true column with a declared property...
@@ -579,9 +581,9 @@ public class Xls2RdfConverter {
 			}
 			
 			// determine the subject of the triple, be default it is the value of the first column but can be overidden
-			if(header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN) != null) {
-				String subjectColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
-				int subjectColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, subjectColumnRef);
+			if(header.getParameters().get(ColumnMapping.PARAMETER_SUBJECT_COLUMN) != null) {
+				String subjectColumnRef = header.getParameters().get(ColumnMapping.PARAMETER_SUBJECT_COLUMN);
+				int subjectColumnIndex = ColumnMapping.idRefOrPropertyRefToColumnIndex(columnHeaders, subjectColumnRef);
 				if(subjectColumnIndex == -1) {
 					throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}

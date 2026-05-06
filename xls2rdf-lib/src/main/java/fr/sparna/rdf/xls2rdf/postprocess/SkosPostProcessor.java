@@ -24,9 +24,9 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
 
 public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
   private static final String CALCULATE_BROADER_TRANSITIVE_SPARQL = "postprocessing/broaderTransitive.ru";
@@ -44,7 +44,7 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
   }
 
   @Override
-  public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders) {
+  public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnMapping> columnHeaders) {
     log.debug("Postprocessing : " + this.getClass().getSimpleName());
 
     boolean isMainResourceConceptScheme = true;

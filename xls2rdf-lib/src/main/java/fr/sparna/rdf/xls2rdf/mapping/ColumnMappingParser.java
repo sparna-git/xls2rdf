@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.mapping;
 
 import java.net.URI;
 import java.security.InvalidParameterException;
@@ -12,24 +12,25 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 
-public class ColumnHeaderParser {
+public class ColumnMappingParser {
 	
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 	
 	private PrefixManager prefixManager;
 
-	public ColumnHeaderParser(PrefixManager prefixManager) {
+	public ColumnMappingParser(PrefixManager prefixManager) {
 		super();
 		this.prefixManager = prefixManager;
 	}
 
-	public ColumnHeader parse(String value, Cell cell) {
+	public ColumnMapping parse(String value, Cell cell) {
 		if(value == null || value.equals("")) {
 			return null;
 		}
-		ColumnHeader h = new ColumnHeader(value);
+		ColumnMapping h = new ColumnMapping(value);
 		h.setDeclaredProperty(parseDeclaredProperty(value));
 		h.setProperty(parseProperty(h.getDeclaredProperty()));
 		h.setLanguage(parseLanguage(value));
@@ -40,33 +41,33 @@ public class ColumnHeaderParser {
 		// prevent problems if parameter parsing went wrong, if cell content
 		// contains parentheses but these are not parameters
 		if(parameters != null) {
-			if(parameters.containsKey(ColumnHeader.PARAMETER_ID)) {
-				h.setId(parameters.get(ColumnHeader.PARAMETER_ID));
+			if(parameters.containsKey(ColumnMapping.PARAMETER_ID)) {
+				h.setId(parameters.get(ColumnMapping.PARAMETER_ID));
 			}
 			
 			// sets the reconcileProperty from parameters, if needed
-			if(parameters.containsKey(ColumnHeader.PARAMETER_RECONCILE_ON)) {
-				IRI reconcileOn = parseProperty(parameters.get(ColumnHeader.PARAMETER_RECONCILE_ON));
+			if(parameters.containsKey(ColumnMapping.PARAMETER_RECONCILE_ON)) {
+				IRI reconcileOn = parseProperty(parameters.get(ColumnMapping.PARAMETER_RECONCILE_ON));
 				if(reconcileOn == null) {
-					 throw new InvalidParameterException("Unable to parse value of "+ ColumnHeader.PARAMETER_RECONCILE_ON +" : '"+parameters.get(ColumnHeader.PARAMETER_RECONCILE_ON)+"'");
+					 throw new InvalidParameterException("Unable to parse value of "+ ColumnMapping.PARAMETER_RECONCILE_ON +" : '"+parameters.get(ColumnMapping.PARAMETER_RECONCILE_ON)+"'");
 				}
 				h.setReconcileOn(reconcileOn);
 			}
 
 			// sets the copyTo property from parameters, if needed
-			if(parameters.containsKey(ColumnHeader.PARAMETER_COPY_TO)) {
-				IRI copyTo = parseProperty(parameters.get(ColumnHeader.PARAMETER_COPY_TO));
+			if(parameters.containsKey(ColumnMapping.PARAMETER_COPY_TO)) {
+				IRI copyTo = parseProperty(parameters.get(ColumnMapping.PARAMETER_COPY_TO));
 				if(copyTo == null) {
-					 throw new InvalidParameterException("Unable to parse value of "+ ColumnHeader.PARAMETER_COPY_TO +" : '"+parameters.get(ColumnHeader.PARAMETER_COPY_TO)+"'");
+					 throw new InvalidParameterException("Unable to parse value of "+ ColumnMapping.PARAMETER_COPY_TO +" : '"+parameters.get(ColumnMapping.PARAMETER_COPY_TO)+"'");
 				}
 				h.setCopyTo(copyTo);
 			}
 
 			// sets the wrapper property from parameters, if needed
-			if(parameters.containsKey(ColumnHeader.PARAMETER_WRAPPER)) {
-				IRI wrapperOperator = parseProperty(parameters.get(ColumnHeader.PARAMETER_WRAPPER));
+			if(parameters.containsKey(ColumnMapping.PARAMETER_WRAPPER)) {
+				IRI wrapperOperator = parseProperty(parameters.get(ColumnMapping.PARAMETER_WRAPPER));
 				if(wrapperOperator == null) {
-					 throw new InvalidParameterException("Unable to parse value of "+ ColumnHeader.PARAMETER_WRAPPER +" : '"+parameters.get(ColumnHeader.PARAMETER_WRAPPER)+"'");
+					 throw new InvalidParameterException("Unable to parse value of "+ ColumnMapping.PARAMETER_WRAPPER +" : '"+parameters.get(ColumnMapping.PARAMETER_WRAPPER)+"'");
 				}
 				h.setWrapper(wrapperOperator);
 			}

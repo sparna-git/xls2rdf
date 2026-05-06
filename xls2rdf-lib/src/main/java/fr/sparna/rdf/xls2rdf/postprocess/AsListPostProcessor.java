@@ -12,8 +12,8 @@ import org.eclipse.rdf4j.model.util.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
 
 public class AsListPostProcessor implements Xls2RdfPostProcessorIfc {
 	
@@ -25,10 +25,10 @@ public class AsListPostProcessor implements Xls2RdfPostProcessorIfc {
 	}
 
 	@Override
-	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders) {
+	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnMapping> columnHeaders) {
 		log.debug("Postprocessing : "+this.getClass().getSimpleName());
 		
-		for (ColumnHeader aHeader : columnHeaders) {
+		for (ColumnMapping aHeader : columnHeaders) {
 			if(aHeader.isAsList()) {
 				Model toRemove = new LinkedHashModel();
 				Model toAdd = new LinkedHashModel();

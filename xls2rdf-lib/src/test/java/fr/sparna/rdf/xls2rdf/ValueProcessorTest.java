@@ -9,10 +9,10 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeaderParser;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMappingParser;
 import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
 import junit.framework.Assert;
 
@@ -22,7 +22,7 @@ public class ValueProcessorTest {
 	private Resource subject;
 	private Model model;
 
-	private ColumnHeaderParser parser;
+	private ColumnMappingParser parser;
 	private PrefixManager prefixManager;
 	
 	private ValueProcessorFactory factory;
@@ -36,7 +36,7 @@ public class ValueProcessorTest {
 		this.prefixManager = new PrefixManager();
 		this.prefixManager.register("skos", SKOS.NAMESPACE);
 		this.prefixManager.register("xsd", XMLSchema.NAMESPACE);
-		parser = new ColumnHeaderParser(this.prefixManager);
+		parser = new ColumnMappingParser(this.prefixManager);
 		
 		factory = new ValueProcessorFactory(new LogXls2RdfMessageListener());
 	}

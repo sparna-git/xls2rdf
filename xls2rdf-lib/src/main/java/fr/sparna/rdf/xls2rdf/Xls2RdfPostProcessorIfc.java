@@ -5,6 +5,8 @@ import java.util.List;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
+
 public interface Xls2RdfPostProcessorIfc {
 	
 	/**
@@ -15,6 +17,6 @@ public interface Xls2RdfPostProcessorIfc {
 	 * @param rowResources resources generated from each row (URI in the first column)
 	 * @param columnNames original column headers
 	 */
-	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders);
+	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnMapping> columnHeaders);
 	
 }

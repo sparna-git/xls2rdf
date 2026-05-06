@@ -33,13 +33,13 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.ExcelHelper;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
 import fr.sparna.rdf.xls2rdf.processor.manchester.ManchesterClassExpressionParserProcessor;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
 import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
@@ -98,7 +98,7 @@ public final class ValueProcessorFactory {
 		};
 	}
 	
-	public ValueProcessorIfc lookup(ColumnHeader header, Sheet sheet, int lookupColumn, int uriColumn, PrefixManager prefixManager) {
+	public ValueProcessorIfc lookup(ColumnMapping header, Sheet sheet, int lookupColumn, int uriColumn, PrefixManager prefixManager) {
 		return (model, subject, value, cell, language) -> {
 			String lookupValue = value;
 			
@@ -121,7 +121,7 @@ public final class ValueProcessorFactory {
 		};
 	}
 	
-	public ValueProcessorIfc reconcile(ColumnHeader header, PrefixManager prefixManager, ReconciliableValueSetIfc reconciledValues) {
+	public ValueProcessorIfc reconcile(ColumnMapping header, PrefixManager prefixManager, ReconciliableValueSetIfc reconciledValues) {
 		return (model, subject, value, cell, language) -> {
 			String lookupValue = normalizeSpace(value);
 			
@@ -180,7 +180,7 @@ public final class ValueProcessorFactory {
 	}
 
 	@Deprecated
-	public ValueProcessorIfc reconcileLocal(ColumnHeader header, PrefixManager prefixManager, IRI reconcileOn, Repository supportRepository) {
+	public ValueProcessorIfc reconcileLocal(ColumnMapping header, PrefixManager prefixManager, IRI reconcileOn, Repository supportRepository) {
 		return (model, subject, value, cell, language) -> {
 			String lookupValue = normalizeSpace(value);
 			
@@ -249,7 +249,7 @@ public final class ValueProcessorFactory {
 		};
 	}
 
-	public ValueProcessorIfc asList(ColumnHeader header, ValueProcessorIfc delegate) {
+	public ValueProcessorIfc asList(ColumnMapping header, ValueProcessorIfc delegate) {
 		return (model, subject, value, cell, language) -> {
 			List<Statement> originalStatements = delegate.processValue(model, subject, value, cell, language);
 
@@ -272,7 +272,7 @@ public final class ValueProcessorFactory {
 		};
 	}
 
-	public ValueProcessorIfc wrapWithShaclLogicalOperator(ColumnHeader header, IRI logicalOperator, ValueProcessorIfc delegate) {
+	public ValueProcessorIfc wrapWithShaclLogicalOperator(ColumnMapping header, IRI logicalOperator, ValueProcessorIfc delegate) {
 		return (model, subject, value, cell, language) -> {
 			List<Statement> originalStatements = delegate.processValue(model, subject, value, cell, language);
 
@@ -318,7 +318,7 @@ public final class ValueProcessorFactory {
 	}
 	
 	
-	public ValueProcessorIfc resourceOrLiteral(ColumnHeader header, PrefixManager prefixManager) {
+	public ValueProcessorIfc resourceOrLiteral(ColumnMapping header, PrefixManager prefixManager) {
 		ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, header, prefixManager, messageListener);
 		return g;
 	}
@@ -436,7 +436,7 @@ public final class ValueProcessorFactory {
 		};
 	}
 
-	public ValueProcessorIfc manchesterClassExpressionParser(ColumnHeader header, PrefixManager prefixManager) {
+	public ValueProcessorIfc manchesterClassExpressionParser(ColumnMapping header, PrefixManager prefixManager) {
 		ManchesterClassExpressionParserProcessor p = new ManchesterClassExpressionParserProcessor(header, prefixManager, messageListener);
 		return p;
 	}

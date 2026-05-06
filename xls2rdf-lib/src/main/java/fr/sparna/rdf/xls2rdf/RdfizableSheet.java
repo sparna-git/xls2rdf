@@ -17,6 +17,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.rdf4j.model.IRI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMappingParser;
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+
 /**
  * A Sheet in a Workbook that can be turned into RDF.
  * @author Thomas Francart
@@ -29,12 +41,12 @@ public class RdfizableSheet {
 	protected Sheet sheet;
 	protected PrefixManager prefixManager;
 	protected int titleRowIndex;
-	protected List<ColumnHeader> columnHeaders;
+	protected List<ColumnMapping> columnHeaders;
 
-	    public RdfizableSheet(
-		    Sheet sheet,
-		    PrefixManager prefixManager
-	    ) {
+	public RdfizableSheet(
+		Sheet sheet,
+		PrefixManager prefixManager
+	) {
 		super();
 		this.sheet = sheet;
 		this.prefixManager = prefixManager;
@@ -91,7 +103,7 @@ public class RdfizableSheet {
 		return titleRowIndex;
 	}
 	
-	public List<ColumnHeader> getColumnHeaders() {
+	public List<ColumnMapping> getColumnHeaders() {
 		return columnHeaders;
 	}
 
@@ -104,7 +116,7 @@ public class RdfizableSheet {
 		int headerRowIndex = 1;
 		
 		boolean found = false;
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
+		ColumnMappingParser headerParser = new ColumnMappingParser(this.prefixManager);
 		for (int rowIndex = headerRowIndex; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 			
 			int numFound = 0;
@@ -112,7 +124,7 @@ public class RdfizableSheet {
 			for (short colIndex = 1; colIndex < 10; colIndex++) {
 				try {
 					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
-					ColumnHeader header = headerParser.parse(c.getCellValue(), c);
+					ColumnMapping header = headerParser.parse(c.getCellValue(), c);
 					if(header.getProperty() != null) {
 						log.debug("Found proper property in header : "+header.getProperty().toString());
 						numFound++;
@@ -137,7 +149,7 @@ public class RdfizableSheet {
 			for (int rowIndex = headerRowIndex; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 				// test if we find "URI" in the first column
 				if(sheet.getRow(rowIndex) != null) {
-					ColumnHeader headerA = null;
+					ColumnMapping headerA = null;
 					try {
 						Cell c = sheet.getRow(rowIndex).getCell(0);
 						headerA = headerParser.parse(c.getCellValue(), c);
@@ -178,11 +190,11 @@ public class RdfizableSheet {
 	 * @param rowNumber the index of the row containing the column headers
 	 * @return
 	 */
-	protected List<ColumnHeader> computeColumnHeaders(int rowNumber) {
-		List<ColumnHeader> columnNames = new ArrayList<>();
+	protected List<ColumnMapping> computeColumnHeaders(int rowNumber) {
+		List<ColumnMapping> columnNames = new ArrayList<>();
 		Row row = this.sheet.getRow(rowNumber);
 		
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
+		ColumnMappingParser headerParser = new ColumnMappingParser(this.prefixManager);
 		if(row != null) {
 			for (short i = 0; true; i++) {
 				Cell cell = row.getCell(i);
@@ -198,17 +210,17 @@ public class RdfizableSheet {
 		return columnNames;
 	}
 	
-	protected List<ColumnHeader> getHeaderColumnHeaders() {
-		List<ColumnHeader> headerColumnHeaders = new ArrayList<>();
+	protected List<ColumnMapping> getHeaderColumnHeaders() {
+		List<ColumnMapping> headerColumnHeaders = new ArrayList<>();
 		
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
+		ColumnMappingParser headerParser = new ColumnMappingParser(this.prefixManager);
 		for (int rowIndex = 1; rowIndex < this.getTitleRowIndex(); rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
 				String key = sheet.getRow(rowIndex).getColumnValue(0);
 				String value = sheet.getRow(rowIndex).getColumnValue(1);
 				
 				// parse the property
-				ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
+				ColumnMapping header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
 				if(
 						header != null
 						&&
@@ -288,7 +300,7 @@ public class RdfizableSheet {
 		boolean allValid = true;
 		
 		// validate also header headers
-		for (ColumnHeader columnHeader : this.getHeaderColumnHeaders()) {
+		for (ColumnMapping columnHeader : this.getHeaderColumnHeaders()) {
 			if(columnHeader.getProperty() != null) {
 				log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
 				boolean valid = propertyValidator.test(columnHeader.getProperty());
@@ -308,7 +320,7 @@ public class RdfizableSheet {
 		}
 		
 		if(this.columnHeaders != null) {
-			for (ColumnHeader columnHeader : this.columnHeaders) {
+			for (ColumnMapping columnHeader : this.columnHeaders) {
 				if(columnHeader.getProperty() != null) {
 					log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
 					boolean valid = propertyValidator.test(columnHeader.getProperty());

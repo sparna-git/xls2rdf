@@ -9,8 +9,8 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
 
 public class DynamicRdfTypePostProcessor implements Xls2RdfPostProcessorIfc {
 
@@ -27,7 +27,7 @@ public class DynamicRdfTypePostProcessor implements Xls2RdfPostProcessorIfc {
 	}
 
 	@Override
-	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders) {
+	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnMapping> columnHeaders) {
 		log.debug("Postprocessing : "+this.getClass().getSimpleName());
 		if(this.classTest.test(mainResource)) {
 			rowResources.stream().forEach(rowResource -> {

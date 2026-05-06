@@ -39,11 +39,11 @@ import org.semanticweb.owlapi.util.mansyntax.ManchesterOWLSyntaxParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
 import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 
@@ -54,11 +54,11 @@ public class ManchesterClassExpressionParserProcessor implements ValueProcessorI
 	/**
 	 * 
 	 */
-	protected ColumnHeader header;
+	protected ColumnMapping header;
 	protected PrefixManager prefixManager;
 	protected Xls2RdfMessageListenerIfc messageListener;
 	
-	public ManchesterClassExpressionParserProcessor(ColumnHeader header, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
+	public ManchesterClassExpressionParserProcessor(ColumnMapping header, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
 		super();
 		this.header = header;
 		this.prefixManager = prefixManager;

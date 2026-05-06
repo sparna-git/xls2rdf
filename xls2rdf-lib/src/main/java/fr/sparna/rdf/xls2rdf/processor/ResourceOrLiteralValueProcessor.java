@@ -21,12 +21,12 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.ExcelHelper;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 
 public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
@@ -35,11 +35,11 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
 	 * 
 	 */
 	private final ValueProcessorFactory valueProcessorFactory;
-	protected ColumnHeader header;
+	protected ColumnMapping header;
 	protected PrefixManager prefixManager;
 	protected Xls2RdfMessageListenerIfc messageListener;
 	
-	public ResourceOrLiteralValueProcessor(ValueProcessorFactory valueProcessorFactory, ColumnHeader header, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
+	public ResourceOrLiteralValueProcessor(ValueProcessorFactory valueProcessorFactory, ColumnMapping header, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
 		super();
 		this.valueProcessorFactory = valueProcessorFactory;
 		this.header = header;

@@ -10,10 +10,10 @@ import org.eclipse.rdf4j.query.parser.sparql.ast.TokenMgrError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 
 public class SparqlPathParserProcessor implements ValueProcessorIfc {
@@ -23,12 +23,12 @@ public class SparqlPathParserProcessor implements ValueProcessorIfc {
 	/**
 	 * 
 	 */
-	protected ColumnHeader header;
+	protected ColumnMapping header;
 	protected PrefixManager prefixManager;
 	protected Xls2RdfMessageListenerIfc messageListener;
 	protected ValueProcessorIfc delegateProcessor;
 	
-	public SparqlPathParserProcessor(ValueProcessorIfc delegate, ColumnHeader header, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
+	public SparqlPathParserProcessor(ValueProcessorIfc delegate, ColumnMapping header, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
 		super();
 		this.delegateProcessor = delegate;
 		this.header = header;

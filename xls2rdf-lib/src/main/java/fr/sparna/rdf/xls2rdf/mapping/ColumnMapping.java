@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.mapping;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +11,7 @@ import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
 
 
-public class ColumnHeader {
+public class ColumnMapping {
 	
 	public static final String PARAMETER_SEPARATOR = "separator";
 	public static final String PARAMETER_SUBJECT_COLUMN = "subjectColumn";
@@ -83,7 +83,7 @@ public class ColumnHeader {
 
 
 	
-	public ColumnHeader(String originalValue) {
+	public ColumnMapping(String originalValue) {
 		this.originalValue = originalValue;
 	}
 
@@ -180,33 +180,33 @@ public class ColumnHeader {
 	}
 	
 	public boolean isReconcileExternal() {
-		return getParameters().get(ColumnHeader.PARAMETER_RECONCILE) != null && getParameters().get(ColumnHeader.PARAMETER_RECONCILE).equals(RECONCILE_VALUES.external.name());
+		return getParameters().get(ColumnMapping.PARAMETER_RECONCILE) != null && getParameters().get(ColumnMapping.PARAMETER_RECONCILE).equals(RECONCILE_VALUES.external.name());
 	}
 	
 	public boolean isReconcileLocal() {
-		return getParameters().get(ColumnHeader.PARAMETER_RECONCILE) != null && getParameters().get(ColumnHeader.PARAMETER_RECONCILE).equals(RECONCILE_VALUES.local.name());
+		return getParameters().get(ColumnMapping.PARAMETER_RECONCILE) != null && getParameters().get(ColumnMapping.PARAMETER_RECONCILE).equals(RECONCILE_VALUES.local.name());
 	}
 
 	public boolean isIgnoreIfParenthesis() {
-		return getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF_PARENTHESIS) != null && Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF_PARENTHESIS));
+		return getParameters().get(ColumnMapping.PARAMETER_IGNORE_IF_PARENTHESIS) != null && Boolean.parseBoolean(getParameters().get(ColumnMapping.PARAMETER_IGNORE_IF_PARENTHESIS));
 	}
 	
 	public boolean isAsList() {
-		return getParameters().get(ColumnHeader.PARAMETER_AS_LIST) != null && Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_AS_LIST));
+		return getParameters().get(ColumnMapping.PARAMETER_AS_LIST) != null && Boolean.parseBoolean(getParameters().get(ColumnMapping.PARAMETER_AS_LIST));
 	}
 	
 	public boolean isManchester() {
-		return getParameters().get(ColumnHeader.PARAMETER_MANCHESTER) != null && Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_MANCHESTER));
+		return getParameters().get(ColumnMapping.PARAMETER_MANCHESTER) != null && Boolean.parseBoolean(getParameters().get(ColumnMapping.PARAMETER_MANCHESTER));
 	}
 	
 	public String getIgnoreIf() {
-		return (getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF) != null)?getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF):null;
+		return (getParameters().get(ColumnMapping.PARAMETER_IGNORE_IF) != null)?getParameters().get(ColumnMapping.PARAMETER_IGNORE_IF):null;
 	}
 
 	public boolean isNormalizeSpace() {
 		boolean normalizeSpace = true;
-		if (getParameters().get(ColumnHeader.PARAMETER_NORMALIZE_SPACE) != null) {
-			normalizeSpace = Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_NORMALIZE_SPACE));
+		if (getParameters().get(ColumnMapping.PARAMETER_NORMALIZE_SPACE) != null) {
+			normalizeSpace = Boolean.parseBoolean(getParameters().get(ColumnMapping.PARAMETER_NORMALIZE_SPACE));
 		}
 		return normalizeSpace;
 	}
@@ -223,8 +223,8 @@ public class ColumnHeader {
 	 * @param idRef
 	 * @return
 	 */
-	public static int idRefToColumnIndex(List<ColumnHeader> headers, String idRef) {
-		for (ColumnHeader header : headers) {
+	public static int idRefToColumnIndex(List<ColumnMapping> headers, String idRef) {
+		for (ColumnMapping header : headers) {
 			if(header.getId() != null && header.getId().equals(idRef)) {
 				return header.getHeaderCell().getColumnIndex();
 			}
@@ -248,8 +248,8 @@ public class ColumnHeader {
 	 * @param idOrPropertyRef the ID or property reference to search
 	 * @return
 	 */
-	public static int idRefOrPropertyRefToColumnIndex(List<ColumnHeader> headers, String idOrPropertyRef) {
-		for (ColumnHeader header : headers) {
+	public static int idRefOrPropertyRefToColumnIndex(List<ColumnMapping> headers, String idOrPropertyRef) {
+		for (ColumnMapping header : headers) {
 			if(
 					(header.getId() != null && header.getId().equals(idOrPropertyRef))
 					||
@@ -268,8 +268,8 @@ public class ColumnHeader {
 		return -1;
 	}
 	
-	public static ColumnHeader findByColumnIndex(List<ColumnHeader> headers, int columnIndex) {
-		for (ColumnHeader header : headers) {
+	public static ColumnMapping findByColumnIndex(List<ColumnMapping> headers, int columnIndex) {
+		for (ColumnMapping header : headers) {
 			if(header.getHeaderCell().getColumnIndex() == columnIndex) {
 				return header;
 			}

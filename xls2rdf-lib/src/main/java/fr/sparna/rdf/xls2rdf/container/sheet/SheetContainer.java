@@ -9,12 +9,12 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
-import fr.sparna.rdf.xls2rdf.ColumnHeaderParser;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.container.BaseLiteral;
 import fr.sparna.rdf.xls2rdf.container.Container;
 import fr.sparna.rdf.xls2rdf.container.Node;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMapping;
+import fr.sparna.rdf.xls2rdf.mapping.ColumnMappingParser;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
@@ -98,7 +98,7 @@ public class SheetContainer implements Container {
 			headerEnd = sheet.getLastRowNum()+1;
 		}
 
-        ColumnHeaderParser headerParser = new ColumnHeaderParser(new PrefixManager(this.parent.getPrefixes()));
+        ColumnMappingParser headerParser = new ColumnMappingParser(new PrefixManager(this.parent.getPrefixes()));
         for (int rowIndex = 1; rowIndex < headerEnd; rowIndex++) {
             if(sheet.getRow(rowIndex) != null) {
                 Row row = sheet.getRow(rowIndex);
@@ -106,7 +106,7 @@ public class SheetContainer implements Container {
                 String key = (cellKey != null) ? cellKey.getCellValue() : null;
                 
                 // parse the property	
-				ColumnHeader header = headerParser.parse(key, cellKey);
+				ColumnMapping header = headerParser.parse(key, cellKey);
 				if(
 						header != null
 						&&
@@ -134,7 +134,7 @@ public class SheetContainer implements Container {
 		int headerRowIndex = -1;
 		
 		boolean found = false;
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(new PrefixManager(this.parent.getPrefixes()));
+		ColumnMappingParser headerParser = new ColumnMappingParser(new PrefixManager(this.parent.getPrefixes()));
 		for (int rowIndex = headerRowIndex; rowIndex <= this.sheet.getLastRowNum(); rowIndex++) {
 			
 			int numFound = 0;
@@ -142,7 +142,7 @@ public class SheetContainer implements Container {
 			for (short colIndex = 1; colIndex < 10; colIndex++) {
 				try {
 					Cell c = this.sheet.getRow(rowIndex).getCell(colIndex);
-					ColumnHeader header = headerParser.parse(c.getCellValue(), c);
+					ColumnMapping header = headerParser.parse(c.getCellValue(), c);
 					if(header.getProperty() != null) {
 						log.debug("Found proper property in header : "+header.getProperty().toString());
 						numFound++;
@@ -167,7 +167,7 @@ public class SheetContainer implements Container {
 			for (int rowIndex = headerRowIndex; rowIndex <= this.sheet.getLastRowNum(); rowIndex++) {
 				// test if we find "URI" in the first column
 				if(this.sheet.getRow(rowIndex) != null) {
-					ColumnHeader headerA = null;
+					ColumnMapping headerA = null;
 					try {
 						Cell c = this.sheet.getRow(rowIndex).getCell(0);
 						headerA = headerParser.parse(c.getCellValue(), c);
