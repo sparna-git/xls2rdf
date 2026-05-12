@@ -112,7 +112,10 @@
 	<script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
         
     <script>
-      anchors.options.placement = 'left';
+      anchors.options = {
+		placement: 'left',
+		visible: 'hover'
+	  }
       anchors.add("h2,h3,h4");
     </script>
 
