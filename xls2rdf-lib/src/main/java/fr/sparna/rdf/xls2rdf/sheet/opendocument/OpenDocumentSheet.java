@@ -34,6 +34,10 @@ public class OpenDocumentSheet implements Sheet {
 
     @Override
     public Row getRow(int rowIndex) {
+        if(rowIndex < 0 || rowIndex > getLastRowNum()) {
+            return null;
+        }
+        // getRowByIndex creates a new row if it doesn't exist, but we don't want that, so we check the row count first
         return new OpenDocumentRow(this.delegate.getRowByIndex(rowIndex), this);
     }
 

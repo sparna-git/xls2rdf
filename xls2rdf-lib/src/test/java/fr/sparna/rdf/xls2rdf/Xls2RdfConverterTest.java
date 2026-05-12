@@ -29,7 +29,7 @@ public class Xls2RdfConverterTest {
         	}
 		}    
         
-        /*
+
         //TEST FOR ODS
         File odsDir = new File("src/test/resources/opendocument/suite");
         List<File> sortedOds = Arrays.asList(odsDir.listFiles());
@@ -39,6 +39,7 @@ public class Xls2RdfConverterTest {
             }
         }
 
+        /*
         //TEST FOR CSV
         File csvDir = new File("src/test/resources/csv/suite");
         List<File> sortedCsv = Arrays.asList(csvDir.listFiles());

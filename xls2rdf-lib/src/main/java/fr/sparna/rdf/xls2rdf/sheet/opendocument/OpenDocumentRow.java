@@ -23,6 +23,10 @@ public class OpenDocumentRow implements Row {
 
     @Override
     public Cell getCell(int columnIndex) {
+        // if(columnIndex < 0 || columnIndex > this.delegate.getCellCount()) {
+        //     return null;
+        // }
+        // getCellByIndex creates a new cell if it doesn't exist, but we don't want that, so we check the cell count first
         return new OpenDocumentCell(this.delegate.getCellByIndex(columnIndex), this);
     }
 

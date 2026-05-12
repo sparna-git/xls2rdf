@@ -188,6 +188,7 @@ public class RdfizableSheet {
 				Cell cell = row.getCell(i);
 				if (null == cell) break;
 				String columnName = cell.getCellValue();
+
 				// stop at the first empty value
 				if (StringUtils.isBlank(columnName)) {
 					break;

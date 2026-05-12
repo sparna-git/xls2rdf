@@ -57,7 +57,10 @@ public class OpenDocumentCell implements Cell{
             case "string"  -> CellType.STRING;
             case "float"   -> CellType.NUMERIC;
             case "boolean" -> CellType.BOOLEAN;
-            default        -> CellType.ERROR;
+            case "date"    -> CellType.STRING;
+            case "currency" -> CellType.STRING;
+            case "time"    -> CellType.STRING;
+            default        -> { throw new RuntimeException("Cell value type unknown or unsupported: " + type); }
         };
     };
 

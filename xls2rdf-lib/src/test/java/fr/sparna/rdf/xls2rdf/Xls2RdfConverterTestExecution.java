@@ -80,6 +80,12 @@ public class Xls2RdfConverterTestExecution implements Test {
 		if(!input.exists()) {
 			input = new File(this.testFolder, "input.xlsm");
 		}
+		if(!input.exists()) {
+			input = new File(this.testFolder, "input.ods");
+		}
+		if(!input.exists()) {
+			input = new File(this.testFolder, "input.csv");
+		}
 		
 		final File expected = new File(this.testFolder, "expected.ttl");
 		System.out.println("Testing "+input.getAbsolutePath());
