@@ -34,5 +34,18 @@ _:1 a rdf:List;
 _:2 rdf:first ex:2;
   rdf:rest rdf:nil .
 
+ex:TEST2 a skos:Concept;
+  ex:value2 _:a ;
+  skos:inScheme ex:my-graph;
+  skos:topConceptOf ex:my-graph .
+
+_:a a rdf:List;
+  rdf:first ex:1;
+  rdf:rest _:b .
+
+_:b rdf:first ex:2;
+  rdf:rest rdf:nil .
+
+
 ex:my-graph a skos:ConceptScheme;
-  skos:hasTopConcept ex:TEST .
+  skos:hasTopConcept ex:TEST, ex:TEST2 .
