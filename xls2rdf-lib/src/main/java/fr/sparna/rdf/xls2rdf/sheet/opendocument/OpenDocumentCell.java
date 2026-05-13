@@ -51,16 +51,15 @@ public class OpenDocumentCell implements Cell{
         return this.strToType.apply(type);
     }
 
-    private Function<String, CellType> strToType = (type) -> {
+    private final Function<String, CellType> strToType = (type) -> {
         return switch (type) {
-            case ""        -> CellType.BLANK;
-            case "string"  -> CellType.STRING;
-            case "float"   -> CellType.NUMERIC;
-            case "boolean" -> CellType.BOOLEAN;
-            case "date"    -> CellType.STRING;
-            case "currency" -> CellType.STRING;
-            case "time"    -> CellType.STRING;
-            default        -> { throw new RuntimeException("Cell value type unknown or unsupported: " + type); }
+            case ""                   -> CellType.BLANK;
+            case "string", "currency" -> CellType.STRING;
+            case "float"              -> CellType.NUMERIC;
+            case "boolean"            -> CellType.BOOLEAN;
+            case "date"               -> CellType.DATE;
+            case "time"               -> CellType.TIME;
+            default                   -> { throw new RuntimeException("Cell value type unknown or unsupported: " + type); }
         };
     };
 
@@ -80,6 +79,8 @@ public class OpenDocumentCell implements Cell{
                 else yield numericValue.toString();
             }
             case FORMULA      -> this.getCellValue(this.strToType.apply(this.delegate.getValueType()));
+            case DATE -> this.delegate.getLocalDateValue().toString();
+            case TIME -> this.delegate.getLocalTimeValue().toString();
             default           -> throw new Xls2RdfException("Cell type unknown or unsupported ({}) at Sheet '{}', row {}, column {}", type.name(), this.getSheet().getSheetName(), this.delegate.getRowIndex(), this.delegate.getColumnIndex());
         };
     }

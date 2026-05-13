@@ -16,14 +16,13 @@ import java.util.List;
 
 public class OpenDocumentWorkbookTest {
 
-
     static final List<String> SHEETS = List.of("Sheet1", "Sheet2", "Sheet3");
-    static final URL ODS_FILE_URI = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
+    static final URL ODS_FILE_URL = OpenDocumentWorkbookFactoryTest.class.getResource("/opendocument/test.ods");
     static final String PATH_NAME;
     static{
         try {
-            Assert.assertNotNull(ODS_FILE_URI);
-            PATH_NAME = ODS_FILE_URI.toURI().getPath();
+            Assert.assertNotNull(ODS_FILE_URL);
+            PATH_NAME = ODS_FILE_URL.toURI().getPath();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -76,7 +75,7 @@ public class OpenDocumentWorkbookTest {
     @Test
     public void try_iterator_on_sheets_are_not_null(){
         for(Sheet s: this.cud){
-            Assert.assertNotNull("The iterator return null value for the sheet.", s);
+            Assert.assertNotNull("The iterator returned null value for the sheet.", s);
         }
     }
 

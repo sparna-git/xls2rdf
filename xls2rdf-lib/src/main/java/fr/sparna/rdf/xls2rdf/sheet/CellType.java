@@ -7,6 +7,8 @@ public enum CellType {
     STRING,
     NUMERIC,
     BOOLEAN,
-    FORMULA;
+    FORMULA,
+    DATE,
+    TIME;
 
 }

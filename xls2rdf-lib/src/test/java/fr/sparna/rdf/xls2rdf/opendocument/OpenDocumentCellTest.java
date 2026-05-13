@@ -68,6 +68,8 @@ public class OpenDocumentCellTest {
                     case NUMERIC -> Assert.assertEquals(NUMERIC, type);
                     case BOOLEAN -> Assert.assertEquals(BOOLEAN, type);
                     case FORMULA -> Assert.assertEquals(FORMULA, type);
+                    case DATE -> Assert.assertEquals(DATE, type);
+                    case TIME -> Assert.assertEquals(TIME, type);
                     default      -> Assert.assertEquals(ERROR, type);
                 }
             }
