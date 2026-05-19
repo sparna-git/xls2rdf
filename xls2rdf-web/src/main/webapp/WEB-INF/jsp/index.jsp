@@ -6,6 +6,7 @@
 <fmt:setBundle basename="fr.sparna.rdf.xls2rdf.i18n.Bundle"/>
 
 <!DOCTYPE html>
+<html>
 
 <head>
 	<title><fmt:message key="page.api"/></title>

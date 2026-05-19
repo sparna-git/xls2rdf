@@ -3,14 +3,14 @@ package fr.sparna.rdf.xls2rdf.web;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
-@Component
 @RequestScope
+@Component
 public class RequestData {
 
 	// error messages to display in alerts
-	protected String errorMessage;
+	private String errorMessage;
 	// default language of the user to initialize the language selection
-	protected String defaultLanguage;
+	private String defaultLanguage;
 
 	public String getErrorMessage() {
 		return this.errorMessage;

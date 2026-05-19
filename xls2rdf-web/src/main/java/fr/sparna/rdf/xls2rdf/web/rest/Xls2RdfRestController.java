@@ -1,121 +1,89 @@
 package fr.sparna.rdf.xls2rdf.web.rest;
 
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFWriterRegistry;
+import fr.sparna.rdf.xls2rdf.web.exception.ExceptionManager;
+import fr.sparna.rdf.xls2rdf.web.exception.Xls2RdfRestControllerException;
+import fr.sparna.rdf.xls2rdf.web.service.Xls2RdfRestService;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.info.Info;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
+
+@OpenAPIDefinition(
+		info = @Info(title = "Excel 2 RDF Rest API", version = "4.0.2", description = """
+				This is the Rest API of Excel 2 RDF. You may choose to convert from an URL or from a file.""")
+)
 @RestController
+@RequestMapping("/api")
 public class Xls2RdfRestController {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
-	
-	@Autowired
-	private Xls2RdfService xls2RdfService;	
+	final static Logger log = LoggerFactory.getLogger(Xls2RdfRestController.class);
 
-	@RequestMapping(value = "/api/convert", method = RequestMethod.GET, params = {"url"})
-	public ResponseEntity<ByteArrayResource> convertRDF(
+	private final Xls2RdfRestService service;
+
+	@Autowired
+	public Xls2RdfRestController(Xls2RdfRestService service){
+		this.service = service;
+	}
+
+	@SwaggerRestInfo
+	@Operation(summary = "Convert excel file from an URL to a specific RDF media type.")
+	@ResponseBody
+	@GetMapping(value = "/convert",
+			produces = {"text/turtle", "application/rdf+xml", "application/n-triples", "application/n-quads", "text/n3", "application/trig"})
+	public ResponseEntity<ByteArrayResource> convertRDFFromGet(
 			@RequestParam(value="lang", required=false) String language,
+			@Parameter(name = "url", required = true, description = """
+					The URL of the Excel file to convert.""", in = ParameterIn.QUERY)
 			@RequestParam(value="url", required=true) String url,
 			@RequestParam(value="format", required=false) String format,
 			@RequestParam(value="skosxl", required=false, defaultValue = "false") boolean useSkosXl,
 			@RequestParam(value="skipHidden", required=false, defaultValue = "false") boolean skipHidden,
 			@RequestParam(value="broaderTransitive", required=false, defaultValue = "false") boolean broaderTransitive,
-			@RequestParam(value="noPostProcessings", required=false, defaultValue = "false") boolean ignorePostProc)
-					throws Exception {
-		
-		RDFFormat theFormat = RDFWriterRegistry.getInstance().getFileFormatForMIMEType(format).orElse(RDFFormat.TURTLE);
+			@RequestParam(value="noPostProcessings", required=false, defaultValue = "false") boolean ignorePostProc){
+			URL clientURL = null;
+			try{
+				if(url.isEmpty()) ExceptionManager.throwException(Xls2RdfRestControllerException.class, ExceptionManager.URL_MISSING.getMessage());
+				else clientURL = URI.create(url).toURL();
+			}catch(MalformedURLException ex){
+				ExceptionManager.throwException(Xls2RdfRestControllerException.class, ex.getMessage());
+			}
+			return this.service.runRestConversion(language, clientURL, format, useSkosXl, skipHidden, broaderTransitive, ignorePostProc);
+    }
 
-		InputStream in;
-		String resultFileName = "xls2rdf";
-
-		try {
-			URL urls = new URL(url);
-			InputStream urlInputStream = urls.openStream(); // throws an IOException
-			in = new DataInputStream(new BufferedInputStream(urlInputStream));
-
-			// set the output file name to the final part of the URL
-			resultFileName = (!urls.getPath().equals("")) ? urls.getPath() : resultFileName;
-			// keep only latest file, after final /
-			resultFileName =
-					(resultFileName.contains("/"))
-					? resultFileName.substring(0, resultFileName.lastIndexOf("/"))
-							: resultFileName;
-		} catch (IOException e) {
-			log.error("error", e);
-			throw new RuntimeException(e);
-		}
-
-		try {
-			resultFileName =
-					(resultFileName.contains("."))
-					? resultFileName.substring(0, resultFileName.lastIndexOf('.'))
-							: resultFileName;
-
-					// add the date in the filename
-					String dateString = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-
-					ByteArrayOutputStream responseOutputStream = new ByteArrayOutputStream();
-					try (var openedIn = in) {
-						List<String> cvIds = this.xls2RdfService.convert(
-								openedIn,
-								responseOutputStream,
-								language,
-								theFormat,
-								useSkosXl,
-								broaderTransitive,
-								ignorePostProc,
-								//fail if no reconcile
-								false,
-								// skip hidden rows and columns
-								skipHidden
-						);
-
-						Collections.sort(cvIds);
-						cvIds.stream().map(cv -> "Converted Graph: " + cv).forEach(log::info);
-
-						String filename = String.format("%s-%s.%s", resultFileName, dateString, theFormat.getDefaultFileExtension());
-						return transformToByteArrayResource(filename, theFormat.getDefaultMIMEType(), responseOutputStream.toByteArray());
-					}
-		} catch (Exception e) {
-			log.error("error", e);
-			throw new RuntimeException(e);
-		}
-	}
-
-
-	static ResponseEntity<ByteArrayResource> transformToByteArrayResource(
-			String filename,
-			String contentType,
-			byte[] file
-    ) {
-		return Optional.ofNullable(file)
-				.map(
-						u ->
-						ResponseEntity.ok()
-						.contentType(MediaType.parseMediaType(contentType))
-						.header(
-								HttpHeaders.CONTENT_DISPOSITION,
-								"attachment; filename=\"" + filename + "\"")
-						.body(new ByteArrayResource(file)))
-				.orElse(ResponseEntity.badRequest().body(null));
+	@SwaggerRestInfo
+	@Operation(summary = "Convert excel file from a local file to a specific RDF media type.")
+	@ResponseBody
+	@PostMapping(value = "/convert",
+			produces = {"text/turtle", "application/rdf+xml", "application/n-triples", "application/n-quads", "text/n3", "application/trig"})
+	public ResponseEntity<ByteArrayResource> convertRDFFromPost(
+			@RequestParam(value="lang", required=false) String language,
+			@Parameter(name = "file", required = true, description = """
+					The file of the Excel file to convert.""", in = ParameterIn.QUERY)
+			@RequestParam(value="file", required=true) MultipartFile clientFile,
+			@RequestParam(value="format", required=false) String format,
+			@RequestParam(value="skosxl", required=false, defaultValue = "false") boolean useSkosXl,
+			@RequestParam(value="skipHidden", required=false, defaultValue = "false") boolean skipHidden,
+			@RequestParam(value="broaderTransitive", required=false, defaultValue = "false") boolean broaderTransitive,
+			@RequestParam(value="noPostProcessings", required=false, defaultValue = "false") boolean ignorePostProc){
+			try{
+				if(clientFile.isEmpty()) ExceptionManager.throwException(Xls2RdfRestControllerException.class, ExceptionManager.FILE_MISSING.getMessage());
+			}catch(Exception ex){
+				ExceptionManager.throwException(Xls2RdfRestControllerException.class, ex.getMessage());
+			}
+			return this.service.runRestConversion(language, clientFile, format, useSkosXl, skipHidden, broaderTransitive, ignorePostProc);
 	}
 
 }

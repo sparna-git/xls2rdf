@@ -1,12 +1,17 @@
 package fr.sparna.rdf.xls2rdf;
 
 
-
-
+import fr.sparna.rdf.xls2rdf.web.SwaggerUICustom;
+import org.springdoc.core.properties.SwaggerUiConfigProperties;
+import org.springdoc.core.properties.SwaggerUiOAuthProperties;
+import org.springdoc.core.providers.ObjectMapperProvider;
+import org.springdoc.webmvc.ui.SwaggerIndexPageTransformer;
+import org.springdoc.webmvc.ui.SwaggerWelcomeCommon;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
@@ -26,5 +31,15 @@ public class Xls2rdfServiceApplication extends SpringBootServletInitializer {
 	@Override
 	public SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(Xls2rdfServiceApplication.class);
+	}
+
+	@Bean
+	public SwaggerIndexPageTransformer swaggerIndexPageTransformer(
+			SwaggerUiConfigProperties a,
+			SwaggerUiOAuthProperties b,
+			SwaggerWelcomeCommon c,
+			ObjectMapperProvider d
+	){
+		return new SwaggerUICustom(a,b,c,d);
 	}
 }

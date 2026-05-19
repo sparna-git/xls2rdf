@@ -6,18 +6,16 @@
 <!-- setup the locale for the messages based on the language in the session -->
 <fmt:setLocale value="${sessionData.userLocale.language}"/>
 <fmt:setBundle basename="fr.sparna.rdf.xls2rdf.i18n.Bundle"/>
-
 <html>
   <head>
-
     <title><fmt:message key="page.convert"/></title>
     <link rel="canonical" href="https://xls2rdf.sparna.fr/web/" />
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <!--FONTAWSEOME CDN-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!--Add Boostrap min.css and Boostrap bundle.min.js // version > 5.3.8-->
-		<link href="bootstrap/bootstrap.min.css" rel="stylesheet">
+      <link href="bootstrap/bootstrap.min.css" rel="stylesheet">
     <script src="bootstrap/bootstrap.bundle.min.js"></script>
     <!--Custom CSS-->
     <link href="css/custom.css" rel="stylesheet">
@@ -71,8 +69,7 @@
 			        <h3 class="alert-heading display-5 fs-3 fw-normal">
 			          <fmt:message key="error" />
 			        </h3>
-              <!--Si l'exception Xls2RdfException est levée l'attribut ${error} s'affiche sinon ${formData.errorMessage} pour Xls2RdfConverSION-->
-			        ${formData.errorMessage}${error}
+			        ${formData.errorMessage}
 			        <button type="button"
 			                class="btn-close"
 			                data-bs-dismiss="alert"
@@ -296,10 +293,8 @@
                     </div>
                   </div>
                   <!--END POST PROCESSOR OUTPUT-->
-          </div>
+
         </fieldset>
-        </div>
-   
         <!--SUBMIT BUTTON-->
         <div class="row justify-content-center mt-5">
             <div class="col-auto mb-5">
@@ -313,11 +308,11 @@
             </div>
         </div>
       </form>
+      </div>
     </div>
 
     <!--FOOTER-->
     <jsp:include page="includeTag/footer.jsp"/>
-
 
   </body>
 </html>

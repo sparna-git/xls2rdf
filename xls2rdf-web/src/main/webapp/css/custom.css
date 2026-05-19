@@ -2,21 +2,30 @@
   font-family: "Roboto", sans-serif;
 }
 
-a{
-  color: white !important;
+html{
+  height: 100vh;
+  width: 100vw;
+}
+
+body{
+  height: 100%;
+}
+
+
+.nav-link{
+  color: white;
+}
+
+.menu-item.nav-link.active{
+  color: white;
 }
 
 p{
-  font-size: 1.2em !important;
+  font-size: 1.2em;
 }
 
 label{
   font-size: 1.1em;
-}
-
-
-html, body {
-  min-height: min-content;
 }
 
 .navbar-nav .nav-link{
@@ -28,13 +37,17 @@ html, body {
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
 }
 
-#api:hover, #doc:hover, #convert:hover{
+.menu-item:hover{
   background-color:  #df6919;
   border-radius: 5px;
 }
 
+.navbar-brand{
+  color: #df6919;
+}
+
 select, #file, #url, #submit, #input_Language{
-  border-radius: 4px !important;
+  border-radius: 4px;
   
 }
 
@@ -54,22 +67,29 @@ select, #file, #url, #submit, #input_Language{
 }
 
 #fieldset-source{
-  padding: 10px !important;
+  padding: 10px;
   border-left: solid #00c851;
 }
 
 #fieldset-options{
-  padding: 10px !important;
+  padding: 10px;
   border-left: solid #4285f4 ;
 }
 
 .anchorjs-link{
-  color: #df6919 !important;
+  color: #df6919;
 }
 
-.highlight{
-   background-color: #0f2537 !important;
-   color: #df6919 !important;
+.menu-item.nav-link.highlight{
+   background-color: #0f2537;
+   color: #df6919;
    border-radius: 5px;
 }
+
+.nav-link.dropdown-toggle:hover,
+.navbar-brand.fw-normal:hover{
+   color: #df6919;
+}
+
+
 

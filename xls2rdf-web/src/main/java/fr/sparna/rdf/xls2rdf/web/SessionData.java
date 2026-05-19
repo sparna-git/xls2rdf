@@ -1,20 +1,22 @@
 package fr.sparna.rdf.xls2rdf.web;
 
-import java.io.Serializable;
-import java.util.Locale;
-
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Locale;
 
 @SessionScope
 @Component
 public class SessionData implements Serializable {
 
-	static final long serialVersionUID = -1;
+	@Serial
+    private static final long serialVersionUID = -1;
 	
 	// The user Locale
-	protected Locale userLocale;
-	protected String baseUrl;
+	private Locale userLocale;
+	private String baseUrl;
 
 	public Locale getUserLocale() {
 		return this.userLocale;

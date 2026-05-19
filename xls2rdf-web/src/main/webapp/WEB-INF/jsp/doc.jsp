@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <fmt:setLocale value="${sessionData.userLocale.language}"/>
 <fmt:setBundle basename="fr.sparna.rdf.xls2rdf.i18n.Bundle"/>
-
+<html>
 <head>
 	<meta charset="UTF-8">
 	<title><fmt:message key="page.doc"/></title>
@@ -414,7 +414,5 @@
 
 	<jsp:include page="includeTag/footer.jsp"/>
 
-	
 </body>
-
 </html>
