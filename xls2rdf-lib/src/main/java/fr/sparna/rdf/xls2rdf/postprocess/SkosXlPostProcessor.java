@@ -54,9 +54,9 @@ public class SkosXlPostProcessor implements Xls2RdfPostProcessorIfc {
 
 			if(this.generateXl) {
 				final List<String> SKOS2SKOSXL_URI_RULESET = Arrays.asList(new String[] { 
-						"skos2skosxl/S55-S56-S57-URIs.ru"
+						"/fr/sparna/rdf/xls2rdf/skos2skosxl/S55-S56-S57-URIs.ru"
 				});			
-				
+					
 				for (String aString : SKOS2SKOSXL_URI_RULESET) {
 					// Load SPARQL query definition
 			        InputStream src = this.getClass().getResourceAsStream(aString);		        
@@ -68,11 +68,12 @@ public class SkosXlPostProcessor implements Xls2RdfPostProcessorIfc {
 			
 			if(this.generateXlDefinitions) {
 				final List<String> SKOS2SKOSXL_NOTES_URI_RULESET = Arrays.asList(new String[] { 
-						"skos2skosxl/S16-URIs.ru"
+						"/fr/sparna/rdf/xls2rdf/skos2skosxl/S16-URIs.ru"
 				});
 				
 				for (String aString : SKOS2SKOSXL_NOTES_URI_RULESET) {
 					// Load SPARQL query definition
+					System.out.println("aString2 XLPOST = " +  aString);
 			        InputStream src = this.getClass().getResourceAsStream(aString);	
 			        String sparql =  IOUtils.toString(src);
 					Update u = c.prepareUpdate(sparql);

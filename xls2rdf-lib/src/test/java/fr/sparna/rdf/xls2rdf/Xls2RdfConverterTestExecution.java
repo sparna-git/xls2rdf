@@ -88,7 +88,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 		}
 		
 		final File expected = new File(this.testFolder, "expected.ttl");
-		System.out.println("Testing "+input.getAbsolutePath());
+		System.out.println("Testing " + input.getAbsolutePath());
 
 		// set external data for reconcile if present
 		final File external = new File(this.testFolder, "external.ttl");

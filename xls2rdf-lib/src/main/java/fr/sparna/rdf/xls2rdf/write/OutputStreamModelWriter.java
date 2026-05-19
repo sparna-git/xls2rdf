@@ -90,6 +90,7 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 			}		
 		
 			out.flush();
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

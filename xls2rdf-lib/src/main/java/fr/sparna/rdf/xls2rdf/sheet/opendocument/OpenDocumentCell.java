@@ -79,8 +79,8 @@ public class OpenDocumentCell implements Cell{
                 else yield numericValue.toString();
             }
             case FORMULA      -> this.getCellValue(this.strToType.apply(this.delegate.getValueType()));
-            case DATE -> this.delegate.getLocalDateValue().toString();
-            case TIME -> this.delegate.getLocalTimeValue().toString();
+            case DATE         -> this.delegate.getLocalDateValue().toString();
+            case TIME         -> this.delegate.getLocalTimeValue().toString();
             default           -> throw new Xls2RdfException("Cell type unknown or unsupported ({}) at Sheet '{}', row {}, column {}", type.name(), this.getSheet().getSheetName(), this.delegate.getRowIndex(), this.delegate.getColumnIndex());
         };
     }

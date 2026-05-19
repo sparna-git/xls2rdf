@@ -29,7 +29,7 @@ import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
 public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
-  private static final String CALCULATE_BROADER_TRANSITIVE_SPARQL = "postprocessing/broaderTransitive.ru";
+  private static final String CALCULATE_BROADER_TRANSITIVE_SPARQL = "/fr/sparna/rdf/xls2rdf/postprocessing/broaderTransitive.ru";
 
   private Logger log = LoggerFactory.getLogger(this.getClass().getName());
   private final boolean runBroaderTransitive;

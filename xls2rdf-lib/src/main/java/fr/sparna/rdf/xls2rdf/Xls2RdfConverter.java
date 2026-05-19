@@ -126,7 +126,7 @@ public class Xls2RdfConverter {
 	 */
 	public List<Model> processFile(File input) {
 		try {
-			log.info("Converting file "+input.getAbsolutePath()+"...");
+			log.info("Converting file " + input.getAbsolutePath()+"...");
 			Workbook workbook;
 			String extension = "";
 			//Le pattern récupére l'extension du fichier soit le dernier .xxx
