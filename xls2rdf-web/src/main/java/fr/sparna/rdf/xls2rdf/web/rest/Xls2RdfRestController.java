@@ -22,8 +22,8 @@ import java.net.URL;
 
 
 @OpenAPIDefinition(
-		info = @Info(title = "Excel 2 RDF Rest API", version = "4.0.2", description = """
-				This is the Rest API of Excel 2 RDF. You may choose to convert from an URL or from a file.""")
+		info = @Info(title = "xls2rdf REST API", version = "4.0.2", description = """
+				This is the Rest API of xls2rdf. You may choose to convert from an URL or from a file.""")
 )
 @RestController
 @RequestMapping("/api")
@@ -39,7 +39,7 @@ public class Xls2RdfRestController {
 	}
 
 	@SwaggerRestInfo
-	@Operation(summary = "Convert excel file from an URL to a specific RDF media type.")
+	@Operation(summary = "Convert Excel file from an URL to a specific RDF media type.")
 	@ResponseBody
 	@GetMapping(value = "/convert",
 			produces = {"text/turtle", "application/rdf+xml", "application/n-triples", "application/n-quads", "text/n3", "application/trig"})
@@ -64,14 +64,14 @@ public class Xls2RdfRestController {
     }
 
 	@SwaggerRestInfo
-	@Operation(summary = "Convert excel file from a local file to a specific RDF media type.")
+	@Operation(summary = "Convert Excel file from a local file to a specific RDF media type.")
 	@ResponseBody
 	@PostMapping(value = "/convert",
 			produces = {"text/turtle", "application/rdf+xml", "application/n-triples", "application/n-quads", "text/n3", "application/trig"})
 	public ResponseEntity<ByteArrayResource> convertRDFFromPost(
 			@RequestParam(value="lang", required=false) String language,
 			@Parameter(name = "file", required = true, description = """
-					The file of the Excel file to convert.""", in = ParameterIn.QUERY)
+					The Excel file to convert.""", in = ParameterIn.QUERY)
 			@RequestParam(value="file", required=true) MultipartFile clientFile,
 			@RequestParam(value="format", required=false) String format,
 			@RequestParam(value="skosxl", required=false, defaultValue = "false") boolean useSkosXl,

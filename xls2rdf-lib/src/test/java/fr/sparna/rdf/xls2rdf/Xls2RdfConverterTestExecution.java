@@ -107,15 +107,6 @@ public class Xls2RdfConverterTestExecution implements Test {
 		// convert
 		this.converter.processFile(input);
 		
-		// get expected repository
-//		Model expectedModel;
-//		try {
-//			expectedModel = Rio.parse(new FileInputStream(expected), expected.toURI().toURL().toString(), RDFFormat.TURTLE);
-//		} catch (Exception e) {
-//			result.addError(this, e);
-//			throw new IllegalArgumentException("Problem with expected.ttl in unit test "+this.testFolder.getName(), e);
-//		}
-		
 		// reput everything in flat repositories for proper comparisons without the graphs
 		Repository outputRepositoryToCompare = new SailRepository(new MemoryStore());
 		outputRepositoryToCompare.init();
@@ -162,8 +153,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 				throw new IllegalArgumentException("Problem with expected.ttl in unit test "+this.testFolder.getName(), e);
 			}
 			
-			// test if isomorphic		
-			// if(!Models.isomorphic(expectedModel, outputModel)) {			
+			// test if isomorphic				
 			if(!RepositoryUtil.equals(outputRepositoryToCompare, expectedRepository)) {
 				result.addFailure(this, new AssertionFailedError("Test failed on "+this.testFolder+":"
 						+ "\nStatements in output not in expected:\n"+prettyPrint(RepositoryUtil.difference(outputRepositoryToCompare, expectedRepository))

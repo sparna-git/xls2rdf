@@ -31,6 +31,7 @@ public class SwaggerUICustom extends SwaggerIndexPageTransformer {
    CUSTOM SWAGGER UI THEME OVERRIDES
    ========================================================= */
 
+/* Masquage de la top bar et du sélecteur de serveur */
 .swagger-ui .topbar,
 .swagger-ui .scheme-container {
     display: none;
