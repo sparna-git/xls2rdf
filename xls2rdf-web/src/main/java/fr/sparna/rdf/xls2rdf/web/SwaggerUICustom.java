@@ -59,10 +59,26 @@ public class SwaggerUICustom extends SwaggerIndexPageTransformer {
 .swagger-ui .models-control > span,
 .swagger-ui .json-schema-2020-12-property .json-schema-2020-12__title,
 .swagger-ui .json-schema-2020-12 *,
-.swagger-ui .arrow {
-    color: white;
+.swagger-ui .prop-format,
+.swagger-ui .responses-inner h4,
+.swagger-ui .responses-inner h5,
+.swagger-ui .response-col_status .response-undocumented
+{
+   color: white;
 }
 
+.swagger-ui .info a{
+    color: #DF6919;
+}
+
+.swagger-ui .info a:hover{
+    color: #B25414;
+}
+
+.swagger-ui .btn-group .btn:last-child{
+    color: white;
+    background-color: #DF6919;
+}
 .swagger-ui p {
     font-size: medium;
 }

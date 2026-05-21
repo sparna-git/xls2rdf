@@ -25,11 +25,11 @@ public class Xls2RdfRestService {
 
     final static Logger log = LoggerFactory.getLogger(Xls2RdfRestService.class);
 
-    private final Xls2RdfConverterService converter;
+    private final Xls2RdfConverterService converterService;
 
     @Autowired
-    public Xls2RdfRestService(Xls2RdfConverterService converter){
-        this.converter = converter;
+    public Xls2RdfRestService(Xls2RdfConverterService converterService){
+        this.converterService = converterService;
     }
 
     public ResponseEntity<ByteArrayResource> runRestConversion(
@@ -64,7 +64,8 @@ public class Xls2RdfRestService {
 
         try{
             ByteArrayOutputStream responseOutputStream = new ByteArrayOutputStream();
-            List<String> cvIds = this.converter.convert(
+
+            List<String> cvIds = this.converterService.convert(
                     in,
                     responseOutputStream,
                     language,
@@ -81,7 +82,7 @@ public class Xls2RdfRestService {
 
             cvIds.stream().map(cv -> "Converted Graph: " + cv).forEach(log::info);
 
-            return this.converter.transformConversionToResponseEntity(fileName, theFormat.getDefaultMIMEType(), responseOutputStream.toByteArray(), ContentDisposition.attachment());
+            return this.converterService.transformConversionToResponseEntity(fileName, theFormat.getDefaultMIMEType(), responseOutputStream.toByteArray(), ContentDisposition.attachment());
 
         }catch (Exception ex) {
             ExceptionManager.throwException(Xls2RdfRestControllerException.class, ex.getMessage());

@@ -185,21 +185,21 @@ import java.lang.annotation.*;
         @ApiResponse(responseCode = "400", description = "The url isn't supported for conversion or is empty.", content = {@Content(mediaType = "application/json",
 				schema = @Schema(implementation = RestExceptionRendererer.class),
 				examples = {
-				@ExampleObject(value = "{\"nameException\":\"fr.sparna.rdf.xls2rdf.web.exception.Xls2RdfRestControllerException\",\"message\":\"Url is not valid for conversion!\",\"statusCode\":\"BAD_REQUEST\",\"dateTime\":\"2026-05-11T13:28:45.367592\"}")
+				@ExampleObject(value = "{\"nameException\":\"fr.sparna.rdf.xls2rdf.web.exception.Xls2RdfRestControllerException\",\"message\":\"Url is not valid for conversion!\",\"statusCode\":\"BAD_REQUEST\",\"dateTime\":\"2026-05-11T13:28:45.367592\",\"stackTrace\":\"...\"}")
 		})}),
         @ApiResponse(responseCode = "500", description = "Internal server error.", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RestExceptionRendererer.class))})
 })
 @Parameters({
         @Parameter(name = "lang", description = "Default language to apply to literal columns.", in = ParameterIn.QUERY, schema = @Schema(allowableValues = {"fr", "es", "ru", "de", "it"})),
-        @Parameter(name = "noPostProcessings", description = "Don't apply SKOS post-processings after conversion. Set this to true only if you are explicitely generating SKOS taxonomies.", in = ParameterIn.QUERY),
-        @Parameter(name = "broaderTransitive", description = "Adds skos:broaderTransitive explicit links.", in = ParameterIn.QUERY),
-        @Parameter(name = "format", description = "Mime type of the RDF output format (e.g. \"application/rdf+xml\"). Turtle is returned by default", in = ParameterIn.QUERY, schema = @Schema(allowableValues = {"text/turtle",
+        @Parameter(name = "noPostProcessing", description = "Don't apply SKOS post-processing after conversion. Set this to true only if you are explicitly generating SKOS taxonomies.", in = ParameterIn.QUERY),
+        @Parameter(name = "broaderTransitive", description = "Adds SKOS:broaderTransitive explicit links.", in = ParameterIn.QUERY),
+        @Parameter(name = "format", description = "Mime type of the RDF output format (e.g. \"application/rdf+xml\"). Turtle is returned by default", in = ParameterIn.QUERY,schema = @Schema(allowableValues = {"text/turtle",
 				"application/rdf+xml",
 				"application/n-triples",
 				"application/n-quads",
 				"text/n3",
 				"application/trig"})),
-        @Parameter(name = "skosxl", description = "Apply SKOS-XL post-processings to reify labels.", in = ParameterIn.QUERY),
+        @Parameter(name = "skosxl", description = "Apply SKOS-XL post-processing to reify labels.", in = ParameterIn.QUERY),
         @Parameter(name = "skipHidden", description = "Default language to apply to literal columns.", in = ParameterIn.QUERY),
 })
 public @interface SwaggerRestInfo {
