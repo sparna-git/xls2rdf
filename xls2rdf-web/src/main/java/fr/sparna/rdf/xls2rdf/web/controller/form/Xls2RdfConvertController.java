@@ -22,7 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,11 +50,11 @@ public class Xls2RdfConvertController {
 		EXAMPLE
 	}
 
-	private Xls2RdfConverterService converter;
+	private Xls2RdfConverterService converterService;
 
 	@Autowired
-	public Xls2RdfConvertController(Xls2RdfConverterService converter){
-		this.converter = converter;
+	public Xls2RdfConvertController(Xls2RdfConverterService converterService){
+		this.converterService = converterService;
 	}
 
 	@GetMapping(value = "/convert")
@@ -67,16 +67,16 @@ public class Xls2RdfConvertController {
 	@PostMapping(value = "/convert",
 			produces = {"text/turtle", "application/rdf+xml", "application/n-triples", "application/n-quads", "text/n3", "application/trig"})
 		public ResponseEntity<ByteArrayResource> convertRDF(
-			@RequestParam(value="source", required=true) String sourceString,
-			@RequestParam(value="file", required=false) MultipartFile file,
-			@RequestParam(value="language", required=false) String language,
-			@RequestParam(value="url", required=false) String url,
-			@RequestParam(value="output", required=false) String format,
-			@RequestParam(value="example", required=false) String example,
-			@RequestParam(value="useskosxl", required=false) boolean useSkosXl,
-			@RequestParam(value="broaderTransitive", required=false) boolean broaderTransitive,
-			@RequestParam(value="usezip", required=false) boolean useZip,
-			@RequestParam(value="ignorePostProc", required=false) boolean ignorePostProc,
+			@RequestPart(value="source", required=true) String sourceString,
+			@RequestPart(value="file", required=false) MultipartFile file,
+			@RequestPart(value="language", required=false) String language,
+			@RequestPart(value="url", required=false) String url,
+			@RequestPart(value="output", required=false) String format,
+			@RequestPart(value="example", required=false) String example,
+			@RequestPart(value="useskosxl", required=false) boolean useSkosXl,
+			@RequestPart(value="broaderTransitive", required=false) boolean broaderTransitive,
+			@RequestPart(value="usezip", required=false) boolean useZip,
+			@RequestPart(value="ignorePostProc", required=false) boolean ignorePostProc,
 			// the request
 			HttpServletRequest request
 	) {
@@ -130,7 +130,7 @@ public class Xls2RdfConvertController {
 			System.setProperty("org.eclipse.rdf4j.rio.turtle.abbreviate_numbers", "false");
 
 			ByteArrayOutputStream responseOutputStream = new ByteArrayOutputStream();
-			List<String> cvIds = this.converter.convert(
+			List<String> cvIds = this.converterService.convert(
 					in,
 					responseOutputStream,
 					language.isEmpty() ? null : language,
@@ -147,7 +147,7 @@ public class Xls2RdfConvertController {
 
 			cvIds.stream().map(cv -> "Converted Graph: " + cv).forEach(log::info);
 
-			return this.converter.transformConversionToResponseEntity(fileName, theFormat.getDefaultMIMEType(), responseOutputStream.toByteArray(), ContentDisposition.attachment());
+			return this.converterService.transformConversionToResponseEntity(fileName, theFormat.getDefaultMIMEType(), responseOutputStream.toByteArray(), ContentDisposition.attachment());
 
 		} catch (IOException ex) {
 			ExceptionManager.throwException(Xls2RdfConvertException.class, ex.getMessage());
