@@ -1,22 +1,5 @@
 package fr.sparna.rdf.xls2rdf.web.rest;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import fr.sparna.rdf.xls2rdf.web.exception.ExceptionManager;
 import fr.sparna.rdf.xls2rdf.web.exception.Xls2RdfRestControllerException;
 import fr.sparna.rdf.xls2rdf.web.service.Xls2RdfRestService;
@@ -27,6 +10,17 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 
 
 @OpenAPIDefinition(
@@ -58,7 +52,7 @@ public class Xls2RdfRestController {
 					description = """
 					The URL of the Excel file to convert.""", in = ParameterIn.QUERY,
 					examples = {
-							@ExampleObject(name = "Exemple 1", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-1.xlsx", description = ""),
+							@ExampleObject(name = "Exemple 1", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-1.xlsx"),
 							@ExampleObject(name = "Exemple 2", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-2.xlsx"),
 							@ExampleObject(name = "Exemple 3", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-3.xlsx"),
 							@ExampleObject(name = "Exemple 4", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-4.xlsx"),
