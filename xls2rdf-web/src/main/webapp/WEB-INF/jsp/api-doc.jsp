@@ -8,7 +8,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><fmt:message key="page.swagger"/></title>
+    <title><fmt:message key="page.api-doc"/></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!--Add Boostrap min.css and Boostrap bundle.min.js // version > 5.3.8-->
     <link href="bootstrap/bootstrap.min.css" rel="stylesheet"/>
@@ -26,10 +26,13 @@
 
     <jsp:include page="includeTag/header.jsp"/>
 
+    <div class="content">
         <div id="swagger-ui" class="container-fluid"></div>
-    <div style="height: 41%;"></div>
+    </div>
+
+
     <jsp:include page="includeTag/footer.jsp"/>
-    </body>
+</body>
 
 </html>
 

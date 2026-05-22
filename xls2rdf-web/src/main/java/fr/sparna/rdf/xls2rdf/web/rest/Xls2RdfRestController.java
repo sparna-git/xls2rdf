@@ -24,10 +24,10 @@ import java.net.URL;
 
 
 @OpenAPIDefinition(
-		info = @Info(title = "xls2rdf REST API", version = "4.0.2", description = """
-				This is the Rest API of xls2rdf. You may choose to convert from an URL or from a file.""")
+		info = @Info(title = "xls2rdf REST API", version = "4", description = """
+				This is the REST API of xls2rdf. You may choose to convert from an URL or from a local file.""")
 )
-@Tag(name = "Excel 2 RDF Rest API")
+@Tag(name = "Convert")
 @RestController
 @RequestMapping("/api")
 public class Xls2RdfRestController {
@@ -49,21 +49,10 @@ public class Xls2RdfRestController {
 			@RequestParam(value="lang", required=false) String language,
 			@Parameter(name = "url",
 					required = true,
-					description = """
-					The URL of the Excel file to convert.""", in = ParameterIn.QUERY,
+					description = "The URL of the Excel file to convert. Note that Google spreadsheets can be converted if they are publicly accessible (\"Everyone with the link\"), and by adding `/export?format=xlsx` at the end of their URL.", in = ParameterIn.QUERY,
 					examples = {
 							@ExampleObject(name = "Exemple 1", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-1.xlsx"),
-							@ExampleObject(name = "Exemple 2", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-2.xlsx"),
-							@ExampleObject(name = "Exemple 3", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-3.xlsx"),
-							@ExampleObject(name = "Exemple 4", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-4.xlsx"),
-							@ExampleObject(name = "Exemple 5", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-5.xlsx"),
-							@ExampleObject(name = "Exemple 6", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-6.xlsx"),
-							@ExampleObject(name = "Exemple 7", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-7.xlsx"),
-							@ExampleObject(name = "Exemple 8", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-8.xlsx"),
-							@ExampleObject(name = "Use case 1", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-use-case-1.xlsx"),
-							@ExampleObject(name = "Use case 2", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-use-case-2.xlsx"),
-							@ExampleObject(name = "Use case 3", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-use-case-3.xlsx"),
-							@ExampleObject(name = "Use case 4", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-use-case-4.xlsx")
+							@ExampleObject(name = "Exemple 2", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-2.xlsx")
 					}
 					)
 			@RequestParam(value="url", required=true) String url,
@@ -91,8 +80,7 @@ public class Xls2RdfRestController {
 			@RequestParam(value="lang", required=false) String language,
 			@Parameter(name = "file",
 					required = true,
-					description = """
-					The file of the Excel file to convert.""")
+					description = "The file of the Excel file to convert.")
 			@RequestPart(value="file", required=true) MultipartFile clientFile,
 			@RequestParam(value="format", required=false) String format,
 			@RequestParam(value="skosxl", required=false, defaultValue = "false") boolean useSkosXl,

@@ -13,10 +13,10 @@ public class Xls2RdfSwaggerController {
 
     final static Logger log = LoggerFactory.getLogger(Xls2RdfSwaggerController.class);
 
-    @GetMapping("/swagger")
+    @GetMapping("/api-doc")
     public String swagger(Model model){
-        model.addAttribute(ConvertFormModelKey.VIEW.getKey(), ConvertFormModelKey.SWAGGER.getKey());
-        return "swagger";
+        model.addAttribute(ConvertFormModelKey.VIEW.getKey(), ConvertFormModelKey.API_DOC.getKey());
+        return "api-doc";
     }
 
 }

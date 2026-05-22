@@ -10,7 +10,7 @@ public enum ConvertFormModelKey {
 		VIEW("view"),
 		API("api"),
 		DOC("doc"),
-		SWAGGER("swagger"),
+		API_DOC("api-doc"),
 		CONVERT("convert");
 		
 		private final String key;

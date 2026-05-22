@@ -60,6 +60,7 @@
     <jsp:include page="includeTag/header.jsp"/>
 
 
+    <div class="content">
     
 		<!-- Error block -->
 			<div class="container mt-4">
@@ -303,12 +304,14 @@
               btn-lg
               btn-primary" 
               type="submit" id="submit">
-              <fmt:message key="convert"/>
+              <fmt:message key="convert.form.convert"/>
             </button>
             </div>
         </div>
       </form>
       </div>
+    </div>
+
     </div>
 
     <!--FOOTER-->

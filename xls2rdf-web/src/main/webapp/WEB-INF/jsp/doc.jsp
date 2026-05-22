@@ -37,6 +37,8 @@
 
 	<jsp:include page="includeTag/header.jsp"/>
 
+	<div class="content">
+
 	<div class="container" style="margin-top:30px;">
 		<div class="row">
 			<div class="col-lg-12">
@@ -48,19 +50,25 @@
 
 					<h4>What is this tool ?</h4>					
 					<p>
-						This is an Excel-to-RDF converter. It can generate RDF files from Excel spreadsheets structured in a specific way, and contains specific features for SKOS.
+						This is an Excel-to-RDF converter. It can generate RDF files from Excel or ODS spreadsheets structured in a specific way, and contains specific features for SKOS.
 						<br />Using the same Excel spreadsheet structure, it is possible to produce any RDF, not only SKOS (lists of foaf:Person, of schema:Event, SHACL, OWL, etc.)
 						<br />This converter does not require any configuration file to work, only the Excel document to convert.
-					</p>
-
-					
+					</p>					
 
 					<h4>Can I convert <i>any</i> Excel file in RDF ?</h4>
 					<p>
 						No. The spreadsheet has to follow <a href="#excel-file-structure">the specific structure described below</a>.
 					</p>
 
-					
+					<h4>Is ODS supported ?</h4>
+					<p>
+						Yes.
+					</p>
+
+					<h4>Is Google Sheets supported ?</h4>
+					<p>
+						Yes, if publicly available. Add <code>/export?format=xlsx</code> at end the of URL to get the Excel variant of the file, and use this URL as input for the converter. 
+					</p>
 
 					<h4>What should the Excel file look like ?</h4>
 					<p>
@@ -75,28 +83,13 @@
 						I am not far from thinking it is actually the best out there.
 						Ho, and it costs 0, is <a href="https://github.com/sparna-git/xls2rdf">open-source on Github</a>, and comes with a <a href="https://github.com/sparna-git/xls2rdf/wiki/Command-line-Excel-to-RDF-conversion">command-line version</a>.
 					</p>
-
-					
-
-					<h4>Do you know of any similar tools ?</h4>
-					<p>There are other converters from Excel to SKOS or RDF out there :</p>
-					<ul>
-						<li><a href="http://xlwrap.sourceforge.net/">XLWrap</a> (I used it quite a bit, it is good but uses complex configuration files)</li>
-						<li><a href="http://art.uniroma2.it/sheet2rdf/">Sheet2RDF</a>, from the team that makes <a href="http://vocbench.uniroma2.it/">VocBench</a></li>
-						<li><a href="http://www.openanzo.org/">Open Anzo</a> (never tested it)</li>
-						<li><a href="https://www.ontotext.com/products/ontotext-refine/">Ontotext Refine</a></li>
-						<li><a href="https://openrefine.org/extensions">Open Refine extensions to work with RDF</a></li>
-						<li>You can check for other tools on the <a href="https://www.w3.org/wiki/ConverterToRdf#Excel">W3C RDF converter wiki page</a>.</li>
-					</ul>
-
-
 			</div>
 		</div>
 		
 		<div class="row">
 			<div class="col-lg-12">
-				<h2>Excel File structure</h2>
-				<p>Your excel file <strong>MUST</strong> follow the structure described below to be converted to RDF. Otherwise you will get an exception or an empty RDF file.
+				<h2>Spreadsheet structure</h2>
+				<p>Your spreadsheet <strong>MUST</strong> follow the structure described below to be converted to RDF. Otherwise you will get an exception or an empty RDF file.
 				Download and look at <a href="#source-example">the examples above</a>.</p>
 				
 				<h4>Spreadsheet processing</h4>
@@ -411,6 +404,8 @@
 	  }
       anchors.add("h2,h3,h4");
     </script>
+
+	</div>
 
 	<jsp:include page="includeTag/footer.jsp"/>
 

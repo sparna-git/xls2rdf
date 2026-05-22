@@ -23,7 +23,7 @@
               <a id="convert-button" class="menu-item nav-link active ${view eq 'convert' ? 'highlight' : ''}" href="${sessionData.baseUrl}/convert"><fmt:message key="convert"/></a>
             </li>
             <li class="nav-item">
-              <a id="swagger-button" class="menu-item nav-link active ${view eq 'swagger' ? 'highlight' : ''}" href="${sessionData.baseUrl}/swagger"><fmt:message key="swagger"/></a>
+              <a id="swagger-button" class="menu-item nav-link active ${view eq 'api-doc' ? 'highlight' : ''}" href="${sessionData.baseUrl}/api-doc"><fmt:message key="api-doc"/></a>
             </li>
           </ul>
           <ul class="navbar-nav d-flex justify-content-end align-items-baseline">
