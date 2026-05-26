@@ -81,7 +81,7 @@ public class Xls2RdfRestController {
 			@Parameter(name = "file",
 					required = true,
 					description = "The file of the Excel file to convert.")
-			@RequestPart(value="file", required=true) MultipartFile clientFile,
+			@RequestParam(value="file", required=true) MultipartFile clientFile,
 			@RequestParam(value="format", required=false) String format,
 			@RequestParam(value="skosxl", required=false, defaultValue = "false") boolean useSkosXl,
 			@RequestParam(value="skipHidden", required=false, defaultValue = "false") boolean skipHidden,
