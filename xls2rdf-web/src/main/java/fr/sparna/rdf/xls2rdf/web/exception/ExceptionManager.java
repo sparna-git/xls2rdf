@@ -1,6 +1,9 @@
 package fr.sparna.rdf.xls2rdf.web.exception;
 
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * <p>Permet d'ajouter des messages d'exception, de rajouter et lever les exceptions
  * grâce à {@link ExceptionManager#throwException} </p>
@@ -24,26 +27,28 @@ public enum ExceptionManager {
         return this.message;
     }    
     
-    private ExceptionManager(String message){
+    ExceptionManager(String message){
         this.message = message;
     }
 
     public static void throwException(Class<? extends Exception> klass, String msg){
 			if(Xls2RdfConvertException.class == klass) {
                 Xls2RdfConvertException e = new Xls2RdfConvertException(msg);
-                printStackTrace(e);
+                e.printStackTrace();
                 throw e;
             }
             if(Xls2RdfRestControllerException.class == klass) {
                 Xls2RdfRestControllerException e = new Xls2RdfRestControllerException(msg);
-                printStackTrace(e);
+                e.printStackTrace();
                 throw e;
             }
             //Add other exceptions here ...
 	}
-    
-    public static void printStackTrace(Throwable ex){
-        ex.printStackTrace();
+
+    public static String getStackTrace(Throwable t){
+        StringWriter writer = new StringWriter();
+        t.printStackTrace(new PrintWriter(writer));
+        return writer.toString();
     }
 
     

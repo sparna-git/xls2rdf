@@ -63,9 +63,9 @@
     <div class="content">
     
 		<!-- Error block -->
-			<div class="container mt-4">
+			<div class="container mt-4 .text-break">
 			  <div class="messages">
-			    <c:if test="${formData.errorMessage != null || error != null}">
+			    <c:if test="${formData.errorMessage != null}">
 			      <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #df6919; border-radius: 5px;">
 			        <h3 class="alert-heading display-5 fs-3 fw-normal">
 			          <fmt:message key="error" />

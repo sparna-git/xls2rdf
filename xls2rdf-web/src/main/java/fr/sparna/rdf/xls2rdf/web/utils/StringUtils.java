@@ -18,15 +18,13 @@ public class StringUtils {
 
     public static String formatFileName(Object obj, String mediaType){
         if(obj instanceof URL url){
-            return  String.format("%s-%s.%s", formatUrlName(url), formatDateISO8601(), mediaType);
+            return String.format("%s-%s.%s", formatUrlName(url), formatDateISO8601(), mediaType);
         }
         if(obj instanceof MultipartFile file){
-            return  String.format("%s-%s.%s", formatFileName(file), formatDateISO8601(), mediaType);
+            return String.format("%s-%s.%s", formatFileName(file), formatDateISO8601(), mediaType);
         }
         return DEFAULT_FILE_NAME;
     }
-
-
 
     private static String formatUrlName(URL url){
         String buffer = (!url.getPath().isEmpty()) ? url.getPath() : DEFAULT_FILE_NAME;

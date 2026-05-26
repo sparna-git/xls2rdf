@@ -4,6 +4,7 @@ import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.web.ApplicationData;
 import fr.sparna.rdf.xls2rdf.web.RequestData;
 import fr.sparna.rdf.xls2rdf.web.SessionData;
+import fr.sparna.rdf.xls2rdf.web.exception.ExceptionManager;
 import fr.sparna.rdf.xls2rdf.web.exception.Xls2RdfConvertException;
 import fr.sparna.rdf.xls2rdf.web.utils.ConvertFormModelKey;
 import org.slf4j.Logger;
@@ -75,7 +76,7 @@ public class Xls2RdfControllerAdvice {
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(exception = {Exception.class}, produces = {"text/html"})
 	public String exceptionHandler(Exception ex, Model model){
-		this.requestData.setErrorMessage(ex.getMessage());
+		this.requestData.setErrorMessage(ExceptionManager.getStackTrace(ex));
 		model.addAllAttributes(convertFormData());
 		return "convert";
 	}
@@ -83,7 +84,7 @@ public class Xls2RdfControllerAdvice {
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(exception = {Error.class}, produces = {"text/html"})
 	public String exceptionHandler(Error error, Model model){
-		this.requestData.setErrorMessage(error.getMessage());
+		this.requestData.setErrorMessage(ExceptionManager.getStackTrace(error));
 		model.addAllAttributes(convertFormData());
 		return "convert";
 	}
