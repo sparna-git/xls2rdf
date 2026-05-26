@@ -90,14 +90,15 @@
 			<div class="col-lg-12">
 				<h2>Spreadsheet structure</h2>
 				<p>Your spreadsheet <strong>MUST</strong> follow the structure described below to be converted to RDF. Otherwise you will get an exception or an empty RDF file.
-				Download and look at <a href="#source-example">the examples above</a>.</p>
+				Download and look at the examples included in the conversion form.</p>
 				
 				<h4>Spreadsheet processing</h4>
 				<p>Your file can contain any number of sheets. All the sheets are processed, and the extractor attempts to convert RDF from all of them.
 				If the structure of a sheet doesn't correspond to the expected template, the converter simply moves to the next one.</p>
 				
 				<h4>Sheet header processing</h4>
-				<p /><strong>ConceptScheme URI</strong> : To be converted to RDF, a sheet <em>MUST contain a URI in cell B1</em>. This is interpreted as the URI of a <code>skos:ConceptScheme</code>.
+				<p /><strong>ConceptScheme URI</strong> : To be converted to RDF, a sheet <em>MUST contain a URI in cell B1</em>. This is interpreted as the URI of a <code>skos:ConceptScheme</code>, and more generally
+				at the URI of the named graph that will contain the generated RDF.
 				<p /><strong>ConceptScheme metadata</strong> : The header CAN contain descriptive metadata of the ConceptScheme, by specifying a property URI in column A, either using a declared prefix
 				(e.g. <code>dct:title</code>, see below) or as a full URI (starting with 'http');
 				<p /><strong>Prefix declaration</strong> : Prefixes can be declared in the header :
@@ -106,7 +107,7 @@
 					<li>column B contains the prefix</li>
 					<li>column C contains the URI to be prefixed</li>
 				</ul>
-				<p />Default prefixes are already known and don't have to be declared (see below).
+				<p />Default prefixes are already known and don't have to be declared (see below). Prefixes can be declared in a separated sheet.
 				<p /><strong>Base IRI declaration</strong> : a base IRI can be declared in the header :
 				<ul>
 					<li>column A contains the special keyword "BASE" (case-insensitive) or "@base"</li>
