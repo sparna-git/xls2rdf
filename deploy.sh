@@ -1,5 +1,5 @@
 # Transfer
-scp -i /home/thomas/.ssh/sparna-keypair-francfort.pem xls2rdf-web/target/xls2rdf-web-4.0.0.war ubuntu@92.243.27.145:xls2rdf-web.war
+scp -i /home/thomas/.ssh/sparna-keypair-francfort.pem xls2rdf-web/target/xls2rdf-web-4.0.2.war ubuntu@92.243.27.145:xls2rdf-web.war
 
 # Redeploy
 ssh -i /home/thomas/.ssh/sparna-keypair-francfort.pem ubuntu@92.243.27.145 'sudo su -c "\
