@@ -77,6 +77,7 @@ public class Xls2RdfControllerAdvice {
 	@ExceptionHandler(exception = {Exception.class}, produces = {"text/html"})
 	public String exceptionHandler(Exception ex, Model model){
 		this.requestData.setErrorMessage(ExceptionManager.getStackTrace(ex));
+		ex.printStackTrace();
 		model.addAllAttributes(convertFormData());
 		return "convert";
 	}
@@ -85,6 +86,7 @@ public class Xls2RdfControllerAdvice {
 	@ExceptionHandler(exception = {Error.class}, produces = {"text/html"})
 	public String exceptionHandler(Error error, Model model){
 		this.requestData.setErrorMessage(ExceptionManager.getStackTrace(error));
+		error.printStackTrace();
 		model.addAllAttributes(convertFormData());
 		return "convert";
 	}
