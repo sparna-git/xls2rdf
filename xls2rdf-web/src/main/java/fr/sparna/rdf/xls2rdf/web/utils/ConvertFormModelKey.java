@@ -19,7 +19,7 @@ public enum ConvertFormModelKey {
 			return this.key;
 		}
 
-		private ConvertFormModelKey(String key) {
+		ConvertFormModelKey(String key) {
 			this.key = key;
 		}
     
