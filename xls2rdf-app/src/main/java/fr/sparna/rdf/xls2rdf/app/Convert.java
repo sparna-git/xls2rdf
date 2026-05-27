@@ -72,15 +72,16 @@ public class Convert implements CliCommandIfc {
 				Collections.addAll(files, arg.getInput().listFiles(this::fileFilter));
 				files.sort((Comparator.comparing(File::getName)));
 				// process each file, and add resulting data in supportRepository
-				for (File f : files) {
+				for (File f : files) {						
+						List<Model> result = builder.buildConverter().processFile(f);
 						try(RepositoryConnection connection = builder.getSupportRepository().getConnection()) {
-							List<Model> result = builder.buildConverter().processFile(f);
 							for (Model m : result) {
 								connection.add(m);
 							}
-					}
+						}
 				}
 			}
+		}
 			//if it's file just process for the input file
 			else {
 				try(InputStream in = new FileInputStream(arg.getInput());){
