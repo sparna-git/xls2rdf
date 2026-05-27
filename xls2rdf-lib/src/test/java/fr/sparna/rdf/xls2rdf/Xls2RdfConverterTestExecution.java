@@ -99,7 +99,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 				c.add(Rio.parse(new FileInputStream(external), external.toURI().toURL().toString(), RDFFormat.TURTLE));
 			} catch (Exception e) {
 				result.addError(this, e);
-				throw new IllegalArgumentException("Problem with external.ttl in unit test "+this.testFolder.getName(), e);
+				throw new IllegalArgumentException("Problem with external.ttl in unit test " + this.testFolder.getName(), e);
 			}
 			this.converter.setReconcileService(new SparqlReconcileService(externalRepository));
 		}

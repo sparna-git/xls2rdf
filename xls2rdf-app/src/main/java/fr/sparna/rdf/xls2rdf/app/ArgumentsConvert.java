@@ -12,17 +12,17 @@ public class ArgumentsConvert {
 	@Parameter(
 			names = { "-i", "--input" },
 			description = "Input Excel file",
-			converter = FileConverter.class,
 			required = true,
+			converter = FileConverter.class,
 			validateWith = FileExistsValidator.class
 	)
 	private File input;
 	
 	@Parameter(
 			names = { "-o", "--output" },
+			required = true,
 			description = "Output RDF or ZIP file name",
-			converter = FileConverter.class,
-			required = true
+			converter = FileConverter.class
 	)
 	private File output;
 	
@@ -104,6 +104,19 @@ public class ArgumentsConvert {
 	)
 	private boolean skipHidden = false;
 
+	@Parameter(
+			names = {"-w", "--watch"},
+			description = "Run a separated thread to scan the input for conversion."
+	)
+	boolean watch;
+
+	public boolean isWatch() {
+		return this.watch;
+	}
+
+	public void setWatch(boolean watch) {
+		this.watch = watch;
+	}
 
 	public File getInput() {
 		return input;

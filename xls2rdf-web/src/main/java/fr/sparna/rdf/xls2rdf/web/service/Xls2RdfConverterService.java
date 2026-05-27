@@ -1,9 +1,7 @@
 package fr.sparna.rdf.xls2rdf.web.service;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
-import fr.sparna.rdf.xls2rdf.Xls2RdfConverterFactory;
-import fr.sparna.rdf.xls2rdf.write.ModelWriterFactory;
+import fr.sparna.rdf.xls2rdf.Xls2RdfConverterBuilder;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +30,21 @@ public class Xls2RdfConverterService {
 		boolean skipHidden,
 		boolean zip) {
 
-		ModelWriterFactory factory = new ModelWriterFactory(zip, format, false);
+		Xls2RdfConverterBuilder builder = Xls2RdfConverterBuilder.getInstance()
+				.withLanguage(lang)
+				.withGenerateXl(skosxl)
+				.withGenerateXlDefinitions(skosxl)
+				.withApplyPostProcessing(ignorePostProc)
+				.withFailOnReconcile(failIfNoReconcile)
+				.withGenerateBroaderTransitive(broaderTransitive)
+				.withSkipHidden(skipHidden)
+				.withFormat(format.getDefaultMIMEType())
+				.withModelWriterFactory(zip, false, false)
+				.withModelWriterIfc(output);
 
-		ModelWriterIfc modelWriter = factory.buildNewModelWriter(output);
-		
-		Xls2RdfConverterFactory converterFactory = new Xls2RdfConverterFactory(!ignorePostProc, skosxl, skosxl, broaderTransitive, failIfNoReconcile, skipHidden);
-		
-		Xls2RdfConverter converter = converterFactory.newConverter(modelWriter, lang);
-		
+		Xls2RdfConverter converter = builder.buildConverter();
 		converter.processInputStream(input);
+
 		return converter.getConvertedVocabularyIdentifiers();
 	}
 

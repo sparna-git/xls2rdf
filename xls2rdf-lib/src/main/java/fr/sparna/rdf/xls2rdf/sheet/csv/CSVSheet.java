@@ -24,7 +24,7 @@ public class CSVSheet implements Sheet {
 
     @Override
     public String getSheetName() {
-        return this.delegate.getFileName();
+        return "Csv Sheet";
     }
 
     @Override

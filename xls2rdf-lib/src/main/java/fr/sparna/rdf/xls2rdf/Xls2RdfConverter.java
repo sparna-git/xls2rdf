@@ -30,8 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -126,7 +124,7 @@ public class Xls2RdfConverter {
 	 */
 	public List<Model> processFile(File input) {
 		try {
-			log.info("Converting file " + input.getAbsolutePath()+"...");
+			log.info("Converting file " + input.getAbsolutePath() + "...");
 			Workbook workbook;
 			String extension = "";
 			//Le pattern récupére l'extension du fichier soit le dernier .xxx
@@ -139,7 +137,7 @@ public class Xls2RdfConverter {
 				//Voir https://support.microsoft.com/fr-fr/office/formats-de-fichier-pris-en-charge-dans-excel-0943ff2c-6014-4e8d-aaea-b83d51d46247
 				case ".xls", ".xlsx", ".xlsm" -> ExcelWorkbookFactory.open(input);
 				case ".ods" -> OpenDocumentWorkbookFactory.open(input);
-				case ".csv" -> CSVWorkbookFactory.open(CSVFormat.DEFAULT, input, Files.newBufferedReader(Path.of(input.toURI())));
+				case ".csv" -> CSVWorkbookFactory.open(CSVFormat.DEFAULT, new InputStreamReader(new FileInputStream(input)));
 				default -> null;
 			};
 			return processWorkbook(workbook);
@@ -154,12 +152,26 @@ public class Xls2RdfConverter {
 	 * @return
 	 */
 	public List<Model> processInputStream(InputStream input) {
+		Workbook workbook;
+		//On garde le contenu de l'input stream car sinon le stream une fois fermé ne peut pas être réutilisé.
+		byte[] buffer = null;
+
 		try {
-			Workbook workbook = ExcelWorkbookFactory.open(input);
-			return processWorkbook(workbook);
+			buffer = input.readAllBytes();
+
+			workbook = ExcelWorkbookFactory.open(new ByteArrayInputStream(buffer));
 		} catch (Exception e) {
-			throw Xls2RdfException.rethrow(e);
-		}	
+            try {
+				workbook = OpenDocumentWorkbookFactory.open(new ByteArrayInputStream(buffer));
+            } catch (Exception ex) {
+                try {
+					workbook = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new InputStreamReader(new ByteArrayInputStream(buffer)));
+                } catch (Exception exc) {
+                    throw Xls2RdfException.rethrow(exc);
+                }
+            }
+        }
+		return processWorkbook(workbook);
 	}
 	
 	/**
@@ -223,7 +235,7 @@ public class Xls2RdfConverter {
 	 * @param sheet
 	 * @return
 	 */
-	private Model processSheet(Sheet sheet) throws IOException {
+	private Model processSheet(Sheet sheet) {
 		
 		// initialize target Model
 		Model model = new LinkedHashModelFactory().createEmptyModel();

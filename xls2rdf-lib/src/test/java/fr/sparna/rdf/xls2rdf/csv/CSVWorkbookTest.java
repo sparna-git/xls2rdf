@@ -9,11 +9,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class CSVWorkbookTest {
@@ -33,7 +33,7 @@ public class CSVWorkbookTest {
 
     @Before
     public void initProperties() throws Exception {
-        this.cud = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new File(CSV_FILE_URI), Files.newBufferedReader(Paths.get(CSV_FILE_URI)));
+        this.cud = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new InputStreamReader(new FileInputStream(Paths.get(CSV_FILE_URI).toFile())));
         Assert.assertNotNull("class under test is null.", cud);
     }
 

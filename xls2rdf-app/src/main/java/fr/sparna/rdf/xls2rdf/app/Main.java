@@ -77,9 +77,9 @@ public class Main {
 //		}
 		
 		// executes the command with the associated arguments
-		COMMAND.valueOf(jc.getParsedCommand().toUpperCase()).getCommand().execute(
-				COMMAND.valueOf(jc.getParsedCommand().toUpperCase()).getArguments()
-		);
+		COMMAND.valueOf(jc.getParsedCommand().toUpperCase())
+				.getCommand()
+				.execute(COMMAND.valueOf(jc.getParsedCommand().toUpperCase()).getArguments());
 	}
 	
 	public static void main(String[] args) throws Exception {

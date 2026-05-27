@@ -4,10 +4,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -27,18 +24,16 @@ public class CSVDelegate {
 
     // Default format -> https://commons.apache.org/proper/commons-csv/apidocs/org/apache/commons/csv/CSVFormat.html#DEFAULT
     private CSVFormat format;
-    private final BufferedReader reader;
-    private final File file;
+    private final Reader reader;
     private List<CSVRecord> records;
 
-
-    public CSVDelegate(CSVFormat format, File file, BufferedReader reader) throws IOException {
+    public CSVDelegate(CSVFormat format, Reader reader) throws IOException {
         this.format = format;
         this.format = this.format.builder().get();
         this.reader = reader;
-        this.file = file;
         this.init();
     }
+
 
     private void init(){
         try {
@@ -61,14 +56,6 @@ public class CSVDelegate {
 
     public CSVRecord getRecordByIndex(int index){
         return this.getRecords().get(index);
-    }
-
-    public String getFileName(){
-        return this.file.getName();
-    }
-
-    public File getFile() {
-        return this.file;
     }
 
     public CSVFormat getFormat(){

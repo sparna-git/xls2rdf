@@ -7,9 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -26,7 +24,7 @@ public class CSVWorkbookFactoryTest {
             throw new RuntimeException(e);
         }
     }
-    BufferedReader csvAsReader;
+    Reader csvAsReader;
     File csvAsFile;
     CSVFormat csvFormat;
 
@@ -36,7 +34,7 @@ public class CSVWorkbookFactoryTest {
         this.csvAsFile = new File(PATH_NAME);
         Assert.assertNotNull("csvAsFile document is null.", csvAsFile);
 
-        this.csvAsReader = new BufferedReader(new FileReader(csvAsFile));
+        this.csvAsReader = new InputStreamReader(new FileInputStream(csvAsFile));
         Assert.assertNotNull("csvAsInputStream document is null.", csvAsReader);
 
         this.csvFormat = CSVFormat.DEFAULT;
@@ -45,7 +43,7 @@ public class CSVWorkbookFactoryTest {
 
     @Test
     public void csvFactoryIn() throws Exception {
-        Workbook doc = CSVWorkbookFactory.open(this.csvFormat, this.csvAsFile, this.csvAsReader);
+        Workbook doc = CSVWorkbookFactory.open(this.csvFormat, this.csvAsReader);
         Assert.assertNotNull("csvFactoryIn doc is null.", doc);
     }
 

@@ -25,4 +25,5 @@ public final class ExcelWorkbookFactory {
     public static Workbook open(InputStream in) throws Exception {
         return new ExcelWorkbook(WorkbookFactory.create(in));
     }
+
 }

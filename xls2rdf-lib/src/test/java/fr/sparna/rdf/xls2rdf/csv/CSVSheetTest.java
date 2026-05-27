@@ -11,13 +11,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class CSVSheetTest {
 
@@ -33,13 +32,13 @@ public class CSVSheetTest {
         }
     }
     static final int ROW_COUNT = 12;
-    static final String SHEET_NAME = "test.csv";
+    static final String SHEET_NAME = "Csv Sheet";
 
     Sheet cud;
 
     @Before
     public void initProperties() throws Exception {
-        this.cud = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new File(CSV_FILE_URI), Files.newBufferedReader(Path.of(CSV_FILE_URI))).getSheet(0);
+        this.cud = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new InputStreamReader(new FileInputStream(CSV_FILE_URI.getPath()))).getSheet(0);
         Assert.assertNotNull("class under test is null.", cud);
     }
 

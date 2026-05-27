@@ -1,141 +1,103 @@
 package fr.sparna.rdf.xls2rdf.app;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-
+import fr.sparna.rdf.xls2rdf.Xls2RdfConverterBuilder;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParserRegistry;
 import org.eclipse.rdf4j.rio.RDFWriterRegistry;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
-import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
-import fr.sparna.rdf.xls2rdf.Xls2RdfConverterFactory;
-import fr.sparna.rdf.xls2rdf.write.ModelWriterFactory;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class Convert implements CliCommandIfc {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
-	
+	private final Logger log = LoggerFactory.getLogger(Convert.class.getName());
+
 	@Override
 	public void execute(Object args) throws Exception {
-		ArgumentsConvert a = (ArgumentsConvert)args;
-		
-		// get an input stream on input file
-		if(!a.getInput().exists()) {
-			log.error("Given input file "+a.getInput().getAbsolutePath()+" does not exist.");
-			return;
+
+		//Cast args to ArgumentsConvert
+		ArgumentsConvert arg = (ArgumentsConvert)args;
+
+		Xls2RdfConverterBuilder builder = Xls2RdfConverterBuilder.getInstance()
+						.withLanguage(arg.getLang())
+						.withApplyPostProcessing(arg.isNoPostProcessings())
+						.withGenerateXl(arg.isXlify())
+						.withGenerateXlDefinitions(arg.isXlifyDefinitions())
+						.withFailOnReconcile(arg.isNoReconcileFail())
+						.withGenerateBroaderTransitive(arg.isBroaderTransitiveify())
+						.withSkipHidden(arg.isSkipHidden());
+
+		//if the option -i and -o and -w are present
+		if(arg.isWatch() && arg.getOutput() != null && arg.getInput() != null){
+			//Run the thread parsing
+			builder
+					.withFormat(arg.getRdfFormat())
+					.withModelWriterFactory(false, arg.isGenerateGraphFiles(), arg.isPretty());
+			DirectoryWatcher watcher = new DirectoryWatcher(arg.getInput(), arg.getOutput(), builder);
+			watcher.runWatchService();
 		}
-		
-		// if user asked for graph files, but without outputting in a directory or in a zip, this is an error
-		if(a.isGenerateGraphFiles() && !(a.getOutput().getName().endsWith("zip") || a.isOutputAsDirectory())) {
-			log.error("If you need to generate graph files please use the option to output in a directory, or provide an output file with .zip extension.");
-			return;
-		}
-		
-		// determine output format
-		RDFFormat theFormat = RDFFormat.RDFXML;
-		if(a.getRdfFormat() != null) {
-			if(!RDFWriterRegistry.getInstance().getFileFormatForMIMEType(a.getRdfFormat()).isPresent()) {
-				log.error("Unknown output format : "+a.getRdfFormat());
+
+		//verify is -i and -o are present to run conversion process
+		else if(arg.getInput() != null && arg.getOutput() != null){
+			if(!arg.getInput().exists()) {
+				log.error("Given input file {} does not exist.", arg.getInput().getAbsolutePath());
 				return;
-			} else {
-				theFormat = RDFWriterRegistry.getInstance().getFileFormatForMIMEType(a.getRdfFormat()).get();
 			}
-		} else {
-			// determine format from file extension
-			if(Rio.getWriterFormatForFileName(a.getOutput().getName()).isPresent()) {
-				theFormat = Rio.getWriterFormatForFileName(a.getOutput().getName()).get();
+			// if user asked for graph files, but without outputting in a directory or in a zip, this is an error
+			if(arg.isGenerateGraphFiles() && !(arg.getOutput().getName().endsWith("zip") || arg.isOutputAsDirectory())) {
+				log.error("If you need to generate graph files please use the option to output in a directory, or provide an output file with .zip extension.");
+				return;
 			}
-		}
-		log.debug("Will use output format : "+theFormat.getDefaultMIMEType());
-		
-		// determine output mode
-		boolean useZip = a.getOutput().getName().endsWith("zip");
-		ModelWriterFactory factory = new ModelWriterFactory(useZip, theFormat, a.isGenerateGraphFiles());
-		factory.setGrouping(a.isPretty());
-		
-		ModelWriterIfc modelWriter = null;
-		FileOutputStream fileStream = null;
-		if(a.isOutputAsDirectory()) {
-			modelWriter = factory.buildNewModelWriter(a.getOutput());
-		} else {
-			// create the file if it does not exists
-			a.getOutput().createNewFile();
-			fileStream = new FileOutputStream(a.getOutput());
-			modelWriter = factory.buildNewModelWriter(fileStream);
-		}
-		
-		log.debug("Will use ModelWriter : "+modelWriter.getClass().getName());
-		Xls2RdfConverterFactory converterFactory = new Xls2RdfConverterFactory(
-				!a.isNoPostProcessings(),
-				a.isXlify(),
-				a.isXlifyDefinitions(),
-				a.isBroaderTransitiveify(),
-				a.isNoReconcileFail(),
-				a.isSkipHidden()
-		);
-		
-		Repository supportRepository = new SailRepository(new MemoryStore());
-		supportRepository.init();
-		
-		try(RepositoryConnection connection = supportRepository.getConnection()) {
-			if(a.getExternalData() != null) {			
-				if(a.getExternalData().isFile()) {
-					log.debug("Loading external data from  : "+a.getExternalData().getName());
-					RDFFormat f = RDFParserRegistry.getInstance().getFileFormatForFileName(a.getExternalData().getName()).orElse(RDFFormat.RDFXML);
-					connection.add(a.getExternalData(), a.getExternalData().toURI().toString(), f);
-				} else {
-					for (File anExternalFile : a.getExternalData().listFiles()) {
-						log.debug("Loading external data from  : "+anExternalFile.getName());
-						RDFFormat f = RDFParserRegistry.getInstance().getFileFormatForFileName(anExternalFile.getName()).orElse(RDFFormat.RDFXML);
-						connection.add(anExternalFile, anExternalFile.toURI().toString(), f);
-					}
-				}			
-			}
-		}
-		
-		converterFactory.setSupportRepository(supportRepository);
-		Xls2RdfConverter converter = converterFactory.newConverter(modelWriter, a.getLang());
-		
-		if(a.getInput().isFile()) {
-			try(InputStream in = new FileInputStream(a.getInput())) {			
-				converter.processInputStream(in);			
-			}
-		} else {
-			// sort files to guarantee alphabetical processing
-			List<File> files = Arrays.asList(a.getInput().listFiles());
-			files.sort((f1, f2) -> { return f1.getName().compareTo(f2.getName()) ;});
-			
-			// process each file, and add resulting data in supportRepository
-			for (File f : files) {
-				try(InputStream in = new FileInputStream(f)) {			
-					List<Model> result = converter.processInputStream(in);
-					for (Model m : result) {
-						try(RepositoryConnection connection = supportRepository.getConnection()) {
-							connection.add(m);
-						}
+
+			builder.withFormat(() -> {
+						if(arg.getRdfFormat() != null) return RDFWriterRegistry.getInstance().getFileFormatForMIMEType(arg.getRdfFormat()).orElse(RDFFormat.TURTLE);
+						else return RDFWriterRegistry.getInstance().getFileFormatForFileName(arg.getOutput().getName()).orElse(RDFFormat.TURTLE);
+					})
+					.withModelWriterFactory(arg.getOutput().getName().endsWith("zip"), arg.isGenerateGraphFiles(), arg.isPretty())
+					.withModelWriterIfc(arg.getOutput(), arg.isOutputAsDirectory())
+					.withSupportRepository(arg.getExternalData());
+
+			//Is input is a directory, look for all xls files to process
+			if(!arg.getInput().isFile()){
+				// sort files to guarantee alphabetical processing
+				List<File> files = new ArrayList<>();
+				Collections.addAll(files, arg.getInput().listFiles(this::fileFilter));
+				files.sort((Comparator.comparing(File::getName)));
+				// process each file, and add resulting data in supportRepository
+				for (File f : files) {
+						try(RepositoryConnection connection = builder.getSupportRepository().getConnection()) {
+							List<Model> result = builder.buildConverter().processFile(f);
+							for (Model m : result) {
+								connection.add(m);
+							}
 					}
 				}
 			}
+			//if it's file just process for the input file
+			else {
+				try(InputStream in = new FileInputStream(arg.getInput());){
+					log.debug("Will use ModelWriter : {}", builder.getModelWriter().getClass().getName());
+					builder.buildConverter().processInputStream(in);
+				}
+			}
 		}
-		
-		if(fileStream != null) {
-			fileStream.flush();
-			fileStream.close();
-		}
-		
 	}
-	
+
+	private boolean fileFilter(File file){
+		String p = file.toPath().toString();
+		//si besoin rajout d'extensions
+		if(p.endsWith(".xls") || p.endsWith(".xlsx") || p.endsWith(".xlsm")) return true;
+		else if(p.endsWith(".ods")) return true;
+		else if(p.endsWith(".csv")) return true;
+		else return false;
+	}
+
 }

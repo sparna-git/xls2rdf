@@ -1,11 +1,10 @@
 package fr.sparna.rdf.xls2rdf.write;
 
-import java.io.File;
-import java.io.OutputStream;
-
+import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
+import java.io.File;
+import java.io.OutputStream;
 
 public class ModelWriterFactory {
 

@@ -11,12 +11,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +43,7 @@ public class CSVCellTest {
     @Before
     public void initProperties() throws Exception {
         this.rows = new ArrayList<>();
-        Sheet sheet = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new File(CSV_FILE_URI), Files.newBufferedReader(Path.of(CSV_FILE_URI))).getSheet(0);
+        Sheet sheet = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new InputStreamReader(new FileInputStream(CSV_FILE_URI.getPath()))).getSheet(0);
         for(int i = 0; i < ROW_COUNT; i++){
             this.rows.add(sheet.getRow(i));
         }
