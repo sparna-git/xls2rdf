@@ -84,6 +84,9 @@
                 <transformer>
                   <resource>META-INF/spring.schemas</resource>
                 </transformer>
+                <transformer>
+                  <resource>META-INF/services/org.apache.poi.ss.usermodel.WorkbookProvider</resource>
+                </transformer>
               </transformers>
             </configuration>
           </execution>

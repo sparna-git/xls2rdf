@@ -40,7 +40,7 @@ public class Xls2RdfConverterService {
 				.withSkipHidden(skipHidden)
 				.withFormat(format.getDefaultMIMEType())
 				.withModelWriterFactory(zip, false, false)
-				.withModelWriterIfc(output);
+				.withOutputStream(output);
 
 		Xls2RdfConverter converter = builder.buildConverter();
 		converter.processInputStream(input);

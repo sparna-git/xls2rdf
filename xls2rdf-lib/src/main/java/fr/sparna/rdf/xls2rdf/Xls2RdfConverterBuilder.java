@@ -79,13 +79,12 @@ public class Xls2RdfConverterBuilder {
         return this;
     }
 
-    public Xls2RdfConverterBuilder withModelWriterIfc(File output, boolean isDirectory) throws FileNotFoundException {
-        if(isDirectory) this.modelWriter = this.modelWriterFactory.buildNewModelWriter(output);
-        else this.modelWriter = this.getModelWriterFactory().buildNewModelWriter(new FileOutputStream(output));
+    public Xls2RdfConverterBuilder withOutputDirectory(File output) throws FileNotFoundException {
+        this.modelWriter = this.modelWriterFactory.buildNewModelWriter(output);
         return this;
     }
 
-    public Xls2RdfConverterBuilder withModelWriterIfc(OutputStream out)  {
+    public Xls2RdfConverterBuilder withOutputStream(OutputStream out)  {
         this.modelWriter = this.getModelWriterFactory().buildNewModelWriter(out);
         return this;
     }

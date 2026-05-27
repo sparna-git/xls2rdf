@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,9 +63,16 @@ public class Convert implements CliCommandIfc {
 						else return RDFWriterRegistry.getInstance().getFileFormatForFileName(arg.getOutput().getName()).orElse(RDFFormat.TURTLE);
 					})
 					.withModelWriterFactory(arg.getOutput().getName().endsWith("zip"), arg.isGenerateGraphFiles(), arg.isPretty())
-					.withModelWriterIfc(arg.getOutput(), arg.isOutputAsDirectory())
 					.withSupportRepository(arg.getExternalData());
 
+			FileOutputStream out = null;
+			if(arg.isOutputAsDirectory()) {
+				builder.withOutputDirectory(arg.getOutput());
+			} else {
+				out = new FileOutputStream(arg.getOutput());
+				builder.withOutputStream(out);
+			}
+			
 			//Is input is a directory, look for all xls files to process
 			if(!arg.getInput().isFile()){
 				// sort files to guarantee alphabetical processing
@@ -81,7 +89,6 @@ public class Convert implements CliCommandIfc {
 						}
 				}
 			}
-		}
 			//if it's file just process for the input file
 			else {
 				try(InputStream in = new FileInputStream(arg.getInput());){
@@ -89,6 +96,9 @@ public class Convert implements CliCommandIfc {
 					builder.buildConverter().processInputStream(in);
 				}
 			}
+
+			if(out != null) out.flush();
+			if(out != null) out.close();
 		}
 	}
 

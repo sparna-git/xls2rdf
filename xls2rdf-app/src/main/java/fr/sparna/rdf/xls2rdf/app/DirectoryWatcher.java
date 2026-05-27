@@ -87,13 +87,11 @@ public class DirectoryWatcher {
                             if(kind == StandardWatchEventKinds.ENTRY_MODIFY && event.count() == 1){
                                 try(FileInputStream in = new FileInputStream (this.fileIn);
                                     FileOutputStream out = new FileOutputStream
-                                            (fileOut.toPath().resolve
-                                                            (this.createFileName
-                                                                (this.fileIn.getName())
-                                                            ).toFile()
+                                            (fileOut.toPath().resolve(this.createFileName(this.fileIn.getName())).toFile()
                                     )){
-                                    this.builder.withModelWriterIfc(out);
+                                    this.builder.withOutputStream(out);
                                     this.builder.buildConverter().processInputStream(in);
+                                    out.flush();
                                     System.out.println("Conversion made for " + this.fileIn + ".");
                                 }catch (IOException ex){
                                     ex.printStackTrace();

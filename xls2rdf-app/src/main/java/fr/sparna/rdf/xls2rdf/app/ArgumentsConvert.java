@@ -12,17 +12,17 @@ public class ArgumentsConvert {
 	@Parameter(
 			names = { "-i", "--input" },
 			description = "Input Excel file",
-			required = true,
 			converter = FileConverter.class,
+			required = true,
 			validateWith = FileExistsValidator.class
 	)
 	private File input;
 	
 	@Parameter(
 			names = { "-o", "--output" },
-			required = true,
 			description = "Output RDF or ZIP file name",
-			converter = FileConverter.class
+			converter = FileConverter.class,
+			required = true
 	)
 	private File output;
 	

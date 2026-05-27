@@ -171,6 +171,7 @@ public class Xls2RdfConverter {
                 }
             }
         }
+		
 		return processWorkbook(workbook);
 	}
 	
