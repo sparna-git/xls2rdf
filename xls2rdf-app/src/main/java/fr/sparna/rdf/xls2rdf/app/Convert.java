@@ -42,7 +42,7 @@ public class Convert implements CliCommandIfc {
 		if(arg.isWatch() && arg.getOutput() != null && arg.getInput() != null){
 			//Run the thread parsing
 			//lance la conversion une première du fichier -i vers -o
-			out = new FileOutputStream(DirectoryWatcher.createFileName(arg.getOutput().getName(), builder.getFormat()));
+			out = new FileOutputStream(arg.getOutput());
 			builder
 					.withModelWriterFactory(false, arg.isGenerateGraphFiles(), arg.isPretty())
 					.withOutputStream(out)

@@ -75,7 +75,7 @@ public class DirectoryWatcher {
 
                             if(kind == StandardWatchEventKinds.ENTRY_MODIFY && event.count() == 1){
                                 try(FileInputStream  in  = new FileInputStream (this.fileIn);
-                                    FileOutputStream out = new FileOutputStream(createFileName(fileOut.toString(), builder.getFormat()))){
+                                    FileOutputStream out = new FileOutputStream(this.fileOut)){
                                     this.builder.withOutputStream(out);
                                     this.builder.buildConverter().processInputStream(in);
                                     out.flush();
@@ -102,7 +102,6 @@ public class DirectoryWatcher {
     }
 
     public static String createFileName(String eventContext, RDFFormat format){
-
         if(eventContext.contains(".")){
             return eventContext
                     .substring(0, eventContext.lastIndexOf(".")) + "." + format.getDefaultFileExtension();
