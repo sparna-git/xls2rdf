@@ -1,6 +1,7 @@
 package fr.sparna.rdf.xls2rdf.app;
 
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverterBuilder;
+import org.eclipse.rdf4j.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +28,7 @@ public class DirectoryWatcher {
         this.builder = builder;
         this.watchService = FileSystems.getDefault().newWatchService();
         this.watchKeyToPath = new HashMap<>();
-        if(!this.isOutDirPresent(this.fileOut)) throw new IllegalArgumentException("The out directory is not valid.");
-        if(!registerWatchKey(this.fileIn.getParentFile())) throw new IllegalArgumentException("The file does not contain a valid directory to watch.");
+        if(!this.registerWatchKey(this.fileIn.getParentFile())) throw new IllegalArgumentException("The file does not contain a valid directory to watch.");
     }
 
 
@@ -41,19 +41,8 @@ public class DirectoryWatcher {
         return true;
     }
 
-    private String createFileName(String eventContext){
-        return eventContext
-                .substring(0, eventContext.lastIndexOf(".")) + "." + this.builder.getModelWriterFactory().getFormat().getDefaultFileExtension();
-    }
-
     private boolean isCorrectFile(Path modifiedFile){
         return modifiedFile.toString().contains(this.fileIn.getName());
-    }
-
-    private boolean isOutDirPresent(File dir){
-        if(dir.isDirectory()) return true;
-        else if(dir.mkdir()) return true;
-        else return false;
     }
 
     //Voir https://docs.oracle.com/javase/tutorial/essential/io/notification.html#name pour WatchService fonctionnement
@@ -85,10 +74,8 @@ public class DirectoryWatcher {
                             if(!this.isCorrectFile(modifiedFile)) continue;
 
                             if(kind == StandardWatchEventKinds.ENTRY_MODIFY && event.count() == 1){
-                                try(FileInputStream in = new FileInputStream (this.fileIn);
-                                    FileOutputStream out = new FileOutputStream
-                                            (fileOut.toPath().resolve(this.createFileName(this.fileIn.getName())).toFile()
-                                    )){
+                                try(FileInputStream  in  = new FileInputStream (this.fileIn);
+                                    FileOutputStream out = new FileOutputStream(createFileName(fileOut.toString(), builder.getFormat()))){
                                     this.builder.withOutputStream(out);
                                     this.builder.buildConverter().processInputStream(in);
                                     out.flush();
@@ -112,6 +99,15 @@ public class DirectoryWatcher {
                     Thread.currentThread().interrupt();
                     System.exit(-1);
                 }
+    }
+
+    public static String createFileName(String eventContext, RDFFormat format){
+
+        if(eventContext.contains(".")){
+            return eventContext
+                    .substring(0, eventContext.lastIndexOf(".")) + "." + format.getDefaultFileExtension();
+        }
+        else return eventContext + "." + format.getDefaultFileExtension();
     }
 
 }

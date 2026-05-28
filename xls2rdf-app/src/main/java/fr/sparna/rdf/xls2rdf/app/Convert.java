@@ -8,10 +8,7 @@ import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +23,7 @@ public class Convert implements CliCommandIfc {
 
 		//Cast args to ArgumentsConvert
 		ArgumentsConvert arg = (ArgumentsConvert)args;
+		FileOutputStream out = null;
 
 		Xls2RdfConverterBuilder builder = Xls2RdfConverterBuilder.getInstance()
 						.withLanguage(arg.getLang())
@@ -34,14 +32,23 @@ public class Convert implements CliCommandIfc {
 						.withGenerateXlDefinitions(arg.isXlifyDefinitions())
 						.withFailOnReconcile(arg.isNoReconcileFail())
 						.withGenerateBroaderTransitive(arg.isBroaderTransitiveify())
-						.withSkipHidden(arg.isSkipHidden());
+						.withSkipHidden(arg.isSkipHidden())
+						.withFormat(() -> {
+							if(arg.getRdfFormat() != null) return RDFWriterRegistry.getInstance().getFileFormatForMIMEType(arg.getRdfFormat()).orElse(RDFFormat.TURTLE);
+							else return RDFWriterRegistry.getInstance().getFileFormatForFileName(arg.getOutput().getName()).orElse(RDFFormat.TURTLE);
+						});
 
-		//if the option -i and -o and -w are present
+		//if the options -i and -o and -w are present
 		if(arg.isWatch() && arg.getOutput() != null && arg.getInput() != null){
 			//Run the thread parsing
+			//lance la conversion une première du fichier -i vers -o
+			out = new FileOutputStream(DirectoryWatcher.createFileName(arg.getOutput().getName(), builder.getFormat()));
 			builder
-					.withFormat(arg.getRdfFormat())
-					.withModelWriterFactory(false, arg.isGenerateGraphFiles(), arg.isPretty());
+					.withModelWriterFactory(false, arg.isGenerateGraphFiles(), arg.isPretty())
+					.withOutputStream(out)
+					.buildConverter().processInputStream(new FileInputStream(arg.getInput()));
+			flushAndClose(out);
+			//fin conversion, on lance le DirectoryWatcher
 			DirectoryWatcher watcher = new DirectoryWatcher(arg.getInput(), arg.getOutput(), builder);
 			watcher.runWatchService();
 		}
@@ -58,14 +65,11 @@ public class Convert implements CliCommandIfc {
 				return;
 			}
 
-			builder.withFormat(() -> {
-						if(arg.getRdfFormat() != null) return RDFWriterRegistry.getInstance().getFileFormatForMIMEType(arg.getRdfFormat()).orElse(RDFFormat.TURTLE);
-						else return RDFWriterRegistry.getInstance().getFileFormatForFileName(arg.getOutput().getName()).orElse(RDFFormat.TURTLE);
-					})
+			builder
 					.withModelWriterFactory(arg.getOutput().getName().endsWith("zip"), arg.isGenerateGraphFiles(), arg.isPretty())
 					.withSupportRepository(arg.getExternalData());
 
-			FileOutputStream out = null;
+
 			if(arg.isOutputAsDirectory()) {
 				builder.withOutputDirectory(arg.getOutput());
 			} else {
@@ -97,8 +101,7 @@ public class Convert implements CliCommandIfc {
 				}
 			}
 
-			if(out != null) out.flush();
-			if(out != null) out.close();
+			flushAndClose(out);
 		}
 	}
 
@@ -110,5 +113,12 @@ public class Convert implements CliCommandIfc {
 		else if(p.endsWith(".csv")) return true;
 		else return false;
 	}
+
+	private void flushAndClose(OutputStream out) throws IOException {
+		if(out != null) out.flush();
+		if(out != null) out.close();
+	}
+
+
 
 }

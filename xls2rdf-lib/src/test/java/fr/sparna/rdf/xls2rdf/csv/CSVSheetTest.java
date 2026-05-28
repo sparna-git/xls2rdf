@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -53,12 +52,12 @@ public class CSVSheetTest {
     }
 
     @Test
-    public void try_get_last_row_num_is_equal() throws IOException {
+    public void try_get_last_row_num_is_equal() {
         Assert.assertEquals("Sheet's row count is different.", ROW_COUNT - 1, this.cud.getLastRowNum());
     }
 
     @Test
-    public void try_get_rows_are_not_null() throws IOException {
+    public void try_get_rows_are_not_null() {
         for(int i = 0; i < ROW_COUNT; i++){
             Row currentRow = this.cud.getRow(i);
             Assert.assertNotNull("The current row is null.", currentRow);
