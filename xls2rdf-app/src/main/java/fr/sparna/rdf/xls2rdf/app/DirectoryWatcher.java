@@ -1,11 +1,13 @@
 package fr.sparna.rdf.xls2rdf.app;
 
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverterBuilder;
-import org.eclipse.rdf4j.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -101,12 +103,12 @@ public class DirectoryWatcher {
                 }
     }
 
-    public static String createFileName(String eventContext, RDFFormat format){
-        if(eventContext.contains(".")){
-            return eventContext
-                    .substring(0, eventContext.lastIndexOf(".")) + "." + format.getDefaultFileExtension();
-        }
-        else return eventContext + "." + format.getDefaultFileExtension();
-    }
+    //public static String createFileName(String eventContext, RDFFormat format){
+    //    if(eventContext.contains(".")){
+    //        return eventContext
+    //                .substring(0, eventContext.lastIndexOf(".")) + "." + format.getDefaultFileExtension();
+    //    }
+    //    else return eventContext + "." + format.getDefaultFileExtension();
+    //}
 
 }
