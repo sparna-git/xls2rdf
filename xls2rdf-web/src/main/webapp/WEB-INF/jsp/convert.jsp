@@ -290,7 +290,7 @@
                           class="form-check-input"
                           type="checkbox"
                           id="ignorePostProc"
-                          name="useignorePostProczip"/>
+                          name="ignorePostProc"/>
                     </div>
                   </div>
                   <!--END POST PROCESSOR OUTPUT-->

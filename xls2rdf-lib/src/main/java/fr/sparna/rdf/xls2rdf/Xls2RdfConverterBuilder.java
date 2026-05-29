@@ -177,7 +177,6 @@ public class Xls2RdfConverterBuilder {
         }
 
         converter.setFailIfNoReconcile(!this.failOnReconcile);
-
         converter.setSkipHidden(this.skipHidden);
 
         return converter;

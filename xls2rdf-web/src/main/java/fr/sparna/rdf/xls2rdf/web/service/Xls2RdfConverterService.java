@@ -34,7 +34,7 @@ public class Xls2RdfConverterService {
 				.withLanguage(lang)
 				.withGenerateXl(skosxl)
 				.withGenerateXlDefinitions(skosxl)
-				.withApplyPostProcessing(ignorePostProc)
+				.withApplyPostProcessing(!ignorePostProc)
 				.withFailOnReconcile(failIfNoReconcile)
 				.withGenerateBroaderTransitive(broaderTransitive)
 				.withSkipHidden(skipHidden)

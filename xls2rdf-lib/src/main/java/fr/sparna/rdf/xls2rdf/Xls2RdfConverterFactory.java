@@ -13,6 +13,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @deprecated {@link Xls2RdfConverter} is now built from {@link Xls2RdfConverterBuilder}.
+ * This class is still usable for backward compatibility.
+ */
+@Deprecated
 public class Xls2RdfConverterFactory {
 	
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
