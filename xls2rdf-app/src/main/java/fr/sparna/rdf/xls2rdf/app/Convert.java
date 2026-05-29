@@ -27,7 +27,7 @@ public class Convert implements CliCommandIfc {
 
 		Xls2RdfConverterBuilder builder = Xls2RdfConverterBuilder.getInstance()
 						.withLanguage(arg.getLang())
-						.withApplyPostProcessing(arg.isNoPostProcessings())
+						.withApplyPostProcessing(!arg.isNoPostProcessings())
 						.withGenerateXl(arg.isXlify())
 						.withGenerateXlDefinitions(arg.isXlifyDefinitions())
 						.withFailOnReconcile(arg.isNoReconcileFail())
