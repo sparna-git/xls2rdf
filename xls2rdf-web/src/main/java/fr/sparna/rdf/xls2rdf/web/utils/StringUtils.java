@@ -16,12 +16,12 @@ public class StringUtils {
 
     private StringUtils(){}
 
-    public static String formatFileName(Object obj, String mediaType){
+    public static String formatFileName(Object obj, String extension){
         if(obj instanceof URL url){
-            return String.format("%s-%s.%s", formatUrlName(url), formatDateISO8601(), mediaType);
+            return String.format("%s-%s.%s", formatUrlName(url), formatDateISO8601(), extension);
         }
         if(obj instanceof MultipartFile file){
-            return String.format("%s-%s.%s", formatFileName(file), formatDateISO8601(), mediaType);
+            return String.format("%s-%s.%s", formatFileName(file), formatDateISO8601(), extension);
         }
         return DEFAULT_FILE_NAME;
     }

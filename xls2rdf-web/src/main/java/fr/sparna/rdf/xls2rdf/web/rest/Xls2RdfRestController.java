@@ -43,16 +43,23 @@ public class Xls2RdfRestController {
 
 	@SwaggerRestInfo
 	@Operation(summary = "Convert excel file from an URL to a specific RDF media type.")
-	@GetMapping(value = "/convert",
+	@GetMapping(
+			value = "/convert",
 			produces = {"text/turtle", "application/rdf+xml", "application/n-triples", "application/n-quads", "text/n3", "application/trig"})
 	public ResponseEntity<ByteArrayResource> convertRDFFromGet(
 			@RequestParam(value="lang", required=false) String language,
-			@Parameter(name = "url",
+			@Parameter(
+					name = "url",
 					required = true,
-					description = "The URL of the Excel file to convert. Note that Google spreadsheets can be converted if they are publicly accessible (\"Everyone with the link\"), and by adding `/export?format=xlsx` at the end of their URL.", in = ParameterIn.QUERY,
+					description = "The URL of the Excel file to convert. Note that Google spreadsheets can be converted if they are publicly accessible (\"Everyone with the link\"), and by adding `/export?format=xlsx` at the end of their URL.",
+					in = ParameterIn.QUERY,
 					examples = {
-							@ExampleObject(name = "Exemple 1", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-1.xlsx"),
-							@ExampleObject(name = "Exemple 2", value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-2.xlsx")
+							@ExampleObject(
+									name = "Exemple 1",
+									value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-1.xlsx"),
+							@ExampleObject(
+									name = "Exemple 2",
+									value = "https://xls2rdf.sparna.fr/web/excel_test/excel2skos-exemple-2.xlsx")
 					}
 					)
 			@RequestParam(value="url", required=true) String url,
@@ -73,12 +80,14 @@ public class Xls2RdfRestController {
 
 	@SwaggerRestInfo
 	@Operation(summary = "Convert excel file from a local file to a specific RDF media type.")
-	@PostMapping(value = "/convert",
+	@PostMapping(
+			value = "/convert",
 			consumes = {"multipart/form-data"},
 			produces = {"text/turtle", "application/rdf+xml", "application/n-triples", "application/n-quads", "text/n3", "application/trig"})
 	public ResponseEntity<ByteArrayResource> convertRDFFromPost(
 			@RequestParam(value="lang", required=false) String language,
-			@Parameter(name = "file",
+			@Parameter(
+					name = "file",
 					required = true,
 					description = "The file of the Excel file to convert.")
 			@RequestParam(value="file", required=true) MultipartFile clientFile,

@@ -64,7 +64,8 @@ public class Xls2RdfConvertController {
 	}
 
 	@ResponseBody
-	@PostMapping(value = "/convert",
+	@PostMapping(
+			value = "/convert",
 			produces = {"text/turtle", "application/rdf+xml", "application/n-triples", "application/n-quads", "text/n3", "application/trig"})
 		public ResponseEntity<ByteArrayResource> convertRDF(
 			@RequestParam(value="source", required=true) String sourceString,

@@ -17,9 +17,15 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Documented
 @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "The file is properly converted.", content = {
-				@Content(mediaType = "text/turtle", examples = {
-						@ExampleObject(value = """
+        @ApiResponse(
+				responseCode = "201",
+				description = "The file is properly converted.",
+				content = {
+				@Content(
+						mediaType = "text/turtle",
+						examples = {
+							@ExampleObject(
+								value = """
 								@prefix schema: <http://schema.org/> .
 								@prefix adms: <http://www.w3.org/ns/adms#> .
 								@prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -51,8 +57,11 @@ import java.lang.annotation.*;
 								  skos:hasTopConcept <http://labs.sparna.fr/skos-play/convert/test/concept_1> .
 								""")
 				}),
-				@Content(mediaType = "application/rdf+xml",examples = {
-						@ExampleObject(value = """
+				@Content(
+						mediaType = "application/rdf+xml",
+						examples = {
+							@ExampleObject(
+								value = """
 								<?xml version="1.0" encoding="UTF-8"?>
 								<rdf:RDF
 									xmlns:schema="http://schema.org/"
@@ -91,8 +100,11 @@ import java.lang.annotation.*;
 								</rdf:RDF>
 								""")
 				}),
-				@Content(mediaType = "application/n-triples", examples = {
-						@ExampleObject(value = """
+				@Content(
+						mediaType = "application/n-triples",
+						examples = {
+							@ExampleObject(
+								value = """
 								<http://labs.sparna.fr/skos-play/convert/test/concept_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .
 								<http://labs.sparna.fr/skos-play/convert/test/concept_1> <http://www.w3.org/2004/02/skos/core#prefLabel> "Test"@fr .
 								<http://labs.sparna.fr/skos-play/convert/test/concept_1> <http://www.w3.org/2004/02/skos/core#altLabel> "toto"@fr .
@@ -102,8 +114,11 @@ import java.lang.annotation.*;
 								<http://labs.sparna.fr/skos-play/convert/test> <http://www.w3.org/2004/02/skos/core#hasTopConcept> <http://labs.sparna.fr/skos-play/convert/test/concept_1> .
 								""")
 				}),
-				@Content(mediaType = "application/n-quads", examples = {
-						@ExampleObject(value = """
+				@Content(
+						mediaType = "application/n-quads",
+						examples = {
+							@ExampleObject(
+								value = """
 								<http://labs.sparna.fr/skos-play/convert/test/concept_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> <http://labs.sparna.fr/skos-play/convert/test> .
 								<http://labs.sparna.fr/skos-play/convert/test/concept_1> <http://www.w3.org/2004/02/skos/core#prefLabel> "Test"@fr <http://labs.sparna.fr/skos-play/convert/test> .
 								<http://labs.sparna.fr/skos-play/convert/test/concept_1> <http://www.w3.org/2004/02/skos/core#altLabel> "toto"@fr <http://labs.sparna.fr/skos-play/convert/test> .
@@ -113,8 +128,11 @@ import java.lang.annotation.*;
 								<http://labs.sparna.fr/skos-play/convert/test> <http://www.w3.org/2004/02/skos/core#hasTopConcept> <http://labs.sparna.fr/skos-play/convert/test/concept_1> <http://labs.sparna.fr/skos-play/convert/test> .							
 								""")
 				}),
-				@Content(mediaType = "text/n3", examples = {
-						@ExampleObject(value = """
+				@Content(
+						mediaType = "text/n3",
+						examples = {
+							@ExampleObject(
+								value = """
 								@prefix schema: <http://schema.org/> .
 								@prefix adms: <http://www.w3.org/ns/adms#> .
 								@prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -146,8 +164,11 @@ import java.lang.annotation.*;
 								  skos:hasTopConcept <http://labs.sparna.fr/skos-play/convert/test/concept_1> .
 								""")
 				}),
-				@Content(mediaType = "application/trig", examples = {
-						@ExampleObject(value = """
+				@Content(
+						mediaType = "application/trig",
+						examples = {
+							@ExampleObject(
+								value = """
 								@prefix schema: <http://schema.org/> .
 								@prefix adms: <http://www.w3.org/ns/adms#> .
 								@prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -182,25 +203,61 @@ import java.lang.annotation.*;
 								""")
 				}),
 		}),
-        @ApiResponse(responseCode = "400", description = "The url isn't supported for conversion or is empty.", content = {@Content(mediaType = "application/json",
-				schema = @Schema(implementation = RestExceptionRendererer.class),
-				examples = {
-				@ExampleObject(value = "{\"nameException\":\"fr.sparna.rdf.xls2rdf.web.exception.Xls2RdfRestControllerException\",\"message\":\"Url is not valid for conversion!\",\"statusCode\":\"BAD_REQUEST\",\"dateTime\":\"2026-05-11T13:28:45.367592\",\"stackTrace\":\"...\"}")
-		})}),
-        @ApiResponse(responseCode = "500", description = "Internal server error.", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RestExceptionRendererer.class))})
+        @ApiResponse(
+				responseCode = "400",
+				description = "Something went wrong with the conversion. Check the url or the local file before processing.",
+				content = {@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = RestExceptionRendererer.class),
+						examples = {
+								@ExampleObject(
+										value = "{\"nameException\":\"fr.sparna.rdf.xls2rdf.web.exception.Xls2RdfRestControllerException\",\"message\":\"Url is not valid for conversion!\",\"statusCode\":\"BAD_REQUEST\",\"dateTime\":\"2026-05-11T13:28:45.367592\",\"stackTrace\":\"...\"}")
+								})
+				}),
+        @ApiResponse(
+				responseCode = "500",
+				description = "Internal server error.",
+				content = {@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = RestExceptionRendererer.class))})
 })
 @Parameters({
-        @Parameter(name = "lang", description = "Default language to apply to literal columns.", in = ParameterIn.QUERY, schema = @Schema(allowableValues = {"fr", "es", "ru", "de", "it"})),
-        @Parameter(name = "noPostProcessing", description = "Don't apply SKOS post-processing after conversion. Set this to true only if you are explicitly generating SKOS taxonomies.", in = ParameterIn.QUERY),
-        @Parameter(name = "broaderTransitive", description = "Adds SKOS:broaderTransitive explicit links.", in = ParameterIn.QUERY),
-        @Parameter(name = "format", description = "Mime type of the RDF output format (e.g. \"application/rdf+xml\"). Turtle is returned by default", in = ParameterIn.QUERY,schema = @Schema(allowableValues = {"text/turtle",
+        @Parameter(
+				name = "lang",
+				description = "Default language to apply to literal columns.",
+				in = ParameterIn.QUERY,
+				schema = @Schema(allowableValues = {"fr", "es", "ru", "de", "it"})),
+
+        @Parameter(
+				name = "noPostProcessing",
+				description = "Don't apply SKOS post-processing after conversion. Set this to true only if you are explicitly generating SKOS taxonomies.",
+				in = ParameterIn.QUERY),
+
+        @Parameter(
+				name = "broaderTransitive",
+				description = "Adds SKOS:broaderTransitive explicit links.",
+				in = ParameterIn.QUERY),
+
+        @Parameter(
+				name = "format",
+				description = "Mime type of the RDF output format (e.g. \"application/rdf+xml\"). Turtle is returned by default",
+				in = ParameterIn.QUERY,
+				schema = @Schema(allowableValues = {"text/turtle",
 				"application/rdf+xml",
 				"application/n-triples",
 				"application/n-quads",
 				"text/n3",
 				"application/trig"})),
-        @Parameter(name = "skosxl", description = "Apply SKOS-XL post-processing to reify labels.", in = ParameterIn.QUERY),
-        @Parameter(name = "skipHidden", description = "Default language to apply to literal columns.", in = ParameterIn.QUERY),
+
+        @Parameter(
+				name = "skosxl",
+				description = "Apply SKOS-XL post-processing to reify labels.",
+				in = ParameterIn.QUERY),
+
+        @Parameter(
+				name = "skipHidden",
+				description = "Default language to apply to literal columns.",
+				in = ParameterIn.QUERY),
 })
 public @interface SwaggerRestInfo {
 
