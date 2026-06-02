@@ -19,3 +19,4 @@ config_sparnatural_HN.xlsx
 .idea/
 
 
+.smarttomcat/xls2rdf-web/conf/tomcat-users.xsd

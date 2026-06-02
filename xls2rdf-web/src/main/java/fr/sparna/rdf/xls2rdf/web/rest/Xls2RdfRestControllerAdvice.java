@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 
-@RestControllerAdvice(basePackages = {"fr.sparna.rdf.xls2rdf.web.rest"})
+@RestControllerAdvice
 public class Xls2RdfRestControllerAdvice {
 
     @ExceptionHandler(exception = {Xls2RdfRestControllerException.class}, produces = {"application/json"})
@@ -18,6 +18,7 @@ public class Xls2RdfRestControllerAdvice {
         return ExceptionManager.prepareRestExceptionRenderer(ex, HttpStatus.BAD_REQUEST, LocalDateTime.now());
     }
 
+    //Permet de catch toutes les erreurs non attrapées par le serveur / spring ou autre.
     @ExceptionHandler(exception = {Exception.class}, produces = {"application/json"})
     public ResponseEntity<RestExceptionRendererer> exceptionHandler(Exception ex) {
         return ExceptionManager.prepareRestExceptionRenderer(ex, HttpStatus.INTERNAL_SERVER_ERROR, LocalDateTime.now());
