@@ -10,7 +10,7 @@ import java.io.InputStream;
 
 public class OpenDocumentWorkbookFactory {
 
-    static Logger log = LoggerFactory.getLogger(OpenDocumentWorkbookFactory.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(OpenDocumentWorkbookFactory.class.getName());
 
     private OpenDocumentWorkbookFactory(){}
 

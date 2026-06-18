@@ -34,7 +34,6 @@ public class CSVDelegate {
         this.init();
     }
 
-
     private void init(){
         try {
             //On associe le reader à un CSVParser et on enregistre les records en mémoire pour pouvoir les utiliser plusieurs fois
