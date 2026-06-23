@@ -23,6 +23,7 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.ExcelHelper;
+import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
@@ -49,14 +50,16 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
 
 	@Override
 	public List<Statement> processValue(Model model, Resource subject, String value, Cell cell, String language) {
-		String theCellValue = this.header.isNormalizeSpace()?ValueProcessorFactory.normalizeSpace(value):value;
+		MappingRule mappingRule = this.header.getMappingRule();
+
+		String theCellValue = mappingRule.isNormalizeSpace()?ValueProcessorFactory.normalizeSpace(value):value;
 		
 		if (StringUtils.isBlank(theCellValue)) {
 			return null;
 		}
 		
-		IRI headerDatatype = header.getDatatype().orElse(null);
-		String headerLanguage = header.getLanguage().orElse(null);
+		IRI headerDatatype = mappingRule.getDatatype().orElse(null);
+		String headerLanguage = mappingRule.getLanguage().orElse(null);
 
 		// if the value starts with http, or uses a known namespace, then try to parse it as a resource
 		// only if no datatype or language have been explicitely specified, in which case this will default to a literal
@@ -67,20 +70,20 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
 				&&
 				(value.startsWith("http") || value.startsWith("mailto") || prefixManager.usesKnownPrefix(theCellValue))
 		) {
-			if(!header.isInverse()) {
+			if(!mappingRule.isInverse()) {
 				Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(theCellValue, false));
-				Statement s = SimpleValueFactory.getInstance().createStatement(subject, header.getProperty(), v);
+				Statement s = SimpleValueFactory.getInstance().createStatement(subject, mappingRule.getProperty(), v);
 				model.add(s);
 				return Collections.singletonList(s);
 			} else {
-				model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(theCellValue, false)), header.getProperty(),subject);
+				model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.uri(theCellValue, false)), mappingRule.getProperty(),subject);
 			}			
 		} else if(headerDatatype == null && headerLanguage == null && value.startsWith("(") && value.endsWith(")")) {
 			// handle rdf:List
-			return this.valueProcessorFactory.turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);	
+			return this.valueProcessorFactory.turtleParsing(mappingRule.getProperty(), prefixManager).processValue(model, subject, value, cell, language);	
 		} else if(headerDatatype == null && headerLanguage == null && value.startsWith("[") && value.endsWith("]")) {
 			// handle blank nodes
-			return this.valueProcessorFactory.turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
+			return this.valueProcessorFactory.turtleParsing(mappingRule.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
 		} else if(
 				value.startsWith("\"")
 				&&
@@ -92,7 +95,7 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
 		) {
 			// handle cells that explicitly indicate a datatype or a language
 			// in that case it has precedence over the ones indicated in the header
-			return this.valueProcessorFactory.turtleParsing(header.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
+			return this.valueProcessorFactory.turtleParsing(mappingRule.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
 		} else {
 			// if the value is surrounded with quotes, remove them, they were here to escape a URI to be considered as a literal
 			String unescapedValue = (value.startsWith("\"") && value.endsWith("\""))?value.substring(1, value.length()-1):value;
@@ -179,22 +182,22 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
 				}
 				
 				if(l != null) {
-					Statement s = SimpleValueFactory.getInstance().createStatement(subject, header.getProperty(), l);
+					Statement s = SimpleValueFactory.getInstance().createStatement(subject, mappingRule.getProperty(), l);
 					model.add(s);
 					return Collections.singletonList(s);
 				}
 			} else if(value.startsWith("_:")) {
 				Value v = SimpleValueFactory.getInstance().createBNode(value.substring(2));
-				Statement s = SimpleValueFactory.getInstance().createStatement(subject, header.getProperty(), v);
+				Statement s = SimpleValueFactory.getInstance().createStatement(subject, mappingRule.getProperty(), v);
 				model.add(s);
 				return Collections.singletonList(s);
 			} else if(value.startsWith("<") && value.endsWith(">")) {
 				Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.relativeUri(value.substring(1, value.length()-1)));
-				Statement s = SimpleValueFactory.getInstance().createStatement(subject, header.getProperty(), v);
+				Statement s = SimpleValueFactory.getInstance().createStatement(subject, mappingRule.getProperty(), v);
 				model.add(s);
 				return Collections.singletonList(s);
 			} else {
-				return this.valueProcessorFactory.langOrPlainLiteral(header.getProperty()).processValue(model, subject, theCellValue, cell, language);
+				return this.valueProcessorFactory.langOrPlainLiteral(mappingRule.getProperty()).processValue(model, subject, theCellValue, cell, language);
 			}
 		}
 		

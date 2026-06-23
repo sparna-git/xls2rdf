@@ -104,7 +104,7 @@ public class RdfizableSheet {
 		int headerRowIndex = 1;
 		
 		boolean found = false;
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
+		MappingRuleParser headerParser = new MappingRuleParser(this.prefixManager);
 		for (int rowIndex = headerRowIndex; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 			
 			int numFound = 0;
@@ -112,9 +112,9 @@ public class RdfizableSheet {
 			for (short colIndex = 1; colIndex < 10; colIndex++) {
 				try {
 					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
-					ColumnHeader header = headerParser.parse(c.getCellValue(), c);
-					if(header.getProperty() != null) {
-						log.debug("Found proper property in header : "+header.getProperty().toString());
+					MappingRule rule = headerParser.parse(c.getCellValue());
+					if(rule.getProperty() != null) {
+						log.debug("Found proper property in header : "+rule.getProperty().toString());
 						numFound++;
 					}
 				} catch (Exception e) {
@@ -140,7 +140,7 @@ public class RdfizableSheet {
 					ColumnHeader headerA = null;
 					try {
 						Cell c = sheet.getRow(rowIndex).getCell(0);
-						headerA = headerParser.parse(c.getCellValue(), c);
+						headerA = new ColumnHeader(c, headerParser.parse(c.getCellValue()));
 					} catch (Exception e) {
 						// we prevent anything to go wrong in the parsing at this stage, since the parsing
 						// tests cells for which we are unsure of the format.
@@ -182,7 +182,7 @@ public class RdfizableSheet {
 		List<ColumnHeader> columnNames = new ArrayList<>();
 		Row row = this.sheet.getRow(rowNumber);
 		
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
+		MappingRuleParser headerParser = new MappingRuleParser(this.prefixManager);
 		if(row != null) {
 			for (short i = 0; true; i++) {
 				Cell cell = row.getCell(i);
@@ -193,7 +193,8 @@ public class RdfizableSheet {
 				if (StringUtils.isBlank(columnName)) {
 					break;
 				}
-				columnNames.add(headerParser.parse(columnName, cell));
+
+				columnNames.add(new ColumnHeader(cell, headerParser.parse(columnName)));
 			}
 		}
 		return columnNames;
@@ -202,22 +203,22 @@ public class RdfizableSheet {
 	protected List<ColumnHeader> getHeaderColumnHeaders() {
 		List<ColumnHeader> headerColumnHeaders = new ArrayList<>();
 		
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
+		MappingRuleParser headerParser = new MappingRuleParser(this.prefixManager);
 		for (int rowIndex = 1; rowIndex < this.getTitleRowIndex(); rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
 				String key = sheet.getRow(rowIndex).getColumnValue(0);
 				String value = sheet.getRow(rowIndex).getColumnValue(1);
 				
-				// parse the property
-				ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
+				// attempt to parse the property
+				MappingRule mappingRule = headerParser.parse(key);
 				if(
-						header != null
+						mappingRule != null
 						&&
-						header.getProperty() != null
+						mappingRule.getProperty() != null
 						&&
 						StringUtils.isNotBlank(value)
 				) {
-					headerColumnHeaders.add(header);
+					headerColumnHeaders.add(new ColumnHeader(sheet.getRow(rowIndex).getCell(0), mappingRule));
 				}
 			}
 		}
@@ -290,11 +291,11 @@ public class RdfizableSheet {
 		
 		// validate also header headers
 		for (ColumnHeader columnHeader : this.getHeaderColumnHeaders()) {
-			if(columnHeader.getProperty() != null) {
-				log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
-				boolean valid = propertyValidator.test(columnHeader.getProperty());
+			if(columnHeader.getMappingRule().getProperty() != null) {
+				log.debug("Validating header property "+columnHeader.getMappingRule().getProperty()+" (originally declared as "+columnHeader.getMappingRule().getDeclaredProperty()+")");
+				boolean valid = propertyValidator.test(columnHeader.getMappingRule().getProperty());
 				if(!valid) {
-					    String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+columnHeader.getHeaderCell().getCellExcelReference();
+					    String message = "Property "+columnHeader.getMappingRule().getProperty()+" is not valid, in cell "+columnHeader.getHeaderCell().getCellExcelReference();
 					log.error(message);
 					messageListener.onMessage(
 							MessageCode.INVALID_PROPERTY,
@@ -303,18 +304,18 @@ public class RdfizableSheet {
 					);
 					allValid = false;
 				} else {
-					log.debug("Property "+columnHeader.getProperty()+" is valid.");
+					log.debug("Property "+columnHeader.getMappingRule().getProperty()+" is valid.");
 				}
 			}
 		}
 		
 		if(this.columnHeaders != null) {
 			for (ColumnHeader columnHeader : this.columnHeaders) {
-				if(columnHeader.getProperty() != null) {
-					log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
-					boolean valid = propertyValidator.test(columnHeader.getProperty());
+				if(columnHeader.getMappingRule().getProperty() != null) {
+					log.debug("Validating header property "+columnHeader.getMappingRule().getProperty()+" (originally declared as "+columnHeader.getMappingRule().getDeclaredProperty()+")");
+					boolean valid = propertyValidator.test(columnHeader.getMappingRule().getProperty());
 					if(!valid) {
-						String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+columnHeader.getHeaderCell().getCellExcelReference();
+						String message = "Property "+columnHeader.getMappingRule().getProperty()+" is not valid, in cell "+columnHeader.getHeaderCell().getCellExcelReference();
 						log.error(message);
 						messageListener.onMessage(
 								MessageCode.INVALID_PROPERTY,
@@ -323,7 +324,7 @@ public class RdfizableSheet {
 						);
 						allValid = false;
 					} else {
-						log.debug("Property "+columnHeader.getProperty()+" is valid.");
+						log.debug("Property "+columnHeader.getMappingRule().getProperty()+" is valid.");
 					}
 				}
 			}

@@ -135,7 +135,7 @@ public class ManchesterClassExpressionParserProcessor implements ValueProcessorI
 	        // read triple from the class expression
 	        Model theInterestingTriples = retrieveStatementsTreeRec(ontologyModel, (Resource)equivalentClassEntity);
 			// add link from subject to class expression
-	        theInterestingTriples.add(subject, header.getProperty(), (Resource)equivalentClassEntity);
+	        theInterestingTriples.add(subject, header.getMappingRule().getProperty(), (Resource)equivalentClassEntity);
 
 	        model.addAll(theInterestingTriples);  
 			

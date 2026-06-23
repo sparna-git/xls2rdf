@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.ExcelHelper;
+import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
@@ -113,7 +114,7 @@ public final class ValueProcessorFactory {
 				return g.processValue(model, subject, foundRow.getColumnValue(uriColumn), cell, language);                
 			} else {
 				// throw Exception if a reference was not found
-				log.error((cell != null ? cell.getCellExcelReference() : "?")+" Unable to find value '"+lookupValue+"' in column "+ExcelRefs.colIndexToLetters(lookupColumn)+", while trying to generate property "+header.getProperty());
+				log.error((cell != null ? cell.getCellExcelReference() : "?")+" Unable to find value '"+lookupValue+"' in column "+ExcelRefs.colIndexToLetters(lookupColumn)+", while trying to generate property "+header.getMappingRule().getProperty());
 				// keep the triple as a literal with special predicate ?				
 				// throw new Xls2SkosException("Unable to find value '"+lookupValue+"' in column of index "+lookupColumn+", while trying to generate property "+property);
 				return null;
@@ -264,7 +265,7 @@ public final class ValueProcessorFactory {
 			// remove all original triples
 			model.removeAll(originalStatements);
 			// add instead triple to the list
-			toAdd.add(subject, header.getProperty(), listHead);
+			toAdd.add(subject, header.getMappingRule().getProperty(), listHead);
 
 			model.addAll(toAdd);
 
@@ -272,7 +273,7 @@ public final class ValueProcessorFactory {
 		};
 	}
 
-	public ValueProcessorIfc wrapWithShaclLogicalOperator(ColumnHeader header, IRI logicalOperator, ValueProcessorIfc delegate) {
+	public ValueProcessorIfc wrapWithShaclLogicalOperator(MappingRule mappingRule, IRI logicalOperator, ValueProcessorIfc delegate) {
 		return (model, subject, value, cell, language) -> {
 			List<Statement> originalStatements = delegate.processValue(model, subject, value, cell, language);
 
@@ -292,7 +293,7 @@ public final class ValueProcessorFactory {
 					toAdd.add(
 						SimpleValueFactory.getInstance().createStatement(
 							bnode,
-							header.getProperty(),
+							mappingRule.getProperty(),
 							v
 						)
 					);

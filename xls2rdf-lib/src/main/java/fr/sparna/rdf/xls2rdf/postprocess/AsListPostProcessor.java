@@ -29,21 +29,21 @@ public class AsListPostProcessor implements Xls2RdfPostProcessorIfc {
 		log.debug("Postprocessing : "+this.getClass().getSimpleName());
 		
 		for (ColumnHeader aHeader : columnHeaders) {
-			if(aHeader.isAsList()) {
+			if(aHeader.getMappingRule().isAsList()) {
 				Model toRemove = new LinkedHashModel();
 				Model toAdd = new LinkedHashModel();
 				// fetch all subject that have this predicate
-				Set<Resource> subjects = model.filter(null, aHeader.getProperty(), null).subjects();
+				Set<Resource> subjects = model.filter(null, aHeader.getMappingRule().getProperty(), null).subjects();
 				for (Resource aSubject : subjects) {
 					// gather all the values
-					Set<Value> values = model.filter(aSubject, aHeader.getProperty(), null).objects();
+					Set<Value> values = model.filter(aSubject, aHeader.getMappingRule().getProperty(), null).objects();
 					// aggregate in list
 					Resource listHead = Values.bnode();
 					RDFCollections.asRDF(values,listHead,toAdd);
 					// remove all original triples
-					toRemove.addAll(model.filter(aSubject, aHeader.getProperty(), null));
+					toRemove.addAll(model.filter(aSubject, aHeader.getMappingRule().getProperty(), null));
 					// add instead triple to the list
-					toAdd.add(aSubject, aHeader.getProperty(), listHead);
+					toAdd.add(aSubject, aHeader.getMappingRule().getProperty(), listHead);
 				}
 				// remove everything that needs to be removed
 				model.removeAll(toRemove);
