@@ -21,7 +21,6 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.ExcelHelper;
 import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
@@ -36,21 +35,20 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
 	 * 
 	 */
 	private final ValueProcessorFactory valueProcessorFactory;
-	protected ColumnHeader header;
+	protected MappingRule mappingRule;
 	protected PrefixManager prefixManager;
 	protected Xls2RdfMessageListenerIfc messageListener;
 	
-	public ResourceOrLiteralValueProcessor(ValueProcessorFactory valueProcessorFactory, ColumnHeader header, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
+	public ResourceOrLiteralValueProcessor(ValueProcessorFactory valueProcessorFactory, MappingRule mappingRule, PrefixManager prefixManager, Xls2RdfMessageListenerIfc messageListener) {
 		super();
 		this.valueProcessorFactory = valueProcessorFactory;
-		this.header = header;
+		this.mappingRule = mappingRule;
 		this.prefixManager = prefixManager;
 		this.messageListener = messageListener;
 	}
 
 	@Override
 	public List<Statement> processValue(Model model, Resource subject, String value, Cell cell, String language) {
-		MappingRule mappingRule = this.header.getMappingRule();
 
 		String theCellValue = mappingRule.isNormalizeSpace()?ValueProcessorFactory.normalizeSpace(value):value;
 		

@@ -31,19 +31,21 @@ public class RdfizableSheet {
 	protected int titleRowIndex;
 	protected List<ColumnHeader> columnHeaders;
 
-	    public RdfizableSheet(
+	protected HeaderLine headerLine;
+
+	public RdfizableSheet(
 		    Sheet sheet,
 		    PrefixManager prefixManager
-	    ) {
+	) {
 		super();
 		this.sheet = sheet;
 		this.prefixManager = prefixManager;
-	}
-	
-	public void init() {
-		this.titleRowIndex = this.computeTitleRowIndex();
-		if(hasDataSection()) {
-			this.columnHeaders = this.computeColumnHeaders(this.titleRowIndex);
+
+		if(this.canRDFize()) {
+			int titleRowIndex = this.computeTitleRowIndex();
+			if(titleRowIndex > -1) {
+				this.headerLine = new HeaderLine(sheet.getRow(titleRowIndex));
+			}			
 		}
 	}
 	
@@ -224,6 +226,10 @@ public class RdfizableSheet {
 		}
 		
 		return headerColumnHeaders;
+	}
+
+	public HeaderLine getHeaderLine() {
+		return this.headerLine;
 	}
 	
 	/**

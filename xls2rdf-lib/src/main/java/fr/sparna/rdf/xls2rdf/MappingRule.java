@@ -209,7 +209,32 @@ public class MappingRule {
 				+ ", parameters=" + parameters + ", id=" + id + ", reconcileOn=" + reconcileOn + "]";
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((originalValue == null) ? 0 : originalValue.hashCode());
+		return result;
+	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MappingRule other = (MappingRule) obj;
+		if (originalValue == null) {
+			if (other.originalValue != null)
+				return false;
+		} else if (!originalValue.equals(other.originalValue))
+			return false;
+		return true;
+	}
+
+	
     
 	
 	

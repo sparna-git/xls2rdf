@@ -99,7 +99,7 @@ public final class ValueProcessorFactory {
 		};
 	}
 	
-	public ValueProcessorIfc lookup(ColumnHeader header, Sheet sheet, int lookupColumn, int uriColumn, PrefixManager prefixManager) {
+	public ValueProcessorIfc lookup(MappingRule mappingRule, Sheet sheet, int lookupColumn, int uriColumn, PrefixManager prefixManager) {
 		return (model, subject, value, cell, language) -> {
 			String lookupValue = value;
 			
@@ -110,11 +110,11 @@ public final class ValueProcessorFactory {
 			Row foundRow = ExcelHelper.columnLookup(lookupValue, sheet, lookupColumn, true);
 			
 			if(foundRow != null) {                
-				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, header, prefixManager, messageListener);
+				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
 				return g.processValue(model, subject, foundRow.getColumnValue(uriColumn), cell, language);                
 			} else {
 				// throw Exception if a reference was not found
-				log.error((cell != null ? cell.getCellExcelReference() : "?")+" Unable to find value '"+lookupValue+"' in column "+ExcelRefs.colIndexToLetters(lookupColumn)+", while trying to generate property "+header.getMappingRule().getProperty());
+				log.error((cell != null ? cell.getCellExcelReference() : "?")+" Unable to find value '"+lookupValue+"' in column "+ExcelRefs.colIndexToLetters(lookupColumn)+", while trying to generate property "+mappingRule.getProperty());
 				// keep the triple as a literal with special predicate ?				
 				// throw new Xls2SkosException("Unable to find value '"+lookupValue+"' in column of index "+lookupColumn+", while trying to generate property "+property);
 				return null;
@@ -122,7 +122,7 @@ public final class ValueProcessorFactory {
 		};
 	}
 	
-	public ValueProcessorIfc reconcile(ColumnHeader header, PrefixManager prefixManager, ReconciliableValueSetIfc reconciledValues) {
+	public ValueProcessorIfc reconcile(MappingRule mappingRule, PrefixManager prefixManager, ReconciliableValueSetIfc reconciledValues) {
 		return (model, subject, value, cell, language) -> {
 			String lookupValue = normalizeSpace(value);
 			
@@ -132,7 +132,7 @@ public final class ValueProcessorFactory {
 			
 			IRI result = reconciledValues.getReconciledValue(value);
 			if(result != null) {
-				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, header, prefixManager, messageListener);
+				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
 				return g.processValue(model, subject, result.toString(), cell, language);
 			} else {
 				log.error("Unable to find value '"+lookupValue+"'@"+language+" in reconciled values");
@@ -181,7 +181,7 @@ public final class ValueProcessorFactory {
 	}
 
 	@Deprecated
-	public ValueProcessorIfc reconcileLocal(ColumnHeader header, PrefixManager prefixManager, IRI reconcileOn, Repository supportRepository) {
+	public ValueProcessorIfc reconcileLocal(MappingRule mappingRule, PrefixManager prefixManager, IRI reconcileOn, Repository supportRepository) {
 		return (model, subject, value, cell, language) -> {
 			String lookupValue = normalizeSpace(value);
 			
@@ -209,7 +209,7 @@ public final class ValueProcessorFactory {
 				}
 				
 				if(filteredStatements.size() == 1) {
-					ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, header, prefixManager, messageListener);
+					ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
 					return g.processValue(model, subject, filteredStatements.get(0).getSubject().toString(), cell, language);		
 				} else if(filteredStatements.size() > 1) {
 					log.error("Found multiple values for '"+lookupValue+"' in type/scheme '"+reconcileOn+"' : "+filteredStatements.stream().map(s -> s.getSubject().toString()).collect(Collectors.joining(", ")));
@@ -319,8 +319,8 @@ public final class ValueProcessorFactory {
 	}
 	
 	
-	public ValueProcessorIfc resourceOrLiteral(ColumnHeader header, PrefixManager prefixManager) {
-		ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, header, prefixManager, messageListener);
+	public ValueProcessorIfc resourceOrLiteral(MappingRule mappingRule, PrefixManager prefixManager) {
+		ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
 		return g;
 	}
 
@@ -437,8 +437,8 @@ public final class ValueProcessorFactory {
 		};
 	}
 
-	public ValueProcessorIfc manchesterClassExpressionParser(ColumnHeader header, PrefixManager prefixManager) {
-		ManchesterClassExpressionParserProcessor p = new ManchesterClassExpressionParserProcessor(header, prefixManager, messageListener);
+	public ValueProcessorIfc manchesterClassExpressionParser(MappingRule mappingRule, PrefixManager prefixManager) {
+		ManchesterClassExpressionParserProcessor p = new ManchesterClassExpressionParserProcessor(mappingRule, prefixManager, messageListener);
 		return p;
 	}
 	
