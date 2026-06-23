@@ -1,8 +1,12 @@
 package fr.sparna.rdf.xls2rdf.web.exception;
 
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.LocalDateTime;
 
 /**
  * <p>Permet d'ajouter des messages d'exception, de rajouter et lever les exceptions
@@ -49,6 +53,12 @@ public enum ExceptionManager {
         StringWriter writer = new StringWriter();
         t.printStackTrace(new PrintWriter(writer));
         return writer.toString();
+    }
+
+    public static ResponseEntity<RestExceptionRendererer> prepareRestExceptionRenderer(Throwable t, HttpStatus status, LocalDateTime dateTime){
+        return new ResponseEntity<>(
+                new RestExceptionRendererer(t.getClass().getName(), t.getMessage(), status, dateTime, ExceptionManager.getStackTrace(t)), status
+        );
     }
 
     

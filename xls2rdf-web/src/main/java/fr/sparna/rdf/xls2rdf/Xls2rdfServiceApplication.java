@@ -1,7 +1,9 @@
 package fr.sparna.rdf.xls2rdf;
 
 
+import fr.sparna.rdf.xls2rdf.web.ApplicationData;
 import fr.sparna.rdf.xls2rdf.web.SwaggerUICustom;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springdoc.core.properties.SwaggerUiOAuthProperties;
 import org.springdoc.core.providers.ObjectMapperProvider;
@@ -41,5 +43,15 @@ public class Xls2rdfServiceApplication extends SpringBootServletInitializer {
 			ObjectMapperProvider d
 	){
 		return new SwaggerUICustom(a,b,c,d);
+	}
+
+	/*
+    Permet de customiser le rendu de la page swagger UNE FOIS la spécification faite par springdoc-open api
+     */
+	@Bean
+	public OpenApiCustomizer customizer(ApplicationData data){
+		return openApi -> {
+			openApi.getInfo().setVersion(data.getBuildVersion());
+		};
 	}
 }

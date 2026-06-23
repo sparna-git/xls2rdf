@@ -102,13 +102,4 @@ public class DirectoryWatcher {
                     System.exit(-1);
                 }
     }
-
-    //public static String createFileName(String eventContext, RDFFormat format){
-    //    if(eventContext.contains(".")){
-    //        return eventContext
-    //                .substring(0, eventContext.lastIndexOf(".")) + "." + format.getDefaultFileExtension();
-    //    }
-    //    else return eventContext + "." + format.getDefaultFileExtension();
-    //}
-
 }

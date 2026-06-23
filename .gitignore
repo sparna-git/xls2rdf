@@ -19,3 +19,13 @@ config_sparnatural_HN.xlsx
 .idea/
 
 
+.smarttomcat/xls2rdf-web/conf/tomcat-users.xsd
+.smarttomcat/xls2rdf-web/conf/context.xml
+.smarttomcat/xls2rdf-web/conf/catalina.properties
+.smarttomcat/xls2rdf-web/conf/catalina.policy
+.smarttomcat/xls2rdf-web/conf/jaspic-providers.xml
+.smarttomcat/xls2rdf-web/conf/jaspic-providers.xsd
+.smarttomcat/xls2rdf-web/conf/logging.properties
+.smarttomcat/xls2rdf-web/conf/server.xml
+.smarttomcat/xls2rdf-web/conf/tomcat-users.xml
+.smarttomcat/xls2rdf-web/conf/web.xml

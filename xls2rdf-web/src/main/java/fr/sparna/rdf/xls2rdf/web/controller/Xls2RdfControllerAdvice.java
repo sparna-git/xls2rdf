@@ -1,6 +1,5 @@
 package fr.sparna.rdf.xls2rdf.web.controller;
 
-import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.web.ApplicationData;
 import fr.sparna.rdf.xls2rdf.web.RequestData;
 import fr.sparna.rdf.xls2rdf.web.SessionData;
@@ -56,18 +55,9 @@ public class Xls2RdfControllerAdvice {
 		model.addAllAttributes(convertFormData());
 	}
 
-
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(exception = {Xls2RdfConvertException.class}, produces = {"text/html"})
 	public String xls2RdfConvertExceptionHandler(Xls2RdfConvertException ex, Model model){
-		this.requestData.setErrorMessage(ex.getMessage());
-		model.addAllAttributes(convertFormData());
-		return "convert";
-	}
-
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	@ExceptionHandler(exception = {Xls2RdfException.class}, produces = {"text/html"})
-	public String xls2RdfExceptionHandler(Xls2RdfException ex, Model model){
 		this.requestData.setErrorMessage(ex.getMessage());
 		model.addAllAttributes(convertFormData());
 		return "convert";
@@ -81,16 +71,5 @@ public class Xls2RdfControllerAdvice {
 		model.addAllAttributes(convertFormData());
 		return "convert";
 	}
-
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	@ExceptionHandler(exception = {Error.class}, produces = {"text/html"})
-	public String exceptionHandler(Error error, Model model){
-		this.requestData.setErrorMessage(ExceptionManager.getStackTrace(error));
-		error.printStackTrace();
-		model.addAllAttributes(convertFormData());
-		return "convert";
-	}
-
-
 
 }
