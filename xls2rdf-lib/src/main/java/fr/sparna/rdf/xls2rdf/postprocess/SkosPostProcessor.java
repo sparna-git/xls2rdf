@@ -3,6 +3,7 @@ package fr.sparna.rdf.xls2rdf.postprocess;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
+import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
@@ -44,7 +45,7 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
   }
 
   @Override
-  public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders) {
+  public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, Map<String, MappingRule> columnMapping) {
     log.debug("Postprocessing : " + this.getClass().getSimpleName());
 
     boolean isMainResourceConceptScheme = true;

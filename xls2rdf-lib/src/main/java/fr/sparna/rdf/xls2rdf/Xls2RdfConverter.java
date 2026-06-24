@@ -222,8 +222,8 @@ public class Xls2RdfConverter {
 	 */
 	private void initPrefixManager(Sheet sheet) {        
 		// read the prefixes
-		this.prefixManager.register(RdfizableSheet.readPrefixes(sheet));
-		String baseIri = RdfizableSheet.readBaseIri(sheet);
+		this.prefixManager.register(PrefixManager.readPrefixes(sheet));
+		String baseIri = PrefixManager.readBaseIri(sheet);
 		// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaratio
 		if(baseIri != null) {
 			this.prefixManager.setBaseUri(baseIri);
@@ -242,7 +242,7 @@ public class Xls2RdfConverter {
 		Model model = new LinkedHashModelFactory().createEmptyModel();
 		SimpleValueFactory svf = SimpleValueFactory.getInstance();
 		
-		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager);
+		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager, RdfizableSheet.autoDetectMappingRules(sheet, prefixManager));
 		
 		if(!rdfizableSheet.canRDFize()) {
 			log.debug(sheet.getSheetName()+" : Ignoring sheet.");
@@ -262,13 +262,15 @@ public class Xls2RdfConverter {
 		Resource csResource = svf.createIRI(csUri);	
 		
 		// find the title row index
-		int headerRowIndex = rdfizableSheet.getTitleRowIndex();
+		int headerRowIndex;
 
 		HeaderLine headerLine = rdfizableSheet.getHeaderLine();
 		// si la ligne d'entete n'a pas été trouvée, on ne génère que la ressource d'entête
 		if(headerLine == null) {
 			log.info("Could not find header row index in sheet "+sheet.getSheetName()+", will parse header object until end of sheet (last rowNum = "+ sheet.getLastRowNum() +")");
 			headerRowIndex = sheet.getLastRowNum()+1;
+		} else {
+			headerRowIndex = rdfizableSheet.getHeaderLine().getRowIndex();
 		}
 		
 		// validate the sheet
@@ -285,14 +287,14 @@ public class Xls2RdfConverter {
 		MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
 		for (int rowIndex = 1; rowIndex < headerRowIndex; rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
-			Row row = sheet.getRow(rowIndex);
-			Cell cellKey = row.getCell(0);
-			String key = (cellKey != null) ? cellKey.getCellValue() : null;
-			Cell cell = row.getCell(1);
-			String value = (cell != null) ? cell.getCellValue() : null;
-				
-			// parse the property	
-			MappingRule mappingRule = headerParser.parse(key);
+				Row row = sheet.getRow(rowIndex);
+				Cell cellKey = row.getCell(0);
+				String key = (cellKey != null) ? cellKey.getCellValue() : null;
+				Cell cell = row.getCell(1);
+				String value = (cell != null) ? cell.getCellValue() : null;
+					
+				// parse the property	
+				MappingRule mappingRule = headerParser.parse(key);
 				if(
 						mappingRule != null
 						&&
@@ -318,11 +320,11 @@ public class Xls2RdfConverter {
 					} 
 					
 					log.debug("Adding value on header object \""+value+"\" with lang "+mappingRule.getLanguage().orElse(this.lang));
-					    cellProcessor.processValue(
+						cellProcessor.processValue(
 							model,
 							csResource,
 							value,
-							    cell,
+								cell,
 							mappingRule.getLanguage().orElse(this.lang)
 					);
 				}
@@ -330,33 +332,35 @@ public class Xls2RdfConverter {
 		}		
 
 		List<Resource> rowResources = new ArrayList<>();
-		List<ColumnHeader> columnNames = new ArrayList<>();
+		Map<String, MappingRule> mappingRules = new HashMap<>();
 
 		if(rdfizableSheet.hasDataSection()) {
 			// read the column names from the header row
-			columnNames = rdfizableSheet.getColumnHeaders();
+			mappingRules = rdfizableSheet.getMappingRules();
 			
-			log.debug("Converting data with these column headers: ");
-			for (ColumnHeader columnHeader : columnNames) {
-				log.debug(columnHeader.getMappingRule().toString());
+			log.debug("Converting data with these columns : ");
+			for(String oneHeader : rdfizableSheet.headerLine.getHeaders()) {
+				log.debug(oneHeader + " --> "+((rdfizableSheet.findMappingRuleByHeader(oneHeader) != null)?rdfizableSheet.findMappingRuleByHeader(oneHeader).getOriginalValue():" _no mapping_ "));
 			}
 			
 			// reconcile columns that need to be reconciled, and store result
-			// TODO : this should be changed to an iteration on the HeaderLine
-			for (MappingRule mappingRule : columnNames.stream().map(ColumnHeader::getMappingRule).toList()) {
+			for(int i = 0; i < rdfizableSheet.getHeaderLine().getHeaders().size(); i++) {
+				String oneHeader = rdfizableSheet.getHeaderLine().getHeaders().get(i);
+
+				// find corresponding mapping rule
+				int columnIndex = i;
+				MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(oneHeader);
+
 				if(mappingRule.isReconcileExternal() && this.reconcileService != null) {					
 					    PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
 							reconcileService,
 							this.failIfNoReconcile
 					);
-					/* TODO : this should be migrated later */
-					/*
 					    reconciliableValueSet.initReconciledValues(
-						    PreloadedReconciliableValueSet.extractDistinctValues(sheet, mappingRule.getHeaderCell().getColumnIndex(), headerRowIndex),
+						    PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnIndex, headerRowIndex),
 							mappingRule.getReconcileOn(),
 							this.messageListener
 					);
-					*/
 					
 					this.reconcileColumnsValues.put(mappingRule, reconciliableValueSet);
 					
@@ -384,7 +388,7 @@ public class Xls2RdfConverter {
 					}
 					Resource rowResource;
 					try {
-						rowResource = handleRow(model, csResource, columnNames, prefixManager, r);
+						rowResource = handleRow(r, model, csResource, rdfizableSheet, prefixManager);
 					} catch (Exception e) {
 						throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName()+" : "+e.getMessage(), (Object[])null);
 					}
@@ -400,12 +404,12 @@ public class Xls2RdfConverter {
 		
 		// always post-process with asList
 		AsListPostProcessor alpp = new AsListPostProcessor();
-		alpp.afterSheet(model, csResource, rowResources, columnNames);
+		alpp.afterSheet(model, csResource, rowResources, mappingRules);
 
 		if(this.postProcessors != null && this.postProcessors.size() > 0) {
 			log.info("Applying SKOS post-processings on the result");
 			for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
-				aProcessor.afterSheet(model, csResource, rowResources, columnNames);
+				aProcessor.afterSheet(model, csResource, rowResources, mappingRules);
 			}
 		} else {
 			log.info("No post-processings to apply");
@@ -420,16 +424,17 @@ public class Xls2RdfConverter {
 		return model;
 	}
 
-	private Resource handleRow(Model model, Resource headerResource, List<ColumnHeader> columnHeaders, PrefixManager prefixManager, Row row) {
+	private Resource handleRow(Row row, Model model, Resource headerResource, RdfizableSheet rdfizableSheet, PrefixManager prefixManager) {
 		RowBuilder rowBuilder = null;
-		for (int colIndex = 0; colIndex < columnHeaders.size(); colIndex++) {
+		for (int colIndex = 0; colIndex < rdfizableSheet.getHeaderLine().getHeaders().size(); colIndex++) {
 			// skip hidden columns
 			if(skipHidden && row.getSheet().isColumnHidden(colIndex)) {
 				continue;
 			}
 
-			ColumnHeader header = columnHeaders.get(colIndex);
-			MappingRule mappingRule = header.getMappingRule();
+			// get corresponding ColumnHeader + MappingRule
+			String header = rdfizableSheet.getHeaderLine().getHeaders().get(colIndex);
+			MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(header);
 			
 			Cell cell = row.getCell(colIndex);            
 			String value = (cell != null)?cell.getCellValue():null;
@@ -491,19 +496,18 @@ public class Xls2RdfConverter {
 			if(mappingRule.getParameters().get(MappingRule.PARAMETER_LOOKUP_COLUMN) != null) {
 				// finds the index of the column corresponding to lookupColumn reference
 				String lookupColumnRef = mappingRule.getParameters().get(MappingRule.PARAMETER_LOOKUP_COLUMN);
-				int lookupColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, lookupColumnRef);
+				int lookupColumnIndex = RdfizableSheet.idRefOrPropertyRefToColumnIndex(rdfizableSheet, lookupColumnRef);
 				if(lookupColumnIndex == -1) {
 					throw new Xls2RdfException("Unable to find lookupColumn reference '"+lookupColumnRef+"' (full header "+mappingRule.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 				
 				// now find the subject at which the lookupColumn property is attached
-				ColumnHeader lookupColumnHeader = ColumnHeader.findByColumnIndex(columnHeaders, lookupColumnIndex);
 				int lookupSubjectColumn = 0;
 				if(mappingRule.getParameters().get(MappingRule.PARAMETER_SUBJECT_COLUMN) != null) {
 					String subjectColumnRef = mappingRule.getParameters().get(MappingRule.PARAMETER_SUBJECT_COLUMN);
-					lookupSubjectColumn = ColumnHeader.idRefToColumnIndex(columnHeaders, subjectColumnRef);
+					lookupSubjectColumn = RdfizableSheet.idRefToColumnIndex(rdfizableSheet, subjectColumnRef);
 					if(lookupSubjectColumn == -1) {
-						throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+lookupColumnHeader.getMappingRule().getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+", while processing lookupColumn in header "+mappingRule.getOriginalValue());
+						throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+mappingRule.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+", while processing lookupColumn in header "+mappingRule.getOriginalValue());
 					}
 				}
 				
@@ -598,7 +602,7 @@ public class Xls2RdfConverter {
 			// determine the subject of the triple, be default it is the value of the first column but can be overidden
 			if(mappingRule.getParameters().get(MappingRule.PARAMETER_SUBJECT_COLUMN) != null) {
 				String subjectColumnRef = mappingRule.getParameters().get(MappingRule.PARAMETER_SUBJECT_COLUMN);
-				int subjectColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, subjectColumnRef);
+				int subjectColumnIndex = RdfizableSheet.idRefOrPropertyRefToColumnIndex(rdfizableSheet, subjectColumnRef);
 				if(subjectColumnIndex == -1) {
 					throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+mappingRule.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}

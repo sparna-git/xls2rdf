@@ -33,7 +33,6 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
 import fr.sparna.rdf.xls2rdf.ExcelHelper;
 import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
@@ -250,7 +249,7 @@ public final class ValueProcessorFactory {
 		};
 	}
 
-	public ValueProcessorIfc asList(ColumnHeader header, ValueProcessorIfc delegate) {
+	public ValueProcessorIfc asList(MappingRule mappingRule, ValueProcessorIfc delegate) {
 		return (model, subject, value, cell, language) -> {
 			List<Statement> originalStatements = delegate.processValue(model, subject, value, cell, language);
 
@@ -265,7 +264,7 @@ public final class ValueProcessorFactory {
 			// remove all original triples
 			model.removeAll(originalStatements);
 			// add instead triple to the list
-			toAdd.add(subject, header.getMappingRule().getProperty(), listHead);
+			toAdd.add(subject, mappingRule.getProperty(), listHead);
 
 			model.addAll(toAdd);
 
