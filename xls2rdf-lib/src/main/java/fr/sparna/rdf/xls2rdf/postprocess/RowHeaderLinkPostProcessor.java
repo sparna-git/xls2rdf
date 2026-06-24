@@ -1,12 +1,14 @@
 package fr.sparna.rdf.xls2rdf.postprocess;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
-import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
+
+import java.util.List;
+import java.util.Map;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import fr.sparna.rdf.xls2rdf.MappingRule;
+import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
-import java.util.List;
 
 public class RowHeaderLinkPostProcessor implements Xls2RdfPostProcessorIfc {
 
@@ -20,7 +22,8 @@ public class RowHeaderLinkPostProcessor implements Xls2RdfPostProcessorIfc {
 	}
 
 	@Override
-	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders) {
+
+	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, Map<String, MappingRule> columnMapping) {
 		if(mainResource != null){
 			rowResources.stream().forEach(rowResource -> {
 				if(
@@ -31,7 +34,7 @@ public class RowHeaderLinkPostProcessor implements Xls2RdfPostProcessorIfc {
 					model.add(rowResource, this.property, mainResource);
 				}
 			});
+
 		}
-	}
-	
+		}
 }

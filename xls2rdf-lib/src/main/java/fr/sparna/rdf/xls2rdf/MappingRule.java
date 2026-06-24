@@ -1,17 +1,15 @@
 package fr.sparna.rdf.xls2rdf;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import fr.sparna.rdf.xls2rdf.sheet.Cell;
-import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
-
-
-public class ColumnHeader {
+/**
+ * A mapping rule in xls2rdf mapping language
+ */
+public class MappingRule {
 	
 	public static final String PARAMETER_SEPARATOR = "separator";
 	public static final String PARAMETER_SUBJECT_COLUMN = "subjectColumn";
@@ -69,10 +67,6 @@ public class ColumnHeader {
 	 */
 	private IRI reconcileOn;
 	/**
-	 * The actual cell in which the header was originally declared, from which we can get the column index
-	 */
-	private Cell headerCell;
-	/**
 	 * The IRI of the property to copyTo, set by the "copyTo" parameter
 	 */
 	private IRI copyTo;
@@ -83,7 +77,7 @@ public class ColumnHeader {
 
 
 	
-	public ColumnHeader(String originalValue) {
+	public MappingRule(String originalValue) {
 		this.originalValue = originalValue;
 	}
 
@@ -146,14 +140,6 @@ public class ColumnHeader {
 	public void setId(String id) {
 		this.id = id;
 	}
-	
-	public Cell getHeaderCell() {
-		return headerCell;
-	}
-
-	public void setHeaderCell(Cell headerCell) {
-		this.headerCell = headerCell;
-	}
 
 	public IRI getReconcileOn() {
 		return reconcileOn;
@@ -180,33 +166,33 @@ public class ColumnHeader {
 	}
 	
 	public boolean isReconcileExternal() {
-		return getParameters().get(ColumnHeader.PARAMETER_RECONCILE) != null && getParameters().get(ColumnHeader.PARAMETER_RECONCILE).equals(RECONCILE_VALUES.external.name());
+		return getParameters().get(MappingRule.PARAMETER_RECONCILE) != null && getParameters().get(MappingRule.PARAMETER_RECONCILE).equals(RECONCILE_VALUES.external.name());
 	}
 	
 	public boolean isReconcileLocal() {
-		return getParameters().get(ColumnHeader.PARAMETER_RECONCILE) != null && getParameters().get(ColumnHeader.PARAMETER_RECONCILE).equals(RECONCILE_VALUES.local.name());
+		return getParameters().get(MappingRule.PARAMETER_RECONCILE) != null && getParameters().get(MappingRule.PARAMETER_RECONCILE).equals(RECONCILE_VALUES.local.name());
 	}
 
 	public boolean isIgnoreIfParenthesis() {
-		return getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF_PARENTHESIS) != null && Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF_PARENTHESIS));
+		return getParameters().get(MappingRule.PARAMETER_IGNORE_IF_PARENTHESIS) != null && Boolean.parseBoolean(getParameters().get(MappingRule.PARAMETER_IGNORE_IF_PARENTHESIS));
 	}
 	
 	public boolean isAsList() {
-		return getParameters().get(ColumnHeader.PARAMETER_AS_LIST) != null && Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_AS_LIST));
+		return getParameters().get(MappingRule.PARAMETER_AS_LIST) != null && Boolean.parseBoolean(getParameters().get(MappingRule.PARAMETER_AS_LIST));
 	}
 	
 	public boolean isManchester() {
-		return getParameters().get(ColumnHeader.PARAMETER_MANCHESTER) != null && Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_MANCHESTER));
+		return getParameters().get(MappingRule.PARAMETER_MANCHESTER) != null && Boolean.parseBoolean(getParameters().get(MappingRule.PARAMETER_MANCHESTER));
 	}
 	
 	public String getIgnoreIf() {
-		return (getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF) != null)?getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF):null;
+		return (getParameters().get(MappingRule.PARAMETER_IGNORE_IF) != null)?getParameters().get(MappingRule.PARAMETER_IGNORE_IF):null;
 	}
 
 	public boolean isNormalizeSpace() {
 		boolean normalizeSpace = true;
-		if (getParameters().get(ColumnHeader.PARAMETER_NORMALIZE_SPACE) != null) {
-			normalizeSpace = Boolean.parseBoolean(getParameters().get(ColumnHeader.PARAMETER_NORMALIZE_SPACE));
+		if (getParameters().get(MappingRule.PARAMETER_NORMALIZE_SPACE) != null) {
+			normalizeSpace = Boolean.parseBoolean(getParameters().get(MappingRule.PARAMETER_NORMALIZE_SPACE));
 		}
 		return normalizeSpace;
 	}
@@ -215,78 +201,40 @@ public class ColumnHeader {
 		return this.parameters.get(parameter) != null;
 	}
 
-	/**
-	 * Finds the column index based on a column ID reference or an Excel column reference.
-	 * Returns -1 if not found.
-	 * 
-	 * @param headers
-	 * @param idRef
-	 * @return
-	 */
-	public static int idRefToColumnIndex(List<ColumnHeader> headers, String idRef) {
-		for (ColumnHeader header : headers) {
-			if(header.getId() != null && header.getId().equals(idRef)) {
-				return header.getHeaderCell().getColumnIndex();
-			}
-		}
-		
-		// if we haven't found the proper column id, try it as an Excel column reference
-		if(idRef.length() <= 2) {
-			int idx = ExcelRefs.colLettersToIndex(idRef);
-			if(idx != -1) return idx;
-		}
-
-		return -1;
-	}
-	
-	/**
-	 * Finds the column index based on a reference that can be 
-	 * either an ID reference or a property reference or an Excel column reference.
-	 * Returns -1 if not found.
-	 * 
-	 * @param headers
-	 * @param idOrPropertyRef the ID or property reference to search
-	 * @return
-	 */
-	public static int idRefOrPropertyRefToColumnIndex(List<ColumnHeader> headers, String idOrPropertyRef) {
-		for (ColumnHeader header : headers) {
-			if(
-					(header.getId() != null && header.getId().equals(idOrPropertyRef))
-					||
-					(header.getDeclaredProperty() != null && header.getDeclaredProperty().equals(idOrPropertyRef))
-			) {
-				return header.getHeaderCell().getColumnIndex();
-			}
-		}
-		
-		// if we haven't found the proper column id, try it as an Excel column reference
-		if(idOrPropertyRef.length() <= 2) {
-			int idx = ExcelRefs.colLettersToIndex(idOrPropertyRef);
-			if(idx != -1) return idx;
-		}
-		
-		return -1;
-	}
-	
-	public static ColumnHeader findByColumnIndex(List<ColumnHeader> headers, int columnIndex) {
-		for (ColumnHeader header : headers) {
-			if(header.getHeaderCell().getColumnIndex() == columnIndex) {
-				return header;
-			}
-		}
-		
-		return null;
-	}
 
 	@Override
 	public String toString() {
 		return "ColumnHeader [originalValue=" + originalValue + ", language=" + language + ", datatype=" + datatype
 				+ ", property=" + property + ", declaredProperty=" + declaredProperty + ", inverse=" + inverse
-				+ ", parameters=" + parameters + ", id=" + id + ", reconcileOn=" + reconcileOn + ", headerCell="
-				+ headerCell + "]";
+				+ ", parameters=" + parameters + ", id=" + id + ", reconcileOn=" + reconcileOn + "]";
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((originalValue == null) ? 0 : originalValue.hashCode());
+		return result;
+	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MappingRule other = (MappingRule) obj;
+		if (originalValue == null) {
+			if (other.originalValue != null)
+				return false;
+		} else if (!originalValue.equals(other.originalValue))
+			return false;
+		return true;
+	}
+
+	
     
 	
 	

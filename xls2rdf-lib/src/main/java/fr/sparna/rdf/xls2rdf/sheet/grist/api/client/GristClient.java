@@ -20,7 +20,7 @@ public class GristClient extends AbstractGristClient {
     }
 
     @Override
-    public JsonNode getGristWorkspace(int workspaceId) {
+    public JsonNode getWorkspace(int workspaceId) {
         if(this.isUseCache() && this.isCached(CacheItem.WORKSPACE, Integer.toString(workspaceId))){
             return this.getNodeCache(CacheItem.WORKSPACE, Integer.toString(workspaceId)).getJsonNode();
         }
@@ -30,7 +30,7 @@ public class GristClient extends AbstractGristClient {
     }
 
     @Override
-    public JsonNode getGristDocument(String documentId) {
+    public JsonNode getDocument(String documentId) {
         if(this.isUseCache() && this.isCached(CacheItem.DOCUMENT, documentId)){
             return this.getNodeCache(CacheItem.DOCUMENT, documentId).getJsonNode();
         }
@@ -40,7 +40,7 @@ public class GristClient extends AbstractGristClient {
     }
 
     @Override
-    public JsonNode getGristTables(String documentId) {
+    public JsonNode getTables(String documentId) {
         if(this.isUseCache() && this.isCached(CacheItem.TABLES, documentId)){
             return this.getNodeCache(CacheItem.TABLES, documentId).getJsonNode();
         }
@@ -50,7 +50,7 @@ public class GristClient extends AbstractGristClient {
     }
 
     @Override
-    public JsonNode getGristRecords(String documentId, String tableId) {
+    public JsonNode getRecords(String documentId, String tableId) {
         String[] identifiers = {documentId, tableId};
         if(this.isUseCache() && this.isCached(CacheItem.RECORDS, identifiers)){
             return this.getNodeCache(CacheItem.RECORDS, identifiers).getJsonNode();
@@ -63,7 +63,7 @@ public class GristClient extends AbstractGristClient {
     }
 
     @Override
-    public JsonNode getGristColumns(String documentId, String tableId) {
+    public JsonNode getColumns(String documentId, String tableId) {
         String[] identifiers = {documentId, tableId};
         if(this.isUseCache() && this.isCached(CacheItem.COLUMNS, identifiers)){
             return this.getNodeCache(CacheItem.COLUMNS, identifiers).getJsonNode();

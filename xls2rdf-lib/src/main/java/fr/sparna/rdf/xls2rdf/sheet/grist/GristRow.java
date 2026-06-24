@@ -5,7 +5,7 @@ import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
-import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.GristClient;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristRecordsParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +63,7 @@ public class GristRow implements Row {
         return ((GristSheet)this.getSheet()).getParentWorkbook();
     }
 
-    public GristClient getGristClient(){
+    public Client getGristClient(){
         return ((GristSheet)this.parentSheet).getGristClient();
     }
 

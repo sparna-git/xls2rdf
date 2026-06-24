@@ -1,6 +1,7 @@
 package fr.sparna.rdf.xls2rdf.postprocess;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
+
+import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 import org.apache.commons.io.IOUtils;
@@ -20,16 +21,18 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
 
 public class SkosXlPostProcessor implements Xls2RdfPostProcessorIfc {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
-	
+
 	/**
 	 * Whether to automatically generates SKOS-XL labels
 	 */
 	protected boolean generateXl = true;
-	
+
 	/**
 	 * Whether to automatically reify definitions (for Vocbench)
 	 */
@@ -42,9 +45,10 @@ public class SkosXlPostProcessor implements Xls2RdfPostProcessorIfc {
 	}
 
 	@Override
-	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders) {
-		if(mainResource !=  null){
-			log.debug("Postprocessing : "+this.getClass().getSimpleName());
+	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, Map<String, MappingRule> columnMapping) {
+		log.debug("Postprocessing : "+this.getClass().getSimpleName());
+
+
 
 			Repository r = new SailRepository(new MemoryStore());
 			r.init();
@@ -93,6 +97,5 @@ public class SkosXlPostProcessor implements Xls2RdfPostProcessorIfc {
 			}
 
 		}
-	}
-	
+
 }

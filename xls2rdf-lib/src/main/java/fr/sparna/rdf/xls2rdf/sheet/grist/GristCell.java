@@ -2,7 +2,7 @@ package fr.sparna.rdf.xls2rdf.sheet.grist;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import fr.sparna.rdf.xls2rdf.sheet.*;
-import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.GristClient;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +69,7 @@ public class GristCell implements Cell {
         return ((GristRow)this.parentRow).getWorkbook();
     }
 
-    public GristClient getGristClient(){
+    public Client getGristClient(){
         return ((GristRow)this.parentRow).getGristClient();
     }
 

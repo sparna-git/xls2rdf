@@ -6,14 +6,14 @@ import java.io.IOException;
 
 public interface Client {
 
-    JsonNode getGristWorkspace(int workspaceId) throws IOException, InterruptedException;
+    JsonNode getWorkspace(int workspaceId) throws IOException, InterruptedException;
 
-    JsonNode getGristDocument(String documentId) throws IOException, InterruptedException;
+    JsonNode getDocument(String documentId) throws IOException, InterruptedException;
 
-    JsonNode getGristTables(String documentId) throws IOException, InterruptedException;
+    JsonNode getTables(String documentId) throws IOException, InterruptedException;
 
-    JsonNode getGristRecords(String documentId, String tableId) throws IOException, InterruptedException;
+    JsonNode getRecords(String documentId, String tableId) throws IOException, InterruptedException;
 
-    JsonNode getGristColumns(String documentId, String tableId) throws IOException, InterruptedException;
+    JsonNode getColumns(String documentId, String tableId) throws IOException, InterruptedException;
 
 }

@@ -88,9 +88,9 @@ public class Xls2RdfConverter {
 	private Xls2RdfMessageListenerIfc messageListener = new LogXls2RdfMessageListener();
 	
 	/**
-	 * Result of reconciliation
+	 * Result of reconciliation per header
 	 */
-	private transient Map<Integer, ReconciliableValueSetIfc> reconcileColumnsValues = new HashMap<Integer, ReconciliableValueSetIfc>();
+	private transient Map<MappingRule, ReconciliableValueSetIfc> reconcileColumnsValues = new HashMap<MappingRule, ReconciliableValueSetIfc>();
 	
 	/**
 	 * Validator capable of telling if a property is valid or not
@@ -222,9 +222,11 @@ public class Xls2RdfConverter {
 	 */
 	private void initPrefixManager(Sheet sheet) {        
 		// read the prefixes
-		this.prefixManager.register(RdfizableSheet.readPrefixes(sheet));
-		String baseIri = RdfizableSheet.readBaseIri(sheet);
-		// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaration
+
+		this.prefixManager.register(PrefixManager.readPrefixes(sheet));
+		String baseIri = PrefixManager.readBaseIri(sheet);
+		// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaratio
+
 		if(baseIri != null) {
 			this.prefixManager.setBaseUri(baseIri);
 		}
@@ -242,45 +244,35 @@ public class Xls2RdfConverter {
 		Model model = new LinkedHashModelFactory().createEmptyModel();
 
 		SimpleValueFactory svf = SimpleValueFactory.getInstance();
-
-		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager);
-
-		List<ColumnHeader> columnHeaders = null;
-
-		if(rdfizableSheet.canRDFize()) {
-			log.debug("Processing sheet: " + sheet.getSheetName());
-			SheetMapping m = new SheetMapping();
-			m.setPrefixManager(prefixManager);
-		}
-		else if(this.sheetMapping != null){
-			this.sheetMapping.setPrefixManager(prefixManager);
-			rdfizableSheet.setTitleRowIndex(0);
-		}
-		else{
+		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager, RdfizableSheet.autoDetectMappingRules(sheet, prefixManager));
+		
+		if(!rdfizableSheet.canRDFize()) {
 			log.debug(sheet.getSheetName()+" : Ignoring sheet.");
 			return model;
 		}
 
-
-		Resource csResource = null;
-		String csUri = null;
-		if(rdfizableSheet.getTitleRowIndex() > 0 ){
-			csUri = prefixManager.isValidURI(rdfizableSheet.getSchemeOrGraph(), true);
-			csResource =  svf.createIRI(csUri);
-		}
+		// read the concept scheme or graph URI
+		String csUri = prefixManager.isValidURI(rdfizableSheet.getSchemeOrGraph(), true);
 
 		// if the URI was already processed, output a warning (this is a possible case)
 		if(this.convertedVocabularyIdentifiers.contains(csUri)) {
 			log.debug("Duplicate graph declaration found: " + csUri + " (declared in more than one sheet)");
 		}
 
+		Resource csResource = svf.createIRI(csUri);
+
 		// find the title row index
-		int headerRowIndex = rdfizableSheet.getTitleRowIndex();
-		log.debug("Found title row at index "+headerRowIndex);
+		int headerRowIndex;
+
+		HeaderLine headerLine = rdfizableSheet.getHeaderLine();
 		// si la ligne d'entete n'a pas été trouvée, on ne génère que la ressource d'entête
-		if(!rdfizableSheet.hasDataSection()) {
+
+		if(headerLine == null) {
+
 			log.info("Could not find header row index in sheet "+sheet.getSheetName()+", will parse header object until end of sheet (last rowNum = "+ sheet.getLastRowNum() +")");
 			headerRowIndex = sheet.getLastRowNum()+1;
+		} else {
+			headerRowIndex = rdfizableSheet.getHeaderLine().getRowIndex();
 		}
 		
 		// validate the sheet
@@ -294,21 +286,22 @@ public class Xls2RdfConverter {
 		}
 		
 		// read the properties on the header by reading the top rows
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(prefixManager);
+		MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
 		for (int rowIndex = 1; rowIndex < headerRowIndex; rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
-			Row row = sheet.getRow(rowIndex);
-			Cell cellKey = row.getCell(0);
-			String key = (cellKey != null) ? cellKey.getCellValue() : null;
-			Cell cell = row.getCell(1);
-			String value = (cell != null) ? cell.getCellValue() : null;
+				Row row = sheet.getRow(rowIndex);
+				Cell cellKey = row.getCell(0);
+				String key = (cellKey != null) ? cellKey.getCellValue() : null;
+				Cell cell = row.getCell(1);
+				String value = (cell != null) ? cell.getCellValue() : null;
+					
+				// parse the property	
+				MappingRule mappingRule = headerParser.parse(key);
 
-			// parse the property	
-			ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
 				if(
-						header != null
+						mappingRule != null
 						&&
-						header.getProperty() != null
+						mappingRule.getProperty() != null
 						&&
 						StringUtils.isNotBlank(value)
 				) {				
@@ -317,25 +310,26 @@ public class Xls2RdfConverter {
 					
 					// always use a default processor
 					ValueProcessorIfc cellProcessor = processorFactory.resourceOrLiteral(
-							header,
+							mappingRule,
 							prefixManager
 					);
 					
 					// support separator option in the header
-					if(header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR) != null) {
+					if(mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR) != null) {
 						cellProcessor = processorFactory.split(
 								cellProcessor,
-								header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR)
+								mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR)
 						);
 					} 
 					
-					log.debug("Adding value on header object \""+value+"\" with lang "+header.getLanguage().orElse(this.lang));
-					    cellProcessor.processValue(
+					log.debug("Adding value on header object \""+value+"\" with lang "+mappingRule.getLanguage().orElse(this.lang));
+						cellProcessor.processValue(
 							model,
 							csResource,
 							value,
 								cell,
-							header.getLanguage().orElse(this.lang)
+
+							mappingRule.getLanguage().orElse(this.lang)
 					);
 				}
 			}
@@ -344,39 +338,49 @@ public class Xls2RdfConverter {
 		//j'ai remonté au début de la méthode
 		//List<ColumnHeader> columnNames = rdfizableSheet.getColumnHeaders();
 		List<Resource> rowResources = new ArrayList<>();
+		Map<String, MappingRule> mappingRules = new HashMap<>();
+
 		if(rdfizableSheet.hasDataSection()) {
 			// read the column names from the header row
-			log.debug("Converting data with these column headers: ");
-			for (ColumnHeader columnHeader : columnHeaders) {
-				log.debug(columnHeader.toString());
+			mappingRules = rdfizableSheet.getMappingRules();
+			
+			log.debug("Converting data with these columns : ");
+			for(String oneHeader : rdfizableSheet.headerLine.getHeaders()) {
+				log.debug(oneHeader + " --> "+((rdfizableSheet.findMappingRuleByHeader(oneHeader) != null)?rdfizableSheet.findMappingRuleByHeader(oneHeader).getOriginalValue():" _no mapping_ "));
 			}
 			
 			// reconcile columns that need to be reconciled, and store result
-			for (ColumnHeader columnHeader : columnHeaders) {
-				if(columnHeader.isReconcileExternal() && this.reconcileService != null) {					
+			for(int i = 0; i < rdfizableSheet.getHeaderLine().getHeaders().size(); i++) {
+				String oneHeader = rdfizableSheet.getHeaderLine().getHeaders().get(i);
+
+				// find corresponding mapping rule
+				int columnIndex = i;
+				MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(oneHeader);
+
+				if(mappingRule.isReconcileExternal() && this.reconcileService != null) {
 					    PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
 							reconcileService,
 							this.failIfNoReconcile
 					);
 					    reconciliableValueSet.initReconciledValues(
-						    PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnHeader.getHeaderCell().getColumnIndex(), headerRowIndex),
-							columnHeader.getReconcileOn(),
+						    PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnIndex, headerRowIndex),
+							mappingRule.getReconcileOn(),
 							this.messageListener
 					);
 					
-					this.reconcileColumnsValues.put(columnHeader.getHeaderCell().getColumnIndex(), reconciliableValueSet);
+					this.reconcileColumnsValues.put(mappingRule, reconciliableValueSet);
 					
-				} else if (columnHeader.isReconcileLocal()) {
+				} else if (mappingRule.isReconcileLocal()) {
 					SparqlReconcileService reconcileService = new SparqlReconcileService(this.globalRepository);
 					
 					DynamicReconciliableValueSet reconciliableValueSet = new DynamicReconciliableValueSet(
 							reconcileService,
-							columnHeader.getReconcileOn(),
+							mappingRule.getReconcileOn(),
 							this.failIfNoReconcile,
 							this.messageListener
 					);
 
-					this.reconcileColumnsValues.put(columnHeader.getHeaderCell().getColumnIndex(), reconciliableValueSet);
+					this.reconcileColumnsValues.put(mappingRule, reconciliableValueSet);
 				} 
 			}
 			// read the rows after the header line and process each row
@@ -389,7 +393,7 @@ public class Xls2RdfConverter {
 					}
 					Resource rowResource;
 					try {
-						rowResource = handleRow(model, csResource, columnHeaders, prefixManager, r);
+						rowResource = handleRow(r, model, csResource, rdfizableSheet, prefixManager);
 					} catch (Exception e) {
 						throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName()+" : "+e.getMessage(), (Object[])null);
 					}
@@ -406,12 +410,15 @@ public class Xls2RdfConverter {
 		
 		// always post-process with asList
 		AsListPostProcessor alpp = new AsListPostProcessor();
-		alpp.afterSheet(model, csResource, rowResources, columnHeaders);
+		alpp.afterSheet(model, csResource, rowResources, mappingRules);
+
 
 		if(this.postProcessors != null && this.postProcessors.size() > 0) {
 			log.info("Applying SKOS post-processings on the result");
 			for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
-				aProcessor.afterSheet(model, csResource, rowResources, columnHeaders);
+
+				aProcessor.afterSheet(model, csResource, rowResources, mappingRules);
+
 			}
 		} else {
 			log.info("No post-processings to apply");
@@ -426,15 +433,17 @@ public class Xls2RdfConverter {
 		return model;
 	}
 
-	private Resource handleRow(Model model, Resource headerResource, List<ColumnHeader> columnHeaders, PrefixManager prefixManager, Row row) {
+	private Resource handleRow(Row row, Model model, Resource headerResource, RdfizableSheet rdfizableSheet, PrefixManager prefixManager) {
 		RowBuilder rowBuilder = null;
-		for (int colIndex = 0; colIndex < columnHeaders.size(); colIndex++) {
+		for (int colIndex = 0; colIndex < rdfizableSheet.getHeaderLine().getHeaders().size(); colIndex++) {
 			// skip hidden columns
 			if(skipHidden && row.getSheet().isColumnHidden(colIndex)) {
 				continue;
 			}
 
-			ColumnHeader header = columnHeaders.get(colIndex);
+			// get corresponding ColumnHeader + MappingRule
+			String header = rdfizableSheet.getHeaderLine().getHeaders().get(colIndex);
+			MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(header);
 			
 			Cell cell = row.getCell(colIndex);            
 			String value = (cell != null)?cell.getCellValue():null;
@@ -481,8 +490,8 @@ public class Xls2RdfConverter {
 				continue;
 			}
 			// test if cell should be ignored
-			if(header.getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF) != null) {
-				if(value.equals(header.getParameters().get(ColumnHeader.PARAMETER_IGNORE_IF))) {
+			if(mappingRule.getParameters().get(MappingRule.PARAMETER_IGNORE_IF) != null) {
+				if(value.equals(mappingRule.getParameters().get(MappingRule.PARAMETER_IGNORE_IF))) {
 					// skip cell
 					continue;
 				}
@@ -493,61 +502,60 @@ public class Xls2RdfConverter {
 			
 			
 			
-			if(header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN) != null) {
+			if(mappingRule.getParameters().get(MappingRule.PARAMETER_LOOKUP_COLUMN) != null) {
 				// finds the index of the column corresponding to lookupColumn reference
-				String lookupColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_LOOKUP_COLUMN);
-				int lookupColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, lookupColumnRef);
+				String lookupColumnRef = mappingRule.getParameters().get(MappingRule.PARAMETER_LOOKUP_COLUMN);
+				int lookupColumnIndex = RdfizableSheet.idRefOrPropertyRefToColumnIndex(rdfizableSheet, lookupColumnRef);
 				if(lookupColumnIndex == -1) {
-					throw new Xls2RdfException("Unable to find lookupColumn reference '"+lookupColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
+					throw new Xls2RdfException("Unable to find lookupColumn reference '"+lookupColumnRef+"' (full header "+mappingRule.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 				
 				// now find the subject at which the lookupColumn property is attached
-				ColumnHeader lookupColumnHeader = ColumnHeader.findByColumnIndex(columnHeaders, lookupColumnIndex);
 				int lookupSubjectColumn = 0;
-				if(header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN) != null) {
-					String subjectColumnRef = lookupColumnHeader.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
-					lookupSubjectColumn = ColumnHeader.idRefToColumnIndex(columnHeaders, subjectColumnRef);
+				if(mappingRule.getParameters().get(MappingRule.PARAMETER_SUBJECT_COLUMN) != null) {
+					String subjectColumnRef = mappingRule.getParameters().get(MappingRule.PARAMETER_SUBJECT_COLUMN);
+					lookupSubjectColumn = RdfizableSheet.idRefToColumnIndex(rdfizableSheet, subjectColumnRef);
 					if(lookupSubjectColumn == -1) {
-						throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+lookupColumnHeader.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+", while processing lookupColumn in header "+header.getOriginalValue());
+						throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+mappingRule.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+", while processing lookupColumn in header "+mappingRule.getOriginalValue());
 					}
 				}
 				
 				cellProcessor = processorFactory.lookup(
-						header,
-					row.getSheet(),
+						mappingRule,
+						row.getSheet(),
 						lookupColumnIndex,
 						lookupSubjectColumn,
 						prefixManager
 				);
 			}
 			
-			else if(header.getParameters().get(ColumnHeader.PARAMETER_RECONCILE) != null) {
-				String reconcileParameterValue = header.getParameters().get(ColumnHeader.PARAMETER_RECONCILE);					
+			else if(mappingRule.getParameters().get(MappingRule.PARAMETER_RECONCILE) != null) {
+				String reconcileParameterValue = mappingRule.getParameters().get(MappingRule.PARAMETER_RECONCILE);					
 				
 				if(reconcileParameterValue.equals("local")) {						
 					cellProcessor = processorFactory.reconcile(
-							header,
+							mappingRule,
 							prefixManager,
-							this.reconcileColumnsValues.get(header.getHeaderCell().getColumnIndex())
+							this.reconcileColumnsValues.get(mappingRule)
 					);
 				} else if(reconcileParameterValue.equals("external") && this.reconcileService != null) {						
 					cellProcessor = processorFactory.reconcile(
-							header,
+							mappingRule,
 							prefixManager,
-							this.reconcileColumnsValues.get(header.getHeaderCell().getColumnIndex())
+							this.reconcileColumnsValues.get(mappingRule)
 					);
 				}
 				
 			}
 			
-			else if(header.isManchester()) {
-				cellProcessor = processorFactory.manchesterClassExpressionParser(header, prefixManager);
+			else if(mappingRule.getParameters().get(MappingRule.PARAMETER_MANCHESTER) != null) {
+				cellProcessor = processorFactory.manchesterClassExpressionParser(mappingRule, prefixManager);
 			}
 
-			else if(header.getProperty() != null && header.getProperty().toString().equals("http://www.w3.org/ns/shacl#path")) {
+			else if(mappingRule.getProperty() != null && mappingRule.getProperty().toString().equals("http://www.w3.org/ns/shacl#path")) {
 				cellProcessor = new SparqlPathParserProcessor(
-					processorFactory.resourceOrLiteral(header, prefixManager),
-					header,
+					processorFactory.resourceOrLiteral(mappingRule, prefixManager),
+					mappingRule,
 					prefixManager,
 					messageListener
 				);
@@ -559,41 +567,41 @@ public class Xls2RdfConverter {
 					(
 							cellProcessor == null
 							||
-							header.getDatatype().isPresent()
+							mappingRule.getDatatype().isPresent()
 							||
-							(header.getParameters() != null && !header.getParameters().isEmpty())
+							(mappingRule.getParameters() != null && !mappingRule.getParameters().isEmpty())
 					)
 					&&
-					header.getProperty() != null
+					mappingRule.getProperty() != null
 			) {
 				cellProcessor = processorFactory.resourceOrLiteral(
-						header,
+						mappingRule,
 						prefixManager
 				);
 			}
 			
 			// if we requested to ignore values in parenthesis, wrap the processor into adequate processor
-			if(header.isIgnoreIfParenthesis()) {
+			if(mappingRule.isIgnoreIfParenthesis()) {
 				cellProcessor = processorFactory.ignoreIfParenthesis(cellProcessor);
 			}
 
 			// copy to another predicate if needed
-			if(header.getCopyTo() != null) {
-				cellProcessor = processorFactory.copyTo(header.getCopyTo(), cellProcessor);
+			if(mappingRule.getCopyTo() != null) {
+				cellProcessor = processorFactory.copyTo(mappingRule.getCopyTo(), cellProcessor);
 			}
 			
-			if(header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR) != null) {
-				cellProcessor = processorFactory.split(cellProcessor, header.getParameters().get(ColumnHeader.PARAMETER_SEPARATOR));
+			if(mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR) != null) {
+				cellProcessor = processorFactory.split(cellProcessor, mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR));
 				// use a default comma separator for cells that contain URI references
 			} else if(
 				// if it is a true column with a declared property...
-				header.getProperty() != null
+				mappingRule.getProperty() != null
 				&&
-				!header.getDatatype().isPresent()
+				!mappingRule.getDatatype().isPresent()
 				&&
-				!header.getLanguage().isPresent()
+				!mappingRule.getLanguage().isPresent()
 				&&
-				!header.isManchester()
+				!mappingRule.isManchester()
 				&&
 				(value.startsWith("http")  || value.startsWith("mailto") || prefixManager.usesKnownPrefix(value.trim()))
 			) {
@@ -601,11 +609,11 @@ public class Xls2RdfConverter {
 			}
 			
 			// determine the subject of the triple, be default it is the value of the first column but can be overidden
-			if(header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN) != null) {
-				String subjectColumnRef = header.getParameters().get(ColumnHeader.PARAMETER_SUBJECT_COLUMN);
-				int subjectColumnIndex = ColumnHeader.idRefOrPropertyRefToColumnIndex(columnHeaders, subjectColumnRef);
+			if(mappingRule.getParameters().get(MappingRule.PARAMETER_SUBJECT_COLUMN) != null) {
+				String subjectColumnRef = mappingRule.getParameters().get(MappingRule.PARAMETER_SUBJECT_COLUMN);
+				int subjectColumnIndex = RdfizableSheet.idRefOrPropertyRefToColumnIndex(rdfizableSheet, subjectColumnRef);
 				if(subjectColumnIndex == -1) {
-					throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
+					throw new Xls2RdfException("Unable to find subjectColumn reference '"+subjectColumnRef+"' (full header "+mappingRule.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 				
 				String currentSubject = (row.getCell(subjectColumnIndex) != null)?row.getCell(subjectColumnIndex).getCellValue():null;
@@ -626,25 +634,25 @@ public class Xls2RdfConverter {
 						e.printStackTrace(new PrintStream(baos));
 						String stacktraceString = new String(baos.toByteArray());
 						String stacktraceStringBegin = (stacktraceString.length() > 256)?stacktraceString.substring(0, 256):stacktraceString;
-						throw new Xls2RdfException(e, "Cannot set subject URI in cell "+subjectColumnRef+(row.getRowNum()+1)+", value is '"+ currentSubject +"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
+						throw new Xls2RdfException(e, "Cannot set subject URI in cell "+subjectColumnRef+(row.getRowNum()+1)+", value is '"+ currentSubject +"' (header "+mappingRule.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
 					}
 				} else {
-					log.warn("Unable to set a new current subject from cell '"+ExcelRefs.cellRef(row.getRowNum(), colIndex)+"' (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
+					log.warn("Unable to set a new current subject from cell '"+ExcelRefs.cellRef(row.getRowNum(), colIndex)+"' (header "+mappingRule.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".");
 				}
 			}
 
 			// TODO : this can enable to generate RDF list from a comma-separated cell values
-			// if(header.isAsList()) {
-			// 	cellProcessor = processorFactory.asList(header, cellProcessor);
+			// if(mappingRule.isAsList()) {
+			// 	cellProcessor = processorFactory.asList(mappingRule, cellProcessor);
 			// }
 
-			if(header.getWrapper() != null) {
-				if(header.getWrapper().toString().equals(SHACL.OR.toString())) {
-					cellProcessor = processorFactory.wrapWithShaclLogicalOperator(header, SHACL.OR, cellProcessor);
-				} else if(header.getWrapper().toString().equals(SHACL.AND.toString())) {
-					cellProcessor = processorFactory.wrapWithShaclLogicalOperator(header, SHACL.AND, cellProcessor);
-				} else if(header.getWrapper().toString().equals(SHACL.XONE.toString())) {
-					cellProcessor = processorFactory.wrapWithShaclLogicalOperator(header, SHACL.XONE, cellProcessor);
+			if(mappingRule.getWrapper() != null) {
+				if(mappingRule.getWrapper().toString().equals(SHACL.OR.toString())) {
+					cellProcessor = processorFactory.wrapWithShaclLogicalOperator(mappingRule, SHACL.OR, cellProcessor);
+				} else if(mappingRule.getWrapper().toString().equals(SHACL.AND.toString())) {
+					cellProcessor = processorFactory.wrapWithShaclLogicalOperator(mappingRule, SHACL.AND, cellProcessor);
+				} else if(mappingRule.getWrapper().toString().equals(SHACL.XONE.toString())) {
+					cellProcessor = processorFactory.wrapWithShaclLogicalOperator(mappingRule, SHACL.XONE, cellProcessor);
 				}
 			} 
 			
@@ -655,7 +663,7 @@ public class Xls2RdfConverter {
 							cellProcessor,
 							value,
 						    cell,
-							header.getLanguage().orElse(this.lang)
+							mappingRule.getLanguage().orElse(this.lang)
 					);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -663,7 +671,7 @@ public class Xls2RdfConverter {
 					e.printStackTrace(new PrintStream(baos));
 					String stacktraceString = new String(baos.toByteArray());
 					String stacktraceStringBegin = (stacktraceString.length() > 256)?stacktraceString.substring(0, 256):stacktraceString;
-					throw new Xls2RdfException(e, "Convert exception while processing value '"+value+"', cell "+ExcelRefs.cellRef(row.getRowNum(), colIndex)+" (header "+header.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
+					throw new Xls2RdfException(e, "Convert exception while processing value '"+value+"', cell "+ExcelRefs.cellRef(row.getRowNum(), colIndex)+" (header "+mappingRule.getOriginalValue()+") in sheet "+row.getSheet().getSheetName()+".\n Message is : "+e.getMessage()+"\n Beginning of stacktrace is "+stacktraceStringBegin);
 				}
 			}
 			

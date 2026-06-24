@@ -1,8 +1,12 @@
 package fr.sparna.rdf.xls2rdf.postprocess;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
-import fr.sparna.rdf.xls2rdf.Xls2RdfException;
-import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -21,11 +25,11 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
+import fr.sparna.rdf.xls2rdf.MappingRule;
+import fr.sparna.rdf.xls2rdf.Xls2RdfException;
+import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
+
 
 public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
   private static final String CALCULATE_BROADER_TRANSITIVE_SPARQL = "/fr/sparna/rdf/xls2rdf/postprocessing/broaderTransitive.ru";
@@ -43,126 +47,127 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
   }
 
   @Override
-  public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders) {
+  public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, Map<String, MappingRule> columnMapping) {
+
       if(mainResource != null){
-        log.debug("Postprocessing : " + this.getClass().getSimpleName());
+          log.debug("Postprocessing : " + this.getClass().getSimpleName());
 
-        boolean isMainResourceConceptScheme = true;
-        if (
-                new HasRdfTypeTest(model).test(mainResource)
-                        &&
-                        model.filter(mainResource, RDF.TYPE, SKOS.CONCEPT_SCHEME).isEmpty()
-        ) {
-          isMainResourceConceptScheme = false;
-        }
-
-        if (isMainResourceConceptScheme) {
-          log.debug("Considering main resource like a ConceptScheme.");
-        }
-
-
-        // if the main resource is a ConceptScheme, add skos:Concept to each entry
-        if (isMainResourceConceptScheme) {
-          rowResources.stream().forEach(rowResource -> {
-            // if, after row processing, no rdf:type was generated, then we consider the row to be a skos:Concept
-            // this allows to generate something else that skos:Concept
-            if (model.filter(rowResource, RDF.TYPE, null).isEmpty()) {
-              model.add(rowResource, RDF.TYPE, SKOS.CONCEPT);
-            }
-          });
-        }
-
-        // add the inverse broaders and narrowers
-        log.debug("Adding inverse skos:broader and skos:narrower");
-        model.filter(null, SKOS.BROADER, null).forEach(
-                s -> {
-                  if (s.getObject() instanceof Resource) {
-                    model.add(((Resource) s.getObject()), SKOS.NARROWER, s.getSubject());
-                  }
-                  else {
-                    log.warn("Found a skos:broader with Literal value : '" + s.getObject().stringValue() + "'");
-                  }
-                }
-        );
-        model.filter(null, SKOS.NARROWER, null).forEach(
-                s -> {
-                  if (s.getObject() instanceof Resource) {
-                    model.add(((Resource) s.getObject()), SKOS.BROADER, s.getSubject());
-                  }
-                  else {
-                    log.warn("Found a skos:narrower with Literal value : '" + s.getObject().stringValue() + "'");
-                  }
-                }
-        );
-
-        if (!model.filter(mainResource, RDF.TYPE, SKOS.COLLECTION).isEmpty()) {
-          log.debug("Main resource is a skos:Collection, adding skos:member to every Concept");
-          // if the header object was explicitely typed as skos:Collection, then add skos:members to every included skos:Concept
-          model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
-                  s -> {
-                    model.add(mainResource, SKOS.MEMBER, ((Resource) s.getSubject()));
-                  }
-          );
-        }
-        else if (new IsClassTest(model).test(mainResource)) {
-          log.debug("Main resource is a rdfs: or owl:Class, adding rdf:type to every Concept");
-          // for each resource without an explicit rdf:type, declare it of the type specified in the header
-          rowResources.stream().filter(r -> model.filter(r, RDF.TYPE, null).isEmpty()).forEach(r -> {
-            model.add(r, RDF.TYPE, mainResource);
-          });
-        }
-        else if (isMainResourceConceptScheme) {
-          // no explicit type given in header : we suppose this is a ConceptScheme and apply SKOS post processings
-
-          // add a skos:inScheme to every skos:Concept or skos:Collection or skos:OrderedCollection that was created
-          log.debug("Adding skos:inScheme");
-          // we are doing this to avoid some concurrent modification exception
-          List<Statement> statements = model.filter(null, RDF.TYPE, SKOS.CONCEPT).stream().collect(Collectors.toList());
-          statements.forEach(
-                  // model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
-                  s -> {
-                    model.add(((Resource) s.getSubject()), SKOS.IN_SCHEME, mainResource);
-                  }
-          );
-          model.filter(null, RDF.TYPE, SKOS.COLLECTION).forEach(
-                  s -> {
-                    model.add(((Resource) s.getSubject()), SKOS.IN_SCHEME, mainResource);
-                  }
-          );
-          model.filter(null, RDF.TYPE, SKOS.ORDERED_COLLECTION).forEach(
-                  s -> {
-                    model.add(((Resource) s.getSubject()), SKOS.IN_SCHEME, mainResource);
-                  }
-          );
-
-          // if at least one skos:Concept was generated,
-          // or if no entry was generated at all, declare the URI in B1 as a ConceptScheme
-          log.debug("Setting rdf:type skos:ConceptScheme to main resource");
+          boolean isMainResourceConceptScheme = true;
           if (
-                  !model.filter(null, RDF.TYPE, SKOS.CONCEPT).isEmpty()
-                          ||
-                          model.filter(null, RDF.TYPE, null).isEmpty()
-          )
-            model.add(mainResource, RDF.TYPE, SKOS.CONCEPT_SCHEME);
+                  new HasRdfTypeTest(model).test(mainResource)
+                          &&
+                          model.filter(mainResource, RDF.TYPE, SKOS.CONCEPT_SCHEME).isEmpty()
+          ) {
+              isMainResourceConceptScheme = false;
+          }
 
-          // add skos:topConceptOf and skos:hasTopConcept for each skos:Concept without broader/narrower
-          log.debug("Adding skos:hasTopConcept / skos:topConceptOf");
-          model.filter(null, RDF.TYPE, SKOS.CONCEPT).subjects().forEach(
-                  concept -> {
-                    if (
-                            model.filter(concept, SKOS.BROADER, null).isEmpty()
-                                    &&
-                                    model.filter(null, SKOS.NARROWER, concept).isEmpty()
-                    ) {
-                      model.add(mainResource, SKOS.HAS_TOP_CONCEPT, concept);
-                      model.add(concept, SKOS.TOP_CONCEPT_OF, mainResource);
-                    }
+          if (isMainResourceConceptScheme) {
+              log.debug("Considering main resource like a ConceptScheme.");
+          }
+
+
+          // if the main resource is a ConceptScheme, add skos:Concept to each entry
+          if (isMainResourceConceptScheme) {
+              rowResources.stream().forEach(rowResource -> {
+                  // if, after row processing, no rdf:type was generated, then we consider the row to be a skos:Concept
+                  // this allows to generate something else that skos:Concept
+                  if (model.filter(rowResource, RDF.TYPE, null).isEmpty()) {
+                      model.add(rowResource, RDF.TYPE, SKOS.CONCEPT);
+                  }
+              });
+          }
+
+          // add the inverse broaders and narrowers
+          log.debug("Adding inverse skos:broader and skos:narrower");
+          model.filter(null, SKOS.BROADER, null).forEach(
+                  s -> {
+                      if (s.getObject() instanceof Resource) {
+                          model.add(((Resource) s.getObject()), SKOS.NARROWER, s.getSubject());
+                      }
+                      else {
+                          log.warn("Found a skos:broader with Literal value : '" + s.getObject().stringValue() + "'");
+                      }
                   }
           );
-          if(runBroaderTransitive) {
-            addBroaderTransitive(model);
+          model.filter(null, SKOS.NARROWER, null).forEach(
+                  s -> {
+                      if (s.getObject() instanceof Resource) {
+                          model.add(((Resource) s.getObject()), SKOS.BROADER, s.getSubject());
+                      }
+                      else {
+                          log.warn("Found a skos:narrower with Literal value : '" + s.getObject().stringValue() + "'");
+                      }
+                  }
+          );
+
+          if (!model.filter(mainResource, RDF.TYPE, SKOS.COLLECTION).isEmpty()) {
+              log.debug("Main resource is a skos:Collection, adding skos:member to every Concept");
+              // if the header object was explicitely typed as skos:Collection, then add skos:members to every included skos:Concept
+              model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
+                      s -> {
+                          model.add(mainResource, SKOS.MEMBER, ((Resource) s.getSubject()));
+                      }
+              );
           }
-        }
+          else if (new IsClassTest(model).test(mainResource)) {
+              log.debug("Main resource is a rdfs: or owl:Class, adding rdf:type to every Concept");
+              // for each resource without an explicit rdf:type, declare it of the type specified in the header
+              rowResources.stream().filter(r -> model.filter(r, RDF.TYPE, null).isEmpty()).forEach(r -> {
+                  model.add(r, RDF.TYPE, mainResource);
+              });
+          }
+          else if (isMainResourceConceptScheme) {
+              // no explicit type given in header : we suppose this is a ConceptScheme and apply SKOS post processings
+
+              // add a skos:inScheme to every skos:Concept or skos:Collection or skos:OrderedCollection that was created
+              log.debug("Adding skos:inScheme");
+              // we are doing this to avoid some concurrent modification exception
+              List<Statement> statements = model.filter(null, RDF.TYPE, SKOS.CONCEPT).stream().collect(Collectors.toList());
+              statements.forEach(
+                      // model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
+                      s -> {
+                          model.add(((Resource) s.getSubject()), SKOS.IN_SCHEME, mainResource);
+                      }
+              );
+              model.filter(null, RDF.TYPE, SKOS.COLLECTION).forEach(
+                      s -> {
+                          model.add(((Resource) s.getSubject()), SKOS.IN_SCHEME, mainResource);
+                      }
+              );
+              model.filter(null, RDF.TYPE, SKOS.ORDERED_COLLECTION).forEach(
+                      s -> {
+                          model.add(((Resource) s.getSubject()), SKOS.IN_SCHEME, mainResource);
+                      }
+              );
+
+              // if at least one skos:Concept was generated,
+              // or if no entry was generated at all, declare the URI in B1 as a ConceptScheme
+              log.debug("Setting rdf:type skos:ConceptScheme to main resource");
+              if (
+                      !model.filter(null, RDF.TYPE, SKOS.CONCEPT).isEmpty()
+                              ||
+                              model.filter(null, RDF.TYPE, null).isEmpty()
+              )
+                  model.add(mainResource, RDF.TYPE, SKOS.CONCEPT_SCHEME);
+
+              // add skos:topConceptOf and skos:hasTopConcept for each skos:Concept without broader/narrower
+              log.debug("Adding skos:hasTopConcept / skos:topConceptOf");
+              model.filter(null, RDF.TYPE, SKOS.CONCEPT).subjects().forEach(
+                      concept -> {
+                          if (
+                                  model.filter(concept, SKOS.BROADER, null).isEmpty()
+                                          &&
+                                          model.filter(null, SKOS.NARROWER, concept).isEmpty()
+                          ) {
+                              model.add(mainResource, SKOS.HAS_TOP_CONCEPT, concept);
+                              model.add(concept, SKOS.TOP_CONCEPT_OF, mainResource);
+                          }
+                      }
+              );
+              if(runBroaderTransitive) {
+                  addBroaderTransitive(model);
+              }
+          }
       }
   }
 

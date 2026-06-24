@@ -34,7 +34,8 @@ public class MergeCsvToXls {
 			return null;
 		} else {
 			Sheet targetSheet = workbookXLS.getSheetAt(indexSheet);
-			int rowIndexTitle = new RdfizableSheet(new ExcelSheet(targetSheet, new ExcelWorkbook(workbookXLS)), prefixManager).computeTitleRowIndex();			
+			ExcelSheet xlSheet = new ExcelSheet(targetSheet, new ExcelWorkbook(workbookXLS));
+			int rowIndexTitle = RdfizableSheet.computeTitleRowIndex(xlSheet, prefixManager);			
 			int nRow = rowIndexTitle;
 			
 			// get all data values
@@ -59,7 +60,7 @@ public class MergeCsvToXls {
 		PrefixManager prefixManager = new PrefixManager();
 		// register prefixes
 		for (Sheet sheet : workbook) {
-			prefixManager.register(RdfizableSheet.readPrefixes(new ExcelSheet(sheet, new ExcelWorkbook(workbook))));
+			prefixManager.register(PrefixManager.readPrefixes(new ExcelSheet(sheet, new ExcelWorkbook(workbook))));
 		}
 		
 		return prefixManager;
@@ -68,7 +69,8 @@ public class MergeCsvToXls {
 	public Integer getMergeSheetIndex(Workbook wbInput, PrefixManager prefixManager) throws InvalidFormatException, IOException {
 	    // find the target sheet
 	    for (Sheet sheet : wbInput) {
-	      RdfizableSheet rdfizableSheetActive = new RdfizableSheet(new ExcelSheet(sheet, new ExcelWorkbook(wbInput)), prefixManager);
+		  ExcelSheet xlSheet = new ExcelSheet(sheet, new ExcelWorkbook(wbInput));
+	      RdfizableSheet rdfizableSheetActive = new RdfizableSheet(xlSheet, prefixManager, RdfizableSheet.autoDetectMappingRules(xlSheet, prefixManager));
 	      if (rdfizableSheetActive.canRDFize()) {
 	        return wbInput.getSheetIndex(sheet.getSheetName());
 	      }

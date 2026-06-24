@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.caller.CallableGrist;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.GristClient;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristEntityFactory;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.record.GristRecords;
@@ -78,7 +80,7 @@ public class GristSheet implements Sheet {
         return this.parentWorkbook;
     }
 
-    public GristClient getGristClient(){
+    public Client getGristClient(){
         return ((GristWorkbook)this.parentWorkbook).getClient();
     }
 

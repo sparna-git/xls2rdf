@@ -10,9 +10,28 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.rdf4j.model.vocabulary.DC;
+import org.eclipse.rdf4j.model.vocabulary.DCAT;
+import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
+import org.eclipse.rdf4j.model.vocabulary.FOAF;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.SHACL;
+import org.eclipse.rdf4j.model.vocabulary.SKOS;
+import org.eclipse.rdf4j.model.vocabulary.SKOSXL;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.postprocess.OWLPostProcessor.XLS2RDF;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+
 public class PrefixManager {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+	private static Logger log = LoggerFactory.getLogger(PrefixManager.class.getName());
 	
 	private Map<String, String> prefixes = new HashMap<>();
 	// prefixes explicitely declared in the file
@@ -163,6 +182,66 @@ public class PrefixManager {
 			}
 		});
 		return outputPrefixes;
+	}
+
+	/**
+	 * Reads the prefixes declared in the sheet. The prefixes are read in the top 100 rows, when column A contains "PREFIX" or "@prefix" (ignoring case).
+	 * @return the map of prefixes
+	 */
+	public static Map<String, String> readPrefixes(Sheet sheet) {
+		Map<String, String> prefixes = new HashMap<String, String>();
+		
+		// read the prefixes in the top 100 rows	(including the first one for cases where all prefixes are grouped in the first sheet)
+		int maxRowToCheck = Math.min(100, sheet.getLastRowNum());
+		for (int rowIndex = 0; rowIndex <= maxRowToCheck; rowIndex++) {
+			if(sheet.getRow(rowIndex) != null) {
+				Row row = sheet.getRow(rowIndex);
+				String prefixKeyword = row.getColumnValue(0);
+				// if we have the "prefix" keyword...
+				// note : we add a null check here because there are problems with some sheets
+				if(prefixKeyword != null && (prefixKeyword.equalsIgnoreCase("PREFIX") || prefixKeyword.equalsIgnoreCase("@prefix"))) {
+
+					// and we have the prefix and namespaces defined...
+					String prefix = row.getColumnValue(1);
+					if(StringUtils.isNotBlank(prefix)) {
+						if(prefix.charAt(prefix.length()-1) == ':') {
+							prefix = prefix.substring(0, prefix.length()-1);
+						}
+
+						String namespace = row.getColumnValue(2);
+						if(StringUtils.isNotBlank(namespace)) {
+							log.debug("Found prefix : "+prefix+" : <"+namespace+">");
+							prefixes.put(prefix, namespace);
+						}
+					}
+				}
+			}
+		}
+		
+		return prefixes;
+	}
+
+	public static String readBaseIri(Sheet sheet) {
+		// read the base IRI in the top 100 rows	(including the first one for cases where all prefixes are grouped in the first sheet)
+		for (int rowIndex = 0; rowIndex <= 100; rowIndex++) {
+			if(sheet.getRow(rowIndex) != null) {
+				Row row = sheet.getRow(rowIndex);
+
+				String baseKeyword = row.getColumnValue(0);
+				// if we have the "base" keyword...
+				// note : we add a null check here because there are problems with some sheets
+				if(baseKeyword != null && (baseKeyword.equalsIgnoreCase("BASE") || baseKeyword.equalsIgnoreCase("@base"))) {
+					// and we have the prefix and namespaces defined...
+					String baseIri = row.getColumnValue(1);
+					if(StringUtils.isNotBlank(baseIri)) {
+						log.debug("Found base IRI : "+baseIri);
+						return baseIri;
+					}
+				}
+			}
+		}
+		
+		return null;
 	}
 
 	public String getBaseUri() {

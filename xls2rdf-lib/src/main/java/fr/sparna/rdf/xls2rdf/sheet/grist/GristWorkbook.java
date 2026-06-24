@@ -1,14 +1,16 @@
 package fr.sparna.rdf.xls2rdf.sheet.grist;
 
+import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
-import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.GristClient;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristEntityFactory;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.table.GristTables;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 public class GristWorkbook implements Workbook {
@@ -16,13 +18,17 @@ public class GristWorkbook implements Workbook {
     private static final Logger LOGGER = LoggerFactory.getLogger(GristWorkbook.class);
 
     private final String gristDocumentId;
-    private final GristClient client;
-    private final GristTables gristTables;
+    private final Client client;
+    private GristTables gristTables;
 
-    public GristWorkbook(String gristDocumentId, GristClient client){
+    public GristWorkbook(String gristDocumentId, Client client){
         this.client = client;
         this.gristDocumentId = gristDocumentId;
-        this.gristTables = GristEntityFactory.getTables(this.client.getGristTables(this.getGristDocumentId()));
+        try {
+            this.gristTables = GristEntityFactory.getTables(this.client.getTables(this.getGristDocumentId()));
+        } catch (IOException | InterruptedException e) {
+            Xls2RdfException.rethrow(e);
+        }
     }
 
     @Override
@@ -52,7 +58,7 @@ public class GristWorkbook implements Workbook {
         };
     }
 
-    public GristClient getClient(){
+    public Client getClient(){
         return this.client;
     }
 

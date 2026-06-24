@@ -2,6 +2,7 @@ package fr.sparna.rdf.xls2rdf;
 
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -22,29 +24,30 @@ import java.util.function.Predicate;
 public class RdfizableSheet {
 
 	static Logger log = LoggerFactory.getLogger(RdfizableSheet.class.getName());
-	
+
 	protected Sheet sheet;
 	protected PrefixManager prefixManager;
-	protected int titleRowIndex;
-	protected List<ColumnHeader> columnHeaders;
 
-	    public RdfizableSheet(
-		    Sheet sheet,
-		    PrefixManager prefixManager
-	    ) {
-			this.sheet = sheet;
-			this.prefixManager = prefixManager;
-			this.titleRowIndex = this.computeTitleRowIndex();
+	protected Map<String, MappingRule> mappingRules;
+	protected HeaderLine headerLine;
 
+	public RdfizableSheet(
+			Sheet sheet,
+			PrefixManager prefixManager,
+			Map<String, MappingRule> mappingRules
+	) {
+		super();
+		this.sheet = sheet;
+		this.prefixManager = prefixManager;
+		this.mappingRules = mappingRules;
+
+		int titleRowIndex = computeTitleRowIndex(sheet, prefixManager);
+		// if we found a title row somewhere...
+		if(titleRowIndex > -1) {
+			this.headerLine = new HeaderLine(sheet.getRow(titleRowIndex));
 		}
+	}
 
-	//public void init(Properties propertiesMapping) {
-	//	this.titleRowIndex = this.computeTitleRowIndex();
-	//	if(hasDataSection()) {
-	//		this.columnHeaders = this.computeColumnHeaders(this.titleRowIndex, propertiesMapping);
-	//	}
-	//}
-	
 	/**
 	 * A Sheet can be converted to RDF if :
 	 * <ol>
@@ -59,14 +62,13 @@ public class RdfizableSheet {
 			log.debug(sheet.getSheetName()+" : First row is empty.");
 			return false;
 		}
-		//On test dans un premier temps si la première ligne est une titleRow
-		if(this.computeTitleRowIndex() == 0){
-			//Si la première ligne est bien la titleRow
-			return true;
-		}
-		else{
-			String uri = sheet.getRow(0).getColumnValue(1);
-			if(uri == null) return false;
+
+		String uri = sheet.getRow(0).getColumnValue(1);
+
+		if(StringUtils.isBlank(uri)) {
+			log.debug(sheet.getSheetName()+" : B1 is empty.");
+			return false;
+		} else {
 			String fixedUri = this.prefixManager.isValidURI(uri, false);
 			try {
 				new URI(fixedUri);
@@ -77,20 +79,17 @@ public class RdfizableSheet {
 				log.debug("Cannot build a valid URI from '"+uri+"'.");
 				return false;
 			}
-            return this.titleRowIndex != -1;
-        }
+		}
+
+		return true;
 	}
 
 	public String getSchemeOrGraph() {
 		return sheet.getRow(0).getCell(1).getCellValue();
 	}
-	
-	public int getTitleRowIndex() {
-		return titleRowIndex;
-	}
-	
-	public List<ColumnHeader> getColumnHeaders() {
-		return columnHeaders;
+
+	public Map<String, MappingRule> getMappingRules() {
+		return mappingRules;
 	}
 
 	/**
@@ -98,22 +97,22 @@ public class RdfizableSheet {
 	 * This is determined by checking if column B and C both contain a URI (full, starting with http://, or abbreviated using one of the declared prefix).
 	 * @return
 	 */
-	public int computeTitleRowIndex() {
+	public static int computeTitleRowIndex(Sheet sheet, PrefixManager prefixManager) {
 		int headerRowIndex = -1;
 
 		boolean found = false;
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
-		for (int rowIndex = 0; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-			
+		MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
+		// look for it in either the lastRowNum or 200, whichever is smaller - don't scan very large tables below row 200
+		for (int rowIndex = headerRowIndex; rowIndex <= Math.min(sheet.getLastRowNum(), 200); rowIndex++) {
+
 			int numFound = 0;
 			// we start to check on the second column to avoid detecting a column header in ConceptScheme metadata
 			for (short colIndex = 1; colIndex < 10; colIndex++) {
 				try {
 					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
-					String cellValue = c.getCellValue();
-					ColumnHeader header = headerParser.parse(cellValue, c);
-					if(header.getProperty() != null) {
-						log.debug("Found proper property in header : "+header.getProperty().toString());
+					MappingRule rule = headerParser.parse(c.getCellValue());
+					if(rule.getProperty() != null) {
+						log.debug("Found proper property in header : "+rule.getProperty().toString());
 						numFound++;
 					}
 				} catch (Exception e) {
@@ -122,7 +121,7 @@ public class RdfizableSheet {
 					log.trace("Unable to parse a cell content while auto-detecting title row : "+e.getMessage());
 				}
 			}
-			
+
 			// we check if we find 2 columns header in the first 10 columns
 			if(numFound >= 2) {
 				log.info("Found at least 2 headers with proper property declaration in the first 10 columns, title row is at index "+rowIndex);
@@ -131,204 +130,230 @@ public class RdfizableSheet {
 				break;
 			}
 		}
-		
+
 		if(!found) {
-			for (int rowIndex = headerRowIndex; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+			for (int rowIndex = -1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 				// test if we find "URI" in the first column
 				if(sheet.getRow(rowIndex) != null) {
-					ColumnHeader headerA = null;
-					try {
-						Cell c = sheet.getRow(rowIndex).getCell(0);
-						headerA = headerParser.parse(c.getCellValue(), c);
-					} catch (Exception e) {
-						// we prevent anything to go wrong in the parsing at this stage, since the parsing
-						// tests cells for which we are unsure of the format.
-						log.trace("Unable to parse a cell content while auto-detecting title row : "+e.getMessage());
-					}
-
-					if(headerA != null) {
-						if(
-								sheet.getRow(rowIndex).getCell(0).getCellValue().equals("URI")
-								||
-								sheet.getRow(rowIndex).getCell(0).getCellValue().equals("IRI")
-						) {
-							headerRowIndex = rowIndex;
-							found = true;
-							break;
-						}
+					if(
+							sheet.getRow(rowIndex).getCell(0) != null
+									&&
+									(
+											sheet.getRow(rowIndex).getCell(0).getCellValue().equals("URI")
+													||
+													sheet.getRow(rowIndex).getCell(0).getCellValue().equals("IRI")
+									)
+					) {
+						headerRowIndex = rowIndex;
+						found = true;
+						break;
 					}
 				}
 			}
 		}
+
 		return headerRowIndex;
 	}
-	
+
 	/**
-	 * A RDFizable sheet has a data section if the title row is greater than 1
+	 * A RDFizable sheet has a data section if we found some header line
 	 * @return
 	 */
 	public boolean hasDataSection() {
-		return titleRowIndex >= 0;
+		return this.headerLine != null;
 	}
-	
+
 	/**
-	 * Parses the ColumnHeader from the title row index.
-	 * @param rowNumber the index of the row containing the column headers
-	 * @return
+	 * @return Attempt to auto-detect mapping rules in a given sheet, by looking up the title row and parsing it
 	 */
-	protected List<ColumnHeader> computeColumnHeaders(int rowNumber) {
-		List<ColumnHeader> columnNames = new ArrayList<>();
-		Row row = this.sheet.getRow(rowNumber);
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
+	public static Map<String, MappingRule> autoDetectMappingRules(Sheet sheet, PrefixManager prefixManager) {
+		Map<String, MappingRule> mappingRules = new HashMap<>();
+
+		// first lookup the title row
+		int titleRowIndex = computeTitleRowIndex(sheet, prefixManager);
+
+		if(titleRowIndex < 0) return mappingRules;
+
+		Row row = sheet.getRow(titleRowIndex);
+
+		MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
 		if(row != null) {
 			for (short i = 0; true; i++) {
 				Cell cell = row.getCell(i);
-				if (cell == null) break;
+				if (null == cell) break;
 				String columnName = cell.getCellValue();
+
 				// stop at the first empty value
 				if (StringUtils.isBlank(columnName)) {
 					break;
 				}
-				else columnNames.add(headerParser.parse(columnName, cell));
+
+				mappingRules.put(columnName, headerParser.parse(columnName));
 			}
 		}
-		return columnNames;
+		return mappingRules;
 	}
 
-	protected List<ColumnHeader> getHeaderColumnHeaders() {
-		List<ColumnHeader> headerColumnHeaders = new ArrayList<>();
-		
-		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
-		for (int rowIndex = 1; rowIndex < this.getTitleRowIndex(); rowIndex++) {
+	/**
+	 * @return The association between a row number in the header part of the sheet and a mapping rule
+	 */
+	protected Map<Integer, MappingRule> parseHeaderMappingRules() {
+		Map<Integer, MappingRule> mappingRules = new HashMap<>();
+
+		MappingRuleParser headerParser = new MappingRuleParser(this.prefixManager);
+		int endOfHeader = (this.getHeaderLine() != null)?this.getHeaderLine().getRowIndex():this.sheet.getLastRowNum()+1;
+		for (int rowIndex = 1; rowIndex < endOfHeader; rowIndex++) {
 			if(sheet.getRow(rowIndex) != null) {
 				String key = sheet.getRow(rowIndex).getColumnValue(0);
 				String value = sheet.getRow(rowIndex).getColumnValue(1);
-				
-				// parse the property
-				ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
+
+				// attempt to parse the property
+				MappingRule mappingRule = headerParser.parse(key);
 				if(
-						header != null
-						&&
-						header.getProperty() != null
-						&&
-						StringUtils.isNotBlank(value)
+						mappingRule != null
+								&&
+								mappingRule.getProperty() != null
+								&&
+								StringUtils.isNotBlank(value)
 				) {
-					headerColumnHeaders.add(header);
+					mappingRules.put(rowIndex, mappingRule);
 				}
 			}
 		}
-		
-		return headerColumnHeaders;
+
+		return mappingRules;
 	}
-	
+
 	/**
-	 * Reads the prefixes declared in the sheet. The prefixes are read in the top 100 rows, when column A contains "PREFIX" or "@prefix" (ignoring case).
-	 * @return the map of prefixes
+	 * @param title
+	 * @return the mapping rule associated to this header
 	 */
-	public static Map<String, String> readPrefixes(Sheet sheet) {
-		Map<String, String> prefixes = new HashMap<String, String>();
-		
-		// read the prefixes in the top 100 rows	(including the first one for cases where all prefixes are grouped in the first sheet)
-		int maxRowToCheck = Math.min(100, sheet.getLastRowNum());
-		for (int rowIndex = 0; rowIndex <= maxRowToCheck; rowIndex++) {
-			if(sheet.getRow(rowIndex) != null) {
-				Row row = sheet.getRow(rowIndex);
-				String prefixKeyword = row.getColumnValue(0);
-				// if we have the "prefix" keyword...
-				// note : we add a null check here because there are problems with some sheets
-				if(prefixKeyword != null && (prefixKeyword.equalsIgnoreCase("PREFIX") || prefixKeyword.equalsIgnoreCase("@prefix"))) {
-
-					// and we have the prefix and namespaces defined...
-					String prefix = row.getColumnValue(1);
-					if(StringUtils.isNotBlank(prefix)) {
-						if(prefix.charAt(prefix.length()-1) == ':') {
-							prefix = prefix.substring(0, prefix.length()-1);
-						}
-
-						String namespace = row.getColumnValue(2);
-						if(StringUtils.isNotBlank(namespace)) {
-							log.debug("Found prefix : "+prefix+" : <"+namespace+">");
-							prefixes.put(prefix, namespace);
-						}
-					}
-				}
-			}
-		}
-		
-		return prefixes;
+	public MappingRule findMappingRuleByHeader(String title) {
+		return this.mappingRules.get(title);
 	}
 
-	public static String readBaseIri(Sheet sheet) {
-		// read the base IRI in the top 100 rows	(including the first one for cases where all prefixes are grouped in the first sheet)
-		for (int rowIndex = 0; rowIndex <= 100; rowIndex++) {
-			if(sheet.getRow(rowIndex) != null) {
-				Row row = sheet.getRow(rowIndex);
-
-				String baseKeyword = row.getColumnValue(0);
-				// if we have the "base" keyword...
-				// note : we add a null check here because there are problems with some sheets
-				if(baseKeyword != null && (baseKeyword.equalsIgnoreCase("BASE") || baseKeyword.equalsIgnoreCase("@base"))) {
-					// and we have the prefix and namespaces defined...
-					String baseIri = row.getColumnValue(1);
-					if(StringUtils.isNotBlank(baseIri)) {
-						log.debug("Found base IRI : "+baseIri);
-						return baseIri;
-					}
-				}
-			}
-		}
-		
-		return null;
+	public HeaderLine getHeaderLine() {
+		return this.headerLine;
 	}
 
-	public boolean validateHeaders(Predicate<IRI> propertyValidator, Xls2RdfMessageListenerIfc messageListener) {		
+	public boolean validateHeaders(Predicate<IRI> propertyValidator, Xls2RdfMessageListenerIfc messageListener) {
 		boolean allValid = true;
-		
+
 		// validate also header headers
-		for (ColumnHeader columnHeader : this.getHeaderColumnHeaders()) {
-			if(columnHeader.getProperty() != null) {
-				log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
-				boolean valid = propertyValidator.test(columnHeader.getProperty());
+		for(Map.Entry<Integer, MappingRule> oneMapping : this.parseHeaderMappingRules().entrySet()) {
+			MappingRule mappingRule = oneMapping.getValue();
+			if(mappingRule.getProperty() != null) {
+				log.debug("Validating header property "+mappingRule.getProperty()+" (originally declared as "+mappingRule.getDeclaredProperty()+")");
+				boolean valid = propertyValidator.test(mappingRule.getProperty());
 				if(!valid) {
-					    String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+columnHeader.getHeaderCell().getCellExcelReference();
+					String cellReference = "A"+oneMapping.getKey();
+					String message = "Property "+mappingRule.getProperty()+" is not valid, in cell "+cellReference;
 					log.error(message);
 					messageListener.onMessage(
 							MessageCode.INVALID_PROPERTY,
-						    columnHeader.getHeaderCell().getCellExcelReference(),
+							cellReference,
 							message
 					);
 					allValid = false;
 				} else {
-					log.debug("Property "+columnHeader.getProperty()+" is valid.");
+					log.debug("Property "+mappingRule.getProperty()+" is valid.");
 				}
 			}
+
 		}
-		
-		if(this.columnHeaders != null) {
-			for (ColumnHeader columnHeader : this.columnHeaders) {
-				if(columnHeader.getProperty() != null) {
-					log.debug("Validating header property "+columnHeader.getProperty()+" (originally declared as "+columnHeader.getDeclaredProperty()+")");
-					boolean valid = propertyValidator.test(columnHeader.getProperty());
+
+		if(this.mappingRules != null) {
+			for(Map.Entry<String, MappingRule> oneMapping : this.mappingRules.entrySet()) {
+				MappingRule mappingRule = oneMapping.getValue();
+				if(oneMapping.getValue().getProperty() != null) {
+					log.debug("Validating header property "+mappingRule.getProperty()+" (originally declared as "+mappingRule.getDeclaredProperty()+")");
+					boolean valid = propertyValidator.test(mappingRule.getProperty());
 					if(!valid) {
-						String message = "Property "+columnHeader.getProperty()+" is not valid, in cell "+columnHeader.getHeaderCell().getCellExcelReference();
+						String message = "Property "+mappingRule.getProperty()+" is not valid, in mapping "+mappingRule.getOriginalValue();
 						log.error(message);
 						messageListener.onMessage(
 								MessageCode.INVALID_PROPERTY,
-							columnHeader.getHeaderCell().getCellExcelReference(),
+								mappingRule.getOriginalValue(),
 								message
 						);
 						allValid = false;
 					} else {
-						log.debug("Property "+columnHeader.getProperty()+" is valid.");
+						log.debug("Property "+mappingRule.getProperty()+" is valid.");
 					}
 				}
 			}
 		}
+
+
 		return allValid;
 	}
 
+	/**
+	 * Finds the column index based on a column ID reference or an Excel column reference.
+	 * Returns -1 if not found.
+	 *
+	 * @param headers
+	 * @param idRef
+	 * @return
+	 */
+	public static int idRefToColumnIndex(RdfizableSheet rdfizableSheet, String idRef) {
+		// iterate on all headers in the file...
+		for(int i = 0; i < rdfizableSheet.getHeaderLine().getHeaders().size(); i++) {
+			String oneHeader = rdfizableSheet.getHeaderLine().getHeaders().get(i);
+			// find corresponding mapping rule for this header
+			MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(oneHeader);
+			if(
+					mappingRule != null
+							&&
+							(mappingRule.getId() != null && mappingRule.getId().equals(idRef))
+			) {
+				return i;
+			}
+		}
 
-	public void setTitleRowIndex(int titleRowIndex){
-		this.titleRowIndex = titleRowIndex;
+		// if we haven't found the proper column id, try it as an Excel column reference
+		if(idRef.length() <= 2) {
+			int idx = ExcelRefs.colLettersToIndex(idRef);
+			if(idx != -1) return idx;
+		}
+
+		return -1;
+	}
+
+	/**
+	 * Finds the column index based on a reference that can be
+	 * either an ID reference or a property reference or an Excel column reference.
+	 * Returns -1 if not found.
+	 *
+	 * @param rdfizableSheet the sheet that contains the headers + the association between headers and mapping rules
+	 * @param idOrPropertyRef the ID or property reference to search
+	 * @return
+	 */
+	public static int idRefOrPropertyRefToColumnIndex(RdfizableSheet rdfizableSheet, String idOrPropertyRef) {
+		// iterate on all headers in the file...
+		for(int i = 0; i < rdfizableSheet.getHeaderLine().getHeaders().size(); i++) {
+			String oneHeader = rdfizableSheet.getHeaderLine().getHeaders().get(i);
+			// find corresponding mapping rule for this header
+			MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(oneHeader);
+			if(
+					mappingRule != null
+							&&
+							(
+									(mappingRule.getId() != null && mappingRule.getId().equals(idOrPropertyRef))
+											||
+											(mappingRule.getDeclaredProperty() != null && mappingRule.getDeclaredProperty().equals(idOrPropertyRef))
+							)
+			) {
+				return i;
+			}
+		}
+
+		// if we haven't found the proper column id, try it as an Excel column reference
+		if(idOrPropertyRef.length() <= 2) {
+			int idx = ExcelRefs.colLettersToIndex(idOrPropertyRef);
+			if(idx != -1) return idx;
+		}
+
+		return -1;
 	}
 }

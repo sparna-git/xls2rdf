@@ -1,7 +1,10 @@
 package fr.sparna.rdf.xls2rdf.postprocess;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
-import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -10,10 +13,9 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fr.sparna.rdf.xls2rdf.MappingRule;
+import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
 public class QBPostProcessor implements Xls2RdfPostProcessorIfc {
 
@@ -47,8 +49,7 @@ public class QBPostProcessor implements Xls2RdfPostProcessorIfc {
 	}
 
 	@Override
-	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, List<ColumnHeader> columnHeaders) {
-
+	public void afterSheet(Model model, Resource mainResource, List<Resource> rowResources, Map<String, MappingRule> columnMapping) {
 		if(mainResource != null){
 			log.debug("Postprocessing : "+this.getClass().getSimpleName());
 
@@ -83,21 +84,37 @@ public class QBPostProcessor implements Xls2RdfPostProcessorIfc {
 							// also type the structure
 							model.add(structure, RDF.TYPE, QB.DATA_STRUCTURE_DEFINITION);
 						} else {
-							log.error("Found structure not a Resource :"+structureValue+", can't attach components");
+							Value structureValue = structures.iterator().next();
+
+							if(structureValue instanceof Resource) {
+								Resource structure = (Resource)structureValue;
+
+								Stream.concat(
+										model.filter(null, QB.DIMENSION, null).subjects().stream(),
+										model.filter(null, QB.MEASURE, null).subjects().stream()
+								).forEach(c -> {
+									model.add(c, RDF.TYPE, QB.COMPONENT_SPECIFICATION);
+									model.add(structure, QB.COMPONENT, c);
+								});
+
+								// also type the structure
+								model.add(structure, RDF.TYPE, QB.DATA_STRUCTURE_DEFINITION);
+							} else {
+								log.error("Found structure not a Resource :"+structureValue+", can't attach components");
+							}
 						}
 					}
+
+					// then every resource in the sheet without a type will be considered an Observation, linked to this Dataset
+					rowResources.stream().filter(r -> model.filter(r, RDF.TYPE, null).isEmpty()).forEach(r -> {
+						model.add(r, RDF.TYPE, QB.OBSERVATION);
+						model.add(r, QB.DATASET_PROPERTY, mainResource);
+					});
+
 				}
 
-				// then every resource in the sheet without a type will be considered an Observation, linked to this Dataset
-				rowResources.stream().filter(r -> model.filter(r, RDF.TYPE, null).isEmpty()).forEach(r -> {
-					model.add(r, RDF.TYPE, QB.OBSERVATION);
-					model.add(r, QB.DATASET_PROPERTY, mainResource);
-				});
-
 			}
-
 		}
-
-	}
+		}
 	
 }
