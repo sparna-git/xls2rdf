@@ -1,23 +1,16 @@
 package fr.sparna.rdf.xls2rdf.processor;
 
 
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import fr.sparna.rdf.xls2rdf.*;
+import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.processor.manchester.ManchesterClassExpressionParserProcessor;
+import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
+import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
+import fr.sparna.rdf.xls2rdf.sheet.Row;
+import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.common.iteration.Iterations;
-import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.RDFCollections;
@@ -33,18 +26,9 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
-import fr.sparna.rdf.xls2rdf.ExcelHelper;
-import fr.sparna.rdf.xls2rdf.PrefixManager;
-import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
-import fr.sparna.rdf.xls2rdf.Xls2RdfException;
-import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
-import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
-import fr.sparna.rdf.xls2rdf.processor.manchester.ManchesterClassExpressionParserProcessor;
-import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
-import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
-import fr.sparna.rdf.xls2rdf.sheet.Row;
-import fr.sparna.rdf.xls2rdf.sheet.Sheet;
+import java.io.StringReader;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public final class ValueProcessorFactory {
 	
@@ -85,7 +69,7 @@ public final class ValueProcessorFactory {
 				return null;
 			}
 			
-			IRI iri = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(normalizeSpace(value), true));
+			IRI iri = SimpleValueFactory.getInstance().createIRI(prefixManager.isValidURI(normalizeSpace(value), true));
 			
 			// can be null if we expected an IRI but we had a literal
 			if(iri == null) {
@@ -424,7 +408,7 @@ public final class ValueProcessorFactory {
 	public ValueProcessorIfc skosXlLabel(IRI xlLabelProperty, PrefixManager prefixManager) {
 		return (model, subject, value, cell, language) -> {
 			// String labelUri = ConceptSchemeFromExcel.fixUri(value);
-			String labelUri = prefixManager.uri(value, true);
+			String labelUri = prefixManager.isValidURI(value, true);
 			IRI labelResource = SimpleValueFactory.getInstance().createIRI(labelUri);
 			List<Statement> statements = new ArrayList<>();
 

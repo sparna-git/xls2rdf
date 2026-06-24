@@ -1,15 +1,7 @@
 package fr.sparna.rdf.xls2rdf.write;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.net.URLEncoder;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
+import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
+import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -18,8 +10,15 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
-import fr.sparna.rdf.xls2rdf.Xls2RdfException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @author thomas
@@ -72,7 +71,13 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri) {
 		try {
 			// declare a new ZipEntry in the Zip file
-			graph = graph + ((this.graphSuffix != null)?graphSuffix:"");
+			if(graph != null){
+				graph = graph + ((this.graphSuffix != null)?graphSuffix:"");
+			}
+			else{
+				graph = "DEFAULT" + ((this.graphSuffix != null)?graphSuffix:"");
+			}
+
 			
 			String entryname = URLEncoder.encode(graph, "UTF-8") + "." + format.getDefaultFileExtension();
 			// String entryname = graph.substring(graph.lastIndexOf('/')+1) + "." + format.getDefaultFileExtension();

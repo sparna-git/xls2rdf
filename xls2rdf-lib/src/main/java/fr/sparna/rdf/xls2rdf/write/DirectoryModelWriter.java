@@ -1,12 +1,8 @@
 package fr.sparna.rdf.xls2rdf.write;
 
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-
+import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
+import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.repository.Repository;
@@ -16,8 +12,11 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
-import fr.sparna.rdf.xls2rdf.Xls2RdfException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Saves each Model in a separate file in the given directory, and optionnaly generates a graph file for easy loading into Virtuoso.
@@ -49,6 +48,9 @@ public class DirectoryModelWriter implements ModelWriterIfc {
 	 */
 	@Override
 	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri) {
+		if(graph == null){
+			graph = "DEFAULT";
+		}
 		graph = graph + ((this.graphSuffix != null)?graphSuffix:"");
 		
 		if(modelsByGraph.containsKey(graph)) {

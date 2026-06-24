@@ -11,10 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -35,17 +32,18 @@ public class RdfizableSheet {
 		    Sheet sheet,
 		    PrefixManager prefixManager
 	    ) {
-		super();
-		this.sheet = sheet;
-		this.prefixManager = prefixManager;
-	}
-	
-	public void init() {
-		this.titleRowIndex = this.computeTitleRowIndex();
-		if(hasDataSection()) {
-			this.columnHeaders = this.computeColumnHeaders(this.titleRowIndex);
+			this.sheet = sheet;
+			this.prefixManager = prefixManager;
+			this.titleRowIndex = this.computeTitleRowIndex();
+
 		}
-	}
+
+	//public void init(Properties propertiesMapping) {
+	//	this.titleRowIndex = this.computeTitleRowIndex();
+	//	if(hasDataSection()) {
+	//		this.columnHeaders = this.computeColumnHeaders(this.titleRowIndex, propertiesMapping);
+	//	}
+	//}
 	
 	/**
 	 * A Sheet can be converted to RDF if :
@@ -61,14 +59,15 @@ public class RdfizableSheet {
 			log.debug(sheet.getSheetName()+" : First row is empty.");
 			return false;
 		}
-		
-		String uri = sheet.getRow(0).getColumnValue(1);
-		
-		if(StringUtils.isBlank(uri)) {
-			log.debug(sheet.getSheetName()+" : B1 is empty.");
-			return false;
-		} else {
-			String fixedUri = this.prefixManager.uri(uri, false);
+		//On test dans un premier temps si la première ligne est une titleRow
+		if(this.computeTitleRowIndex() == 0){
+			//Si la première ligne est bien la titleRow
+			return true;
+		}
+		else{
+			String uri = sheet.getRow(0).getColumnValue(1);
+			if(uri == null) return false;
+			String fixedUri = this.prefixManager.isValidURI(uri, false);
 			try {
 				new URI(fixedUri);
 			} catch (URISyntaxException e) {
@@ -78,11 +77,10 @@ public class RdfizableSheet {
 				log.debug("Cannot build a valid URI from '"+uri+"'.");
 				return false;
 			}
-		}
-		
-		return true;
+            return this.titleRowIndex != -1;
+        }
 	}
-	
+
 	public String getSchemeOrGraph() {
 		return sheet.getRow(0).getCell(1).getCellValue();
 	}
@@ -101,18 +99,19 @@ public class RdfizableSheet {
 	 * @return
 	 */
 	public int computeTitleRowIndex() {
-		int headerRowIndex = 1;
-		
+		int headerRowIndex = -1;
+
 		boolean found = false;
 		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
-		for (int rowIndex = headerRowIndex; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+		for (int rowIndex = 0; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 			
 			int numFound = 0;
 			// we start to check on the second column to avoid detecting a column header in ConceptScheme metadata
 			for (short colIndex = 1; colIndex < 10; colIndex++) {
 				try {
 					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
-					ColumnHeader header = headerParser.parse(c.getCellValue(), c);
+					String cellValue = c.getCellValue();
+					ColumnHeader header = headerParser.parse(cellValue, c);
 					if(header.getProperty() != null) {
 						log.debug("Found proper property in header : "+header.getProperty().toString());
 						numFound++;
@@ -146,7 +145,7 @@ public class RdfizableSheet {
 						// tests cells for which we are unsure of the format.
 						log.trace("Unable to parse a cell content while auto-detecting title row : "+e.getMessage());
 					}
-					
+
 					if(headerA != null) {
 						if(
 								sheet.getRow(rowIndex).getCell(0).getCellValue().equals("URI")
@@ -161,7 +160,6 @@ public class RdfizableSheet {
 				}
 			}
 		}
-		
 		return headerRowIndex;
 	}
 	
@@ -170,7 +168,7 @@ public class RdfizableSheet {
 	 * @return
 	 */
 	public boolean hasDataSection() {
-		return titleRowIndex > 1;
+		return titleRowIndex >= 0;
 	}
 	
 	/**
@@ -181,24 +179,22 @@ public class RdfizableSheet {
 	protected List<ColumnHeader> computeColumnHeaders(int rowNumber) {
 		List<ColumnHeader> columnNames = new ArrayList<>();
 		Row row = this.sheet.getRow(rowNumber);
-		
 		ColumnHeaderParser headerParser = new ColumnHeaderParser(this.prefixManager);
 		if(row != null) {
 			for (short i = 0; true; i++) {
 				Cell cell = row.getCell(i);
-				if (null == cell) break;
+				if (cell == null) break;
 				String columnName = cell.getCellValue();
-
 				// stop at the first empty value
 				if (StringUtils.isBlank(columnName)) {
 					break;
 				}
-				columnNames.add(headerParser.parse(columnName, cell));
+				else columnNames.add(headerParser.parse(columnName, cell));
 			}
 		}
 		return columnNames;
 	}
-	
+
 	protected List<ColumnHeader> getHeaderColumnHeaders() {
 		List<ColumnHeader> headerColumnHeaders = new ArrayList<>();
 		
@@ -328,8 +324,11 @@ public class RdfizableSheet {
 				}
 			}
 		}
-		
-		
 		return allValid;
+	}
+
+
+	public void setTitleRowIndex(int titleRowIndex){
+		this.titleRowIndex = titleRowIndex;
 	}
 }

@@ -9,10 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class Convert implements CliCommandIfc {
 
@@ -97,6 +94,7 @@ public class Convert implements CliCommandIfc {
 			else {
 				try(InputStream in = new FileInputStream(arg.getInput());){
 					log.debug("Will use ModelWriter : {}", builder.getModelWriter().getClass().getName());
+
 					builder.buildConverter().processInputStream(in);
 				}
 			}

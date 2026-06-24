@@ -107,6 +107,8 @@ public class Xls2RdfConverter {
 	 */
 	private boolean skipHidden = false;
 
+	private SheetMapping sheetMapping;
+
 	public Xls2RdfConverter(ModelWriterIfc modelWriter) {		
 		this(modelWriter, null);
 	}
@@ -171,7 +173,6 @@ public class Xls2RdfConverter {
                 }
             }
         }
-		
 		return processWorkbook(workbook);
 	}
 	
@@ -212,7 +213,6 @@ public class Xls2RdfConverter {
 		} catch (Exception e) {
 			throw Xls2RdfException.rethrow(e);
 		}
-		
 		return models;
 	}
 	
@@ -224,7 +224,7 @@ public class Xls2RdfConverter {
 		// read the prefixes
 		this.prefixManager.register(RdfizableSheet.readPrefixes(sheet));
 		String baseIri = RdfizableSheet.readBaseIri(sheet);
-		// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaratio
+		// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaration
 		if(baseIri != null) {
 			this.prefixManager.setBaseUri(baseIri);
 		}
@@ -237,38 +237,48 @@ public class Xls2RdfConverter {
 	 * @return
 	 */
 	private Model processSheet(Sheet sheet) {
-		
+
 		// initialize target Model
 		Model model = new LinkedHashModelFactory().createEmptyModel();
+
 		SimpleValueFactory svf = SimpleValueFactory.getInstance();
-		
+
 		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager);
-		
-		if(!rdfizableSheet.canRDFize()) {
+
+		List<ColumnHeader> columnHeaders = null;
+
+		if(rdfizableSheet.canRDFize()) {
+			log.debug("Processing sheet: " + sheet.getSheetName());
+			SheetMapping m = new SheetMapping();
+			m.setPrefixManager(prefixManager);
+		}
+		else if(this.sheetMapping != null){
+			this.sheetMapping.setPrefixManager(prefixManager);
+			rdfizableSheet.setTitleRowIndex(0);
+		}
+		else{
 			log.debug(sheet.getSheetName()+" : Ignoring sheet.");
 			return model;
-		} else {
-			log.debug("Processing sheet: " + sheet.getSheetName());
 		}
-		
-		// init the sheet (after prefixes are read)
-		rdfizableSheet.init();
-		
-		// read the concept scheme or graph URI
-		String csUri = prefixManager.uri(rdfizableSheet.getSchemeOrGraph(), true);
-		
+
+
+		Resource csResource = null;
+		String csUri = null;
+		if(rdfizableSheet.getTitleRowIndex() > 0 ){
+			csUri = prefixManager.isValidURI(rdfizableSheet.getSchemeOrGraph(), true);
+			csResource =  svf.createIRI(csUri);
+		}
+
 		// if the URI was already processed, output a warning (this is a possible case)
 		if(this.convertedVocabularyIdentifiers.contains(csUri)) {
 			log.debug("Duplicate graph declaration found: " + csUri + " (declared in more than one sheet)");
 		}
-		
-		Resource csResource = svf.createIRI(csUri);	
-		
+
 		// find the title row index
 		int headerRowIndex = rdfizableSheet.getTitleRowIndex();
 		log.debug("Found title row at index "+headerRowIndex);
 		// si la ligne d'entete n'a pas été trouvée, on ne génère que la ressource d'entête
-		if(headerRowIndex == 1) {
+		if(!rdfizableSheet.hasDataSection()) {
 			log.info("Could not find header row index in sheet "+sheet.getSheetName()+", will parse header object until end of sheet (last rowNum = "+ sheet.getLastRowNum() +")");
 			headerRowIndex = sheet.getLastRowNum()+1;
 		}
@@ -292,7 +302,7 @@ public class Xls2RdfConverter {
 			String key = (cellKey != null) ? cellKey.getCellValue() : null;
 			Cell cell = row.getCell(1);
 			String value = (cell != null) ? cell.getCellValue() : null;
-				
+
 			// parse the property	
 			ColumnHeader header = headerParser.parse(key, sheet.getRow(rowIndex).getCell(0));
 				if(
@@ -302,7 +312,7 @@ public class Xls2RdfConverter {
 						&&
 						StringUtils.isNotBlank(value)
 				) {				
-					
+
 					ValueProcessorFactory processorFactory = new ValueProcessorFactory(messageListener);
 					
 					// always use a default processor
@@ -324,26 +334,25 @@ public class Xls2RdfConverter {
 							model,
 							csResource,
 							value,
-							    cell,
+								cell,
 							header.getLanguage().orElse(this.lang)
 					);
 				}
 			}
-		}		
+		}
 
+		//j'ai remonté au début de la méthode
+		//List<ColumnHeader> columnNames = rdfizableSheet.getColumnHeaders();
 		List<Resource> rowResources = new ArrayList<>();
-		List<ColumnHeader> columnNames = new ArrayList<>();
 		if(rdfizableSheet.hasDataSection()) {
 			// read the column names from the header row
-			columnNames = rdfizableSheet.getColumnHeaders();
-			
 			log.debug("Converting data with these column headers: ");
-			for (ColumnHeader columnHeader : columnNames) {
+			for (ColumnHeader columnHeader : columnHeaders) {
 				log.debug(columnHeader.toString());
 			}
 			
 			// reconcile columns that need to be reconciled, and store result
-			for (ColumnHeader columnHeader : columnNames) {
+			for (ColumnHeader columnHeader : columnHeaders) {
 				if(columnHeader.isReconcileExternal() && this.reconcileService != null) {					
 					    PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
 							reconcileService,
@@ -370,7 +379,6 @@ public class Xls2RdfConverter {
 					this.reconcileColumnsValues.put(columnHeader.getHeaderCell().getColumnIndex(), reconciliableValueSet);
 				} 
 			}
-			
 			// read the rows after the header line and process each row
 			log.info("Converting rows...");
 			for (int rowIndex = (headerRowIndex + 1); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
@@ -381,7 +389,7 @@ public class Xls2RdfConverter {
 					}
 					Resource rowResource;
 					try {
-						rowResource = handleRow(model, csResource, columnNames, prefixManager, r);
+						rowResource = handleRow(model, csResource, columnHeaders, prefixManager, r);
 					} catch (Exception e) {
 						throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName()+" : "+e.getMessage(), (Object[])null);
 					}
@@ -390,19 +398,20 @@ public class Xls2RdfConverter {
 					}
 				}
 			}
-			
 		} else {
 			log.info("Sheet has no title row, skipping data processing.");
 		}
+
+
 		
 		// always post-process with asList
 		AsListPostProcessor alpp = new AsListPostProcessor();
-		alpp.afterSheet(model, csResource, rowResources, columnNames);
+		alpp.afterSheet(model, csResource, rowResources, columnHeaders);
 
 		if(this.postProcessors != null && this.postProcessors.size() > 0) {
 			log.info("Applying SKOS post-processings on the result");
 			for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
-				aProcessor.afterSheet(model, csResource, rowResources, columnNames);
+				aProcessor.afterSheet(model, csResource, rowResources, columnHeaders);
 			}
 		} else {
 			log.info("No post-processings to apply");
@@ -431,7 +440,7 @@ public class Xls2RdfConverter {
 			String value = (cell != null)?cell.getCellValue():null;
 			// if it is the first column...
 			if (null == rowBuilder) {
-				// if the value of the first column is empty, or is striked through, or if it is hidden, skip the whole row
+				// if the value of the first column is empty, or is struck through, or if it is hidden, skip the whole row
 				if (
 						StringUtils.isBlank(value)
 						||
@@ -450,7 +459,7 @@ public class Xls2RdfConverter {
 					if(value.startsWith("_:")) {
 						subjectResource = SimpleValueFactory.getInstance().createBNode(value.substring(2));
 					} else {
-						String iriPossiblyNull = prefixManager.uri(value, false);
+						String iriPossiblyNull = prefixManager.isValidURI(value, false);
 						// this can be null in the case column A does not contain a valid full or prefixed IRI
 						if(iriPossiblyNull != null) {
 							subjectResource = SimpleValueFactory.getInstance().createIRI(iriPossiblyNull);
@@ -600,14 +609,14 @@ public class Xls2RdfConverter {
 				}
 				
 				String currentSubject = (row.getCell(subjectColumnIndex) != null)?row.getCell(subjectColumnIndex).getCellValue():null;
-				
+
 				if(currentSubject != null) {
 					try {
 						Resource currentSubjectResource;
 						if(currentSubject.startsWith("_:")) {
 							currentSubjectResource = SimpleValueFactory.getInstance().createBNode(currentSubject.substring(2));
 						} else {
-							currentSubjectResource = SimpleValueFactory.getInstance().createIRI(prefixManager.uri(currentSubject, false));
+							currentSubjectResource = SimpleValueFactory.getInstance().createIRI(prefixManager.isValidURI(currentSubject, false));
 						}
 						
 						rowBuilder.setCurrentSubject(currentSubjectResource);
@@ -760,6 +769,11 @@ public class Xls2RdfConverter {
 	public void setSkipHidden(boolean skipHidden) {
 		this.skipHidden = skipHidden;
 	}
+
+	public void setPropertiesMapping(SheetMapping sheetMapping) {
+		this.sheetMapping = sheetMapping;
+	}
+
 
 	public static void main(String[] args) throws Exception {
 		

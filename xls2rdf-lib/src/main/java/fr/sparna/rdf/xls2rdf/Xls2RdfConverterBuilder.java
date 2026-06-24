@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -42,6 +41,8 @@ public class Xls2RdfConverterBuilder {
 
     private String language;
 
+    private SheetMapping sheetMapping;
+
     private boolean applyPostProcessing;
 
     private boolean generateXl;
@@ -53,7 +54,6 @@ public class Xls2RdfConverterBuilder {
     private boolean generateBroaderTransitive;
 
     private boolean skipHidden;
-
 
     private Xls2RdfConverterBuilder(){}
 
@@ -82,7 +82,12 @@ public class Xls2RdfConverterBuilder {
         return this;
     }
 
-    public Xls2RdfConverterBuilder withOutputDirectory(File output) throws FileNotFoundException {
+    public Xls2RdfConverterBuilder withSheetMapping(SheetMapping sheetMapping){
+        this.sheetMapping = sheetMapping;
+        return this;
+    }
+
+    public Xls2RdfConverterBuilder withOutputDirectory(File output) {
         this.modelWriter = this.modelWriterFactory.buildNewModelWriter(output);
         return this;
     }
@@ -92,7 +97,7 @@ public class Xls2RdfConverterBuilder {
         return this;
     }
 
-    public Xls2RdfConverterBuilder withSupportRepository(Consumer<Repository> initRDFRepository) throws IOException {
+    public Xls2RdfConverterBuilder withSupportRepository(Consumer<Repository> initRDFRepository)  {
         this.supportRepository = new SailRepository(new MemoryStore());
         this.supportRepository.init();
         initRDFRepository.accept(this.supportRepository);
@@ -178,6 +183,7 @@ public class Xls2RdfConverterBuilder {
 
         converter.setFailIfNoReconcile(!this.failOnReconcile);
         converter.setSkipHidden(this.skipHidden);
+        converter.setPropertiesMapping(this.sheetMapping);
 
         return converter;
     }
@@ -228,5 +234,8 @@ public class Xls2RdfConverterBuilder {
     public boolean isSkipHidden() {
         return this.skipHidden;
     }
+
+    public SheetMapping getPropertiesMapping() {return this.sheetMapping;}
+
 
 }

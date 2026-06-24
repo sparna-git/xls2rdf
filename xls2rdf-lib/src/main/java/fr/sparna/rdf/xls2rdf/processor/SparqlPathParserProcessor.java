@@ -1,6 +1,10 @@
 package fr.sparna.rdf.xls2rdf.processor;
 
-import java.util.List;
+import fr.sparna.rdf.xls2rdf.ColumnHeader;
+import fr.sparna.rdf.xls2rdf.PrefixManager;
+import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
+import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -10,11 +14,7 @@ import org.eclipse.rdf4j.query.parser.sparql.ast.TokenMgrError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.ColumnHeader;
-import fr.sparna.rdf.xls2rdf.PrefixManager;
-import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
-import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
-import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import java.util.List;
 
 public class SparqlPathParserProcessor implements ValueProcessorIfc {
 
@@ -41,7 +41,7 @@ public class SparqlPathParserProcessor implements ValueProcessorIfc {
 		if (StringUtils.isBlank(ValueProcessorFactory.normalizeSpace(value))) {
 			return null;
 		}
-		
+
 		log.debug("Parsing a SPARQL property path : '"+value+"'");
 
 		try {
@@ -53,7 +53,6 @@ public class SparqlPathParserProcessor implements ValueProcessorIfc {
 			this.delegateProcessor.processValue(model, subject, value, cell, language);
 			return null;
 		}
-	};		
-	
+	}
 
 }

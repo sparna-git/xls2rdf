@@ -43,7 +43,7 @@ public class SheetContainer implements Container {
     @Override
     public String getId() {
         String b1Value = sheet.getRow(0).getCell(1).getCellValue();
-        String fixedUri = new PrefixManager(this.parent.getPrefixes()).uri(b1Value, false);
+        String fixedUri = new PrefixManager(this.parent.getPrefixes()).isValidURI(b1Value, false);
         return fixedUri;
     }
 

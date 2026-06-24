@@ -1,0 +1,51 @@
+properties.A=owl:versionInfo
+properties.B=^sh:property(separator=",")
+properties.C=sh:path
+properties.D=sh:name@en
+properties.E=sh:description@en
+properties.F=skos:example^^xsd:string
+properties.G=sh:minCount^^xsd:integer
+properties.H=sh:maxCount^^xsd:integer(ignoreIf="n")
+properties.I=sh:nodeKind
+properties.J=sh:datatype(separator="," wrapper="sh:or")
+properties.K=sh:node(separator="," wrapper="sh:or")
+properties.L=sh:class(separator="," wrapper="sh:or")
+properties.M=sh:or
+properties.N=sh:hasValue
+properties.O=sh:in(separator="," asList="true")
+properties.P=sh:pattern^^xsd:string
+properties.Q=sh:deactivated^^xsd:boolean
+properties.R=sh:uniqueLang^^xsd:boolean
+properties.S=sh:languageIn
+properties.T=sh:qualifiedValueShape
+properties.U=sh:qualifiedMinCount^^xsd:integer
+properties.V=sh:qualifiedMaxCount^^xsd:integer
+properties.W=ods:testIdentifier(separator=",")
+
+classes.A=rdf:type(separator=",")
+classes.B=owl:versionInfo
+classes.C=skos:editorialNote@en
+classes.D=rdfs:comment@en
+classes.E=sh:minCount^^xsd:integer
+classes.F=sh:maxCount^^xsd:integer(ignoreIf="n")
+classes.G=sh:target(id="target")
+classes.H=sh:select(subjectColumn="target")
+classes.I=sh:targetSubjectsOf
+classes.J=sh:targetClass
+classes.K=skos:example^^xsd:string
+classes.L=sh:nodeKind
+classes.M=sh:pattern^^xsd:string
+classes.N=sh:node
+classes.O=sh:closed^^xsd:boolean
+classes.P=sh:ignoredProperties
+classes.Q=sh:order^^xsd:integer
+classes.R=shacl-play:color
+classes.S=shacl-play:background-color
+classes.T=rdfs:label@en
+classes.U=rdfs:label@fr
+
+constraints.A=^sh:sparql
+constraints.B=rdf:type
+constraints.C=dcterms:description@en
+constraints.D=sh:message@en
+constraints.E=sh:select

@@ -168,7 +168,7 @@ public class WorkbookContainer implements RootContainer {
 			log.debug(sheet.getSheetName()+" : B1 is empty.");
 			return false;
 		} else {
-			String fixedUri = new PrefixManager(this.getPrefixes()).uri(uri, false);
+			String fixedUri = new PrefixManager(this.getPrefixes()).isValidURI(uri, false);
 			try {
 				new URI(fixedUri);
 			} catch (URISyntaxException e) {

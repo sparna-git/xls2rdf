@@ -1,10 +1,7 @@
 package fr.sparna.rdf.xls2rdf.write;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.Map;
-
+import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
+import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
@@ -16,8 +13,10 @@ import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
-import fr.sparna.rdf.xls2rdf.Xls2RdfException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * @author thomas
@@ -61,7 +60,10 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 			try(RepositoryConnection c = this.outputRepository.getConnection()) {
 				// register the prefixes
 				prefixes.entrySet().forEach(e -> c.setNamespace(e.getKey(), e.getValue()));
-				c.add(model, SimpleValueFactory.getInstance().createIRI(graph));
+				if(graph != null){
+					c.add(model, SimpleValueFactory.getInstance().createIRI(graph));
+				}
+				else c.add(model);
 			}
 
 			// keep track of baseIri

@@ -1,18 +1,17 @@
 package fr.sparna.rdf.xls2rdf;
 
+import fr.sparna.rdf.xls2rdf.sheet.Cell;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import fr.sparna.rdf.xls2rdf.sheet.Cell;
 
 public class ColumnHeaderParser {
 	
@@ -21,7 +20,6 @@ public class ColumnHeaderParser {
 	private PrefixManager prefixManager;
 
 	public ColumnHeaderParser(PrefixManager prefixManager) {
-		super();
 		this.prefixManager = prefixManager;
 	}
 
@@ -80,7 +78,7 @@ public class ColumnHeaderParser {
 	private IRI parseProperty(String declaredProperty) {
 		try {
 			if(this.prefixManager.usesKnownPrefix(declaredProperty)) {
-				return SimpleValueFactory.getInstance().createIRI(this.prefixManager.uri(declaredProperty, false));
+				return SimpleValueFactory.getInstance().createIRI(this.prefixManager.isValidURI(declaredProperty, false));
 			} else {
 				// if not using known namespace, handle only if it is an absolute URI
 				if((new URI(declaredProperty)).isAbsolute()) {
@@ -136,7 +134,7 @@ public class ColumnHeaderParser {
 			}
 			
 			if(this.prefixManager.usesKnownPrefix(dt)) {
-				return Optional.of(SimpleValueFactory.getInstance().createIRI(this.prefixManager.uri(dt, false)));
+				return Optional.of(SimpleValueFactory.getInstance().createIRI(this.prefixManager.isValidURI(dt, false)));
 			} else if (dt.startsWith("<http")){
 				return Optional.of(SimpleValueFactory.getInstance().createIRI(dt.substring(1, dt.length()-1)));
 			} else {
