@@ -1,0 +1,40 @@
+{
+  "records": [
+    {
+      "id": "testRecord1",
+      "fields": {
+        "testField1": "value1Test",
+        "testField2": "value2Test",
+        "testField3": "value3Test",
+        "testField4": "value4Test",
+        "testField5": "value5Test",
+        "testField6": "value6Test",
+        "testField7": "value7Test"
+      }
+    },
+    {
+      "id": "testRecord2",
+      "fields": {
+        "testField1": "value8Test",
+        "testField2": "value9Test",
+        "testField3": "value10Test",
+        "testField4": "value11Test",
+        "testField5": "value12Test",
+        "testField6": "value13Test",
+        "testField7": "value14Test"
+      }
+    },
+    {
+      "id": "testRecord3",
+      "fields": {
+        "testField1": "value15Test",
+        "testField2": "value16Test",
+        "testField3": "value17Test",
+        "testField4": "value18Test",
+        "testField5": "value19Test",
+        "testField6": "value20Test",
+        "testField7": "value21Test"
+      }
+    }
+  ]
+}

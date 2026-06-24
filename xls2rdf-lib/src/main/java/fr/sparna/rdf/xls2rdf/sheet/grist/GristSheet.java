@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
-import fr.sparna.rdf.xls2rdf.sheet.grist.api.caller.CallableGrist;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
-import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.GristClient;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristEntityFactory;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.record.GristRecords;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristTablesParser;
@@ -30,7 +28,7 @@ public class GristSheet implements Sheet {
     public GristSheet(JsonNode tableNode, GristWorkbook delegate){
         this.tableNode = tableNode;
         this.parentWorkbook = delegate;
-        this.gristRecords = GristEntityFactory.getRecords(this.getGristClient().getGristRecords(((GristWorkbook)this.parentWorkbook).getGristDocumentId(), this.getSheetName()));
+        this.gristRecords = GristEntityFactory.getRecords(this.getGristClient().getRecords(((GristWorkbook)this.parentWorkbook).getGristDocumentId(), this.getSheetName()));
         this.columnNames = new ArrayList<>();
         Iterator<String> iter = this.gristRecords.getColumnNames(0);
         iter.forEachRemaining(columnNames::add);

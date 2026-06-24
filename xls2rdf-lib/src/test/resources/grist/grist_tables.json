@@ -1,0 +1,48 @@
+{
+  "tables": [
+    {
+      "id": "NodeShapes",
+      "fields": {
+        "tableRef": 1,
+        "primaryViewId": 1,
+        "summarySourceTable": 0,
+        "onDemand": false,
+        "rawViewSectionRef": 2,
+        "recordCardViewSectionRef": 3
+      }
+    },
+    {
+      "id": "PropertyShapes",
+      "fields": {
+        "tableRef": 2,
+        "primaryViewId": 2,
+        "summarySourceTable": 0,
+        "onDemand": false,
+        "rawViewSectionRef": 5,
+        "recordCardViewSectionRef": 6
+      }
+    },
+    {
+      "id": "ShaclGraph",
+      "fields": {
+        "tableRef": 3,
+        "primaryViewId": 3,
+        "summarySourceTable": 0,
+        "onDemand": false,
+        "rawViewSectionRef": 9,
+        "recordCardViewSectionRef": 10
+      }
+    },
+    {
+      "id": "Prefixes",
+      "fields": {
+        "tableRef": 4,
+        "primaryViewId": 4,
+        "summarySourceTable": 0,
+        "onDemand": false,
+        "rawViewSectionRef": 16,
+        "recordCardViewSectionRef": 17
+      }
+    }
+  ]
+}

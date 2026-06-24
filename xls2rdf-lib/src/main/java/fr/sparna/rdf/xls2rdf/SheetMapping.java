@@ -7,7 +7,7 @@ import java.util.Properties;
 public class SheetMapping {
 
     private Map<String, String> mapper;
-    private Map<String, ColumnHeader> columnHeaders;
+    private Map<String, MappingRule> columnHeaders;
     private Properties mappingProperties;
     private String subjectColumn;
     private PrefixManager prefixManager;
@@ -22,15 +22,15 @@ public class SheetMapping {
         this.columnHeaders = new HashMap<>();
     }
 
-   public ColumnHeader parseColumnHeader(String sheetName, String columnName){
-        ColumnHeaderParser parser = new ColumnHeaderParser(this.prefixManager);
-        ColumnHeader columnHeader = parser.parse(this.mappingProperties.getProperty(sheetName + "." + columnName), null);
+   public MappingRule parseColumnHeader(String sheetName, String columnName){
+        MappingRuleParser parser = new MappingRuleParser(this.prefixManager);
+       MappingRule columnHeader = parser.parse(this.mappingProperties.getProperty(sheetName + "." + columnName));
         if(columnHeader.getProperty() == null)
         this.columnHeaders.put(columnName, columnHeader);
         return columnHeader;
    }
 
-   public Map<String, ColumnHeader> getColumnHeaders(){
+   public Map<String, MappingRule> getColumnHeaders(){
         return this.columnHeaders;
    }
 

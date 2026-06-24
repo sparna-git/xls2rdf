@@ -1,0 +1,40 @@
+{
+  "records": [
+    {
+      "id": 1,
+      "fields": {
+        "UUID": "be1dd2ce-a565-4730-b402-ad9c0098327a",
+        "rdfs_label_en": "Documents API description",
+        "owl_versionInfo": "3.2.1",
+        "rdf_type_separator_": "owl:Ontology, adms:Asset",
+        "dcterms_modified": 1776175610.314592,
+        "adms_versionNotes_en": "",
+        "adms_status": ""
+      }
+    },
+    {
+      "id": 2,
+      "fields": {
+        "UUID": "783fcfab-41db-4c7d-acb9-6681fc872705",
+        "rdfs_label_en": "",
+        "owl_versionInfo": "1.1.1",
+        "rdf_type_separator_": "",
+        "dcterms_modified": 1780996823.254766,
+        "adms_versionNotes_en": "",
+        "adms_status": ""
+      }
+    },
+    {
+      "id": 3,
+      "fields": {
+        "UUID": "13d154c9-54ca-43a8-9998-4dafcc62c0d3",
+        "rdfs_label_en": "",
+        "owl_versionInfo": "1.1.1",
+        "rdf_type_separator_": "",
+        "dcterms_modified": 1780996827.565509,
+        "adms_versionNotes_en": "",
+        "adms_status": ""
+      }
+    }
+  ]
+}

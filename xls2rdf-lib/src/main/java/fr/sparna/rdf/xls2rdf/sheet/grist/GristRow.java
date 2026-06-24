@@ -25,7 +25,6 @@ public class GristRow implements Row {
         this.parentSheet = delegate;
         this.rowNode = rowNode;
         this.columnNames = columnNames;
-        System.out.println("row = " + this.rowNode.toPrettyString());
     }
 
     @Override

@@ -1,0 +1,25 @@
+{
+  "records": [
+    {
+      "id": 1,
+      "fields": {
+        "A": "dcterms",
+        "B": "http://purl.org/dc/terms/"
+      }
+    },
+    {
+      "id": 2,
+      "fields": {
+        "A": "eli",
+        "B": "http://data.europa.eu/eli/ontology#"
+      }
+    },
+    {
+      "id": 3,
+      "fields": {
+        "A": "foaf",
+        "B": "http://xmlns.com/foaf/0.1/"
+      }
+    }
+  ]
+}

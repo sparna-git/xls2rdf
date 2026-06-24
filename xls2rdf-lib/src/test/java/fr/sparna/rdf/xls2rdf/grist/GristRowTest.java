@@ -1,16 +1,24 @@
 package fr.sparna.rdf.xls2rdf.grist;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
-import fr.sparna.rdf.xls2rdf.sheet.grist.GristWorkbookFactory;
+import fr.sparna.rdf.xls2rdf.sheet.grist.GristWorkbook;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+@RunWith(MockitoJUnitRunner.class)
 public class GristRowTest {
 
     final static String   DOCUMENT_ID   = "nh8zUVxuPVGRC4cgHWC9bg";
@@ -20,27 +28,43 @@ public class GristRowTest {
 
     Workbook workbook;
     List<Sheet> sheets;
+    @Mock
+    Client mockClient;
+    ObjectMapper m = new ObjectMapper();
 
 
-    public void initProperties_with_cache(){
+    public void mockRecordsClientCall(String tableName) throws IOException {
+
+        switch (tableName){
+            case "NodeShapes" -> {
+                Mockito.when(mockClient.getRecords(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist_NodeShapes_records.json")));
+            }
+            case "PropertyShapes" -> {
+                Mockito.when(mockClient.getRecords(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist.PropertyShapes_records.json")));
+            }
+            case "Prefixes" -> {
+                Mockito.when(mockClient.getRecords(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist_Prefiixes_records.json")));
+            }
+            case "ShaclGraph" -> {
+                Mockito.when(mockClient.getRecords(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist_ShaclGraph_records.json")));
+            }
+        }
+    }
+
+    public void initProperties() throws IOException {
         this.sheets = new ArrayList<>();
-        this.workbook = GristWorkbookFactory.open(DOCUMENT_ID, System.getProperty("gristToken"), true);
+        Mockito.when(this.mockClient.getTables(Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist_tables.json")));
+        this.workbook = new GristWorkbook(DOCUMENT_ID, this.mockClient);
         for(String n : TABLES_NAMES){
+            this.mockRecordsClientCall(n);
             this.sheets.add(workbook.getSheet(n));
         }
     }
 
-    public void initProperties_with_no_cache(){
-        this.sheets = new ArrayList<>();
-        this.workbook = GristWorkbookFactory.open(DOCUMENT_ID, System.getProperty("gristToken"), false);
-        for(String n : TABLES_NAMES){
-            this.sheets.add(workbook.getSheet(n));
-        }
-    }
 
     @Test
-    public void try_get_cell_value_at_with_no_cache(){
-        this.initProperties_with_no_cache();
+    public void try_get_cell() throws IOException {
+        this.initProperties();
         for(Sheet s : sheets){
             int index = 0;
             Iterator<Row> iter = s.iterator();
@@ -61,30 +85,8 @@ public class GristRowTest {
     }
 
     @Test
-    public void try_get_cell_value_at_with_cache(){
-        this.initProperties_with_cache();
-        for(Sheet s : sheets){
-            int index = 0;
-            Iterator<Row> iter = s.iterator();
-            System.out.println("--------------------");
-            System.out.println("SHEET = " + s.getSheetName());
-            System.out.println("--------------------");
-            while(iter.hasNext()){
-                System.out.println("--------------------");
-                System.out.println("ROW NUMBER ==== " + index++);
-                System.out.println("--------------------");
-                Row r = iter.next();
-                Assert.assertNotNull("Row is null.", r);
-                for (int i = 0; i < 30 ; i++) {
-                    System.out.println(r.getColumnValue(i));
-                }
-            }
-        }
-    }
-
-    @Test
-    public void try_get_row_num_with_cache(){
-        this.initProperties_with_cache();
+    public void try_get_row_num() throws IOException {
+        this.initProperties();
         for(Sheet s : sheets){
             Iterator<Row> iter = s.iterator();
             System.out.println("--------------------");
@@ -99,20 +101,5 @@ public class GristRowTest {
         }
     }
 
-    @Test
-    public void try_get_row_num_with_no_cache(){
-        this.initProperties_with_no_cache();
-        for(Sheet s : sheets){
-            Iterator<Row> iter = s.iterator();
-            System.out.println("--------------------");
-            System.out.println("SHEET = " + s.getSheetName());
-            System.out.println("--------------------");
-            while(iter.hasNext()){
-                Row r = iter.next();
-                Assert.assertNotNull("Row is null.", r);
-                System.out.println("row num = " + r.getRowNum());
-            }
-        }
-    }
 
 }

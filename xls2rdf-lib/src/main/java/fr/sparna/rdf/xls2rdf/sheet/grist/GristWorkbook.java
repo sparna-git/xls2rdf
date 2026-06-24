@@ -1,6 +1,5 @@
 package fr.sparna.rdf.xls2rdf.sheet.grist;
 
-import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
@@ -10,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 public class GristWorkbook implements Workbook {
@@ -19,22 +17,20 @@ public class GristWorkbook implements Workbook {
 
     private final String gristDocumentId;
     private final Client client;
-    private GristTables gristTables;
+    private final GristTables gristTables;
 
     public GristWorkbook(String gristDocumentId, Client client){
         this.client = client;
         this.gristDocumentId = gristDocumentId;
-        try {
-            this.gristTables = GristEntityFactory.getTables(this.client.getTables(this.getGristDocumentId()));
-        } catch (IOException | InterruptedException e) {
-            Xls2RdfException.rethrow(e);
-        }
+        this.gristTables = GristEntityFactory.getTables(this.client.getTables(this.getGristDocumentId()));
+
     }
 
     @Override
     public Sheet getSheet(int index) {
         return new GristSheet(this.gristTables.getTable(index),this);
     }
+
     @Override
     public Sheet getSheet(String name) {
         return new GristSheet(this.gristTables.getTable(name),this);

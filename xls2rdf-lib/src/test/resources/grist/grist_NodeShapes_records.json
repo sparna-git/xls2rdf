@@ -1,0 +1,124 @@
+{
+  "records": [
+    {
+      "id": 1,
+      "fields": {
+        "UUID": "37a24249-477b-4aad-b0db-bda28058d972",
+        "rdf_type": "sh:NodeShape",
+        "owl_versionInfo": "3.2.0",
+        "ID2": "Work",
+        "rdfs_comment_en": "This node shape represents a subset of eli:Work ",
+        "sh_target_id_target_": "",
+        "sh_select_subjectColumn_target_": "PREFIX eli: <http://data.europa.eu/eli/ontology#>\nSELECT ?this\nWHERE {\n  ?this a eli:Work.\n  ?this eli:work_type ?workType .\nVALUES ?workType { \n<https://data.europarl.europa.eu/def/ep-document-types/TEXT_ADOPTED>\n<https://data.europarl.europa.eu/def/ep-document-types/BUDGET_EP_DRAFT>\n<https://data.europarl.europa.eu/def/ep-document-types/AMENDMENT_BUDGET_EU_DRAFT>\n<https://data.europarl.europa.eu/def/ep-document-types/CORRIGENDUM>\n<https://data.europarl.europa.eu/def/ep-document-types/CONSOLIDATED_TEXT>\n<https://data.europarl.europa.eu/def/ep-document-types/MEMBER_DECLARATION_INTEREST_CONFLICT>\n}\n}",
+        "sh_targetClass": "",
+        "skos_example_xsd_string": "https://data.europarl.europa.eu/eli/dl/doc/TA-9-2021-0362",
+        "sh_nodeKind": "sh:IRI",
+        "sh_node_separator_wrapper_sh_or_": "",
+        "sh_closed_xsd_boolean": true,
+        "sh_ignoredProperties": "(rdf:type)",
+        "sh_order_xsd_integer": 0,
+        "shacl_play_color": "White",
+        "shacl_play_background_color": "DarkOrange",
+        "rdfs_label_en": "Documents",
+        "rdfs_label_fr": "",
+        "dcterms_modified": 1781777497.654306,
+        "PropertyShapes_Ref": [
+          "L",
+          2,
+          1,
+          3
+        ],
+        "PropertyShapes_A": 1,
+        "Date": 334540800,
+        "DateTime": 807083100,
+        "Comments": "",
+        "skos_editorialNote": "",
+        "sh_targetSubjectsOf": "",
+        "sh_pattern_xsd_string": "",
+        "PropertyShapes_A_UUID": "684933de-61e2-4451-9030-7a875592e2a2",
+        "PropertyShapes": [
+          "L",
+          "eli:work_type",
+          "dcterms:identifier",
+          "eli:title"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "fields": {
+        "UUID": "f430bff5-d4ab-4a26-b74f-694ed30b365c",
+        "rdf_type": "sh:NodeShape",
+        "owl_versionInfo": "3.2.0",
+        "ID2": "Expression",
+        "rdfs_comment_en": "This node shape represents a subset of eli:Expression",
+        "sh_target_id_target_": "",
+        "sh_select_subjectColumn_target_": "",
+        "sh_targetClass": "eli:Expression",
+        "skos_example_xsd_string": "https://data.europarl.europa.eu/eli/dl/doc/TA-9-2021-0362/en",
+        "sh_nodeKind": "sh:IRI",
+        "sh_node_separator_wrapper_sh_or_": "shacl-ep:Expression-Node",
+        "sh_closed_xsd_boolean": true,
+        "sh_ignoredProperties": "(rdf:type)",
+        "sh_order_xsd_integer": 3,
+        "shacl_play_color": "White",
+        "shacl_play_background_color": "CornflowerBlue",
+        "rdfs_label_en": "Expression",
+        "rdfs_label_fr": "",
+        "dcterms_modified": 1781771278.719663,
+        "PropertyShapes_Ref": [
+          "L",
+          3
+        ],
+        "PropertyShapes_A": 2,
+        "Date": null,
+        "DateTime": null,
+        "Comments": "",
+        "skos_editorialNote": "",
+        "sh_targetSubjectsOf": "",
+        "sh_pattern_xsd_string": "",
+        "PropertyShapes_A_UUID": "02fa489c-c043-458b-9528-3ec639e348f2",
+        "PropertyShapes": [
+          "L",
+          "eli:title"
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "fields": {
+        "UUID": "e6ef71a7-231a-4dce-bbd8-f86fa4323f6f",
+        "rdf_type": "toto",
+        "owl_versionInfo": "0.3.2",
+        "ID2": "",
+        "rdfs_comment_en": "",
+        "sh_target_id_target_": "",
+        "sh_select_subjectColumn_target_": "",
+        "sh_targetClass": "",
+        "skos_example_xsd_string": "",
+        "sh_nodeKind": "sh:IRI",
+        "sh_node_separator_wrapper_sh_or_": "",
+        "sh_closed_xsd_boolean": false,
+        "sh_ignoredProperties": "",
+        "sh_order_xsd_integer": 0,
+        "shacl_play_color": "",
+        "shacl_play_background_color": "",
+        "rdfs_label_en": "",
+        "rdfs_label_fr": "",
+        "dcterms_modified": 1781002126.10661,
+        "PropertyShapes_Ref": null,
+        "PropertyShapes_A": 0,
+        "Date": null,
+        "DateTime": null,
+        "Comments": "",
+        "skos_editorialNote": "",
+        "sh_targetSubjectsOf": "",
+        "sh_pattern_xsd_string": "",
+        "PropertyShapes_A_UUID": "",
+        "PropertyShapes": [
+          "L"
+        ]
+      }
+    }
+  ]
+}

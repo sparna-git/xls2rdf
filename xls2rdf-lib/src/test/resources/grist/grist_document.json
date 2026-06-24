@@ -1,0 +1,93 @@
+{
+  "name": "SHACL ELI-EP",
+  "createdAt": "2026-04-14T11:18:37.842Z",
+  "updatedAt": "2026-06-19T08:35:13.496Z",
+  "id": "nh8zUVxuPVGRC4cgHWC9bg",
+  "isPinned": false,
+  "urlId": "nh8zUVxuPVGR",
+  "options": {
+    "appearance": {
+      "icon": {
+        "backgroundColor": "#084794",
+        "color": "#000000",
+        "emoji": "✍️"
+      }
+    }
+  },
+  "trunkId": null,
+  "type": null,
+  "workspace": {
+    "name": "Home",
+    "createdAt": "2026-04-03T15:19:42.038Z",
+    "updatedAt": "2026-04-03T15:19:42.066Z",
+    "id": 204826,
+    "isSupportWorkspace": false,
+    "org": {
+      "name": "Personal",
+      "createdAt": "2026-04-03T15:19:42.038Z",
+      "updatedAt": "2026-04-03T15:19:42.048Z",
+      "id": 193231,
+      "domain": "docs-184674",
+      "host": null,
+      "owner": {
+        "id": 184674,
+        "name": "Thomas Francart",
+        "picture": "https://lh3.googleusercontent.com/a/ACg8ocK6YPZ396gZPhIwYpvkVomo7RvcGqzsY_yd1bv7scYhzJe5u1Hd=s96-c",
+        "ref": "xsBoyoravkLHQsCkZfrJk8",
+        "createdAt": "2026-04-03T15:19:42.038Z",
+        "type": "login"
+      },
+      "billingAccount": {
+        "id": 193228,
+        "features": null,
+        "individual": true,
+        "inGoodStanding": true,
+        "status": null,
+        "stripePlanId": null,
+        "paymentLink": null,
+        "externalId": null,
+        "externalOptions": null,
+        "product": {
+          "id": 8,
+          "name": "personalFree",
+          "features": {
+            "workspaces": true,
+            "maxSharesPerWorkspace": 0,
+            "maxSharesPerDoc": 2,
+            "snapshotWindow": {
+              "count": 30,
+              "unit": "days"
+            },
+            "baseMaxRowsPerDocument": 5000,
+            "baseMaxApiUnitsPerDocumentPerDay": 5000,
+            "baseMaxDataSizePerDocument": 10240000,
+            "baseMaxAttachmentsBytesPerDocument": 1073741824,
+            "maxAttachmentsBytesPerOrg": 53687091200,
+            "gracePeriodDays": 14,
+            "baseMaxAssistantCalls": 100
+          }
+        }
+      },
+      "access": "viewers"
+    },
+    "access": "viewers",
+    "owner": {
+      "id": 184674,
+      "name": "Thomas Francart",
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocK6YPZ396gZPhIwYpvkVomo7RvcGqzsY_yd1bv7scYhzJe5u1Hd=s96-c",
+      "ref": "xsBoyoravkLHQsCkZfrJk8",
+      "createdAt": "2026-04-03T15:19:42.038Z",
+      "type": "login"
+    }
+  },
+  "aliases": [
+    {
+      "orgId": 193231,
+      "urlId": "nh8zUVxuPVGR",
+      "docId": "nh8zUVxuPVGRC4cgHWC9bg",
+      "createdAt": "2026-04-14T11:18:37.842Z"
+    }
+  ],
+  "forks": [],
+  "access": "owners"
+}
