@@ -252,27 +252,32 @@ public class Xls2RdfConverter {
 		}
 
 		// read the concept scheme or graph URI
-		String csUri = prefixManager.isValidURI(rdfizableSheet.getSchemeOrGraph(), true);
+		String csUri = rdfizableSheet.b1ContainsUri()?prefixManager.isValidURI(rdfizableSheet.getSchemeOrGraph(), true):null;
 
 		// if the URI was already processed, output a warning (this is a possible case)
-		if(this.convertedVocabularyIdentifiers.contains(csUri)) {
+		if(csUri != null && this.convertedVocabularyIdentifiers.contains(csUri)) {
 			log.debug("Duplicate graph declaration found: " + csUri + " (declared in more than one sheet)");
 		}
 
-		Resource csResource = svf.createIRI(csUri);
+		Resource csResource = null;
+		if(csUri != null) {
+			csResource = svf.createIRI(csUri);
+		}
 
 		// find the title row index
 		int headerRowIndex;
 
-		HeaderLine headerLine = rdfizableSheet.getHeaderLine();
+		HeaderLine headerLine = rdfizableSheet.getHeaderLine();		
 
 		// si la ligne d'entete n'a pas été trouvée, on ne génère que la ressource d'entête
 		if(headerLine == null) {
 			log.info("Could not find header row index in sheet "+sheet.getSheetName()+", will parse header object until end of sheet (last rowNum = "+ sheet.getLastRowNum() +")");
 			headerRowIndex = sheet.getLastRowNum()+1;
 		} else {
-			headerRowIndex = rdfizableSheet.getHeaderLine().getRowIndex();
+			headerRowIndex = headerLine.getRowIndex();
 		}
+
+		System.out.println("headerRowIndex : "+headerRowIndex);
 		
 		// validate the sheet
 		if(this.propertyValidator != null) {
@@ -309,8 +314,8 @@ public class Xls2RdfConverter {
 					
 					// always use a default processor
 					ValueProcessorIfc cellProcessor = processorFactory.resourceOrLiteral(
-							mappingRule,
-							prefixManager
+						mappingRule,
+						prefixManager
 					);
 					
 					// support separator option in the header
@@ -322,20 +327,17 @@ public class Xls2RdfConverter {
 					} 
 					
 					log.debug("Adding value on header object \""+value+"\" with lang "+mappingRule.getLanguage().orElse(this.lang));
-						cellProcessor.processValue(
-							model,
-							csResource,
-							value,
-								cell,
-
-							mappingRule.getLanguage().orElse(this.lang)
+					cellProcessor.processValue(
+						model,
+						csResource,
+						value,
+						cell,
+						mappingRule.getLanguage().orElse(this.lang)
 					);
 				}
 			}
 		}
 
-		//j'ai remonté au début de la méthode
-		//List<ColumnHeader> columnNames = rdfizableSheet.getColumnHeaders();
 		List<Resource> rowResources = new ArrayList<>();
 		Map<String, MappingRule> mappingRules = new HashMap<>();
 

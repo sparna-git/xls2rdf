@@ -32,16 +32,16 @@ public class RdfizableSheet {
 	protected HeaderLine headerLine;
 
 	public RdfizableSheet(
-			Sheet sheet,
-			PrefixManager prefixManager,
-			Map<String, MappingRule> mappingRules
+		Sheet sheet,
+		PrefixManager prefixManager,
+		Map<String, MappingRule> mappingRules
 	) {
 		super();
 		this.sheet = sheet;
 		this.prefixManager = prefixManager;
 		this.mappingRules = mappingRules;
 
-		int titleRowIndex = computeTitleRowIndex(sheet, prefixManager);
+		int titleRowIndex = this.findHeaderLineIndex();
 		// if we found a title row somewhere...
 		if(titleRowIndex > -1) {
 			this.headerLine = new HeaderLine(sheet.getRow(titleRowIndex));
@@ -49,7 +49,19 @@ public class RdfizableSheet {
 	}
 
 	/**
-	 * A Sheet can be converted to RDF if :
+	 * @return true if either there is a URI in cell B1, or we found the header line
+	 */
+	public boolean canRDFize() {
+		// we still need this condition to be able to parse sheets where only the header part is set
+		// but with no body
+		boolean b1ContainsUri = b1ContainsUri();
+		boolean headerLineKnown = (this.headerLine != null);
+
+		return b1ContainsUri || headerLineKnown;
+	}
+
+	/**
+	 * Tests whether cell B1 contains a valid URI
 	 * <ol>
 	 *   <li>The first row is not empty</li>
 	 *   <li>Cell B1 contains a value</li>
@@ -57,31 +69,32 @@ public class RdfizableSheet {
 	 * </ol>
 	 * @return true if this sheet can be converted in RDF by the converter, false otherwise.
 	 */
-	public boolean canRDFize() {
+	public boolean b1ContainsUri() {
+		boolean valid = false;
+
 		if(sheet.getRow(0) == null) {
 			log.debug(sheet.getSheetName()+" : First row is empty.");
-			return false;
+			return valid;
 		}
 
 		String uri = sheet.getRow(0).getColumnValue(1);
 
 		if(StringUtils.isBlank(uri)) {
 			log.debug(sheet.getSheetName()+" : B1 is empty.");
-			return false;
+			return valid;
 		} else {
 			String fixedUri = this.prefixManager.isValidURI(uri, false);
 			try {
 				new URI(fixedUri);
+				valid = true;
 			} catch (URISyntaxException e) {
 				log.debug(sheet.getSheetName()+" : B1 is not a valid URI ('"+uri+"').");
-				return false;
 			} catch (NullPointerException e) {
 				log.debug("Cannot build a valid URI from '"+uri+"'.");
-				return false;
 			}
 		}
 
-		return true;
+		return valid;
 	}
 
 	public String getSchemeOrGraph() {
@@ -93,6 +106,56 @@ public class RdfizableSheet {
 	}
 
 	/**
+	 * Determines where is the header line whose values are mapped in the provided Mapping rules
+	 * @return
+	 */
+	public int findHeaderLineIndex() {
+		int headerRowIndex = -1;
+
+		// look for it in either the lastRowNum or 200, whichever is smaller - don't scan very large tables below row 200
+		for (int rowIndex = headerRowIndex; rowIndex <= Math.min(sheet.getLastRowNum(), 200); rowIndex++) {
+			int numFound = 0;
+			// we start to check on the second column to avoid detecting a column header in ConceptScheme metadata
+			for (short colIndex = 1; colIndex < 10; colIndex++) {
+				try {
+					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
+					if(this.findMappingRuleByHeader(c.getCellValue()) != null) {
+						numFound++;
+					}
+				} catch (Exception e) {
+					// we prevent anything to go wrong in the parsing at this stage, since the parsing
+					// tests cells for which we are unsure of the format.
+					log.trace("Unable to parse a cell content while auto-detecting title row : "+e.getMessage());
+				}
+			}
+
+			// we check if we find 2 columns header in the first 10 columns
+			if(numFound >= 2) {
+				log.info("Found at least 2 headers that are mapped in the first 10 columns, title row is at index "+rowIndex);
+				headerRowIndex = rowIndex;
+				break;
+			}
+
+			if(numFound == 1) {
+				if(
+					sheet.getRow(rowIndex).getCell(0) != null
+					&&
+					(
+						sheet.getRow(rowIndex).getCell(0).getCellValue().equals("URI")
+						||
+						sheet.getRow(rowIndex).getCell(0).getCellValue().equals("IRI")
+					)
+				) {
+					headerRowIndex = rowIndex;
+					break;
+				}
+			}
+		}
+
+		return headerRowIndex;
+	}
+
+	/**
 	 * Determines the index of the row containing the column headers.
 	 * This is determined by checking if column B and C both contain a URI (full, starting with http://, or abbreviated using one of the declared prefix).
 	 * @return
@@ -100,7 +163,6 @@ public class RdfizableSheet {
 	public static int computeTitleRowIndex(Sheet sheet, PrefixManager prefixManager) {
 		int headerRowIndex = -1;
 
-		boolean found = false;
 		MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
 		// look for it in either the lastRowNum or 200, whichever is smaller - don't scan very large tables below row 200
 		for (int rowIndex = headerRowIndex; rowIndex <= Math.min(sheet.getLastRowNum(), 200); rowIndex++) {
@@ -126,28 +188,21 @@ public class RdfizableSheet {
 			if(numFound >= 2) {
 				log.info("Found at least 2 headers with proper property declaration in the first 10 columns, title row is at index "+rowIndex);
 				headerRowIndex = rowIndex;
-				found = true;
 				break;
 			}
-		}
 
-		if(!found) {
-			for (int rowIndex = -1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-				// test if we find "URI" in the first column
-				if(sheet.getRow(rowIndex) != null) {
-					if(
-							sheet.getRow(rowIndex).getCell(0) != null
-									&&
-									(
-											sheet.getRow(rowIndex).getCell(0).getCellValue().equals("URI")
-													||
-													sheet.getRow(rowIndex).getCell(0).getCellValue().equals("IRI")
-									)
-					) {
-						headerRowIndex = rowIndex;
-						found = true;
-						break;
-					}
+			if(numFound == 1) {
+				if(
+					sheet.getRow(rowIndex).getCell(0) != null
+					&&
+					(
+						sheet.getRow(rowIndex).getCell(0).getCellValue().equals("URI")
+						||
+						sheet.getRow(rowIndex).getCell(0).getCellValue().equals("IRI")
+					)
+				) {
+					headerRowIndex = rowIndex;
+					break;
 				}
 			}
 		}
@@ -259,7 +314,6 @@ public class RdfizableSheet {
 					log.debug("Property "+mappingRule.getProperty()+" is valid.");
 				}
 			}
-
 		}
 
 		if(this.mappingRules != null) {
