@@ -36,12 +36,12 @@ public class GristWorkbookTest {
         JsonNode jsonNode = this.m.readTree(node);
         //On initie le comportement du mock avant d'être ajouté dans le GristWorkbook
         Mockito.when(mockClient.getTables(Mockito.anyString())).thenReturn(jsonNode);
-        cud = Mockito.spy(new GristWorkbook(DOCUMENT_ID, mockClient));
+        cud = new GristWorkbook(DOCUMENT_ID, mockClient);
+        Mockito.verify(this.mockClient).getTables(DOCUMENT_ID);
 
     }
 
     public void mockRecordsClientCall(String tableName) throws IOException {
-
         switch (tableName){
             case "NodeShapes" -> {
                 Mockito.when(mockClient.getRecords(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist_NodeShapes_records.json")));
@@ -69,7 +69,6 @@ public class GristWorkbookTest {
         }
     }
 
-
     @Test
     public void try_get_sheet_by_index() throws IOException {
         Assert.assertNotNull("Class under test is null.", this.cud);
@@ -80,7 +79,6 @@ public class GristWorkbookTest {
             System.out.println(s.getSheetName());
         }
     }
-
 
     @Test
     public void try_iter_on_sheet() throws IOException {

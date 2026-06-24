@@ -24,7 +24,7 @@ public class SheetMapping {
 
    public MappingRule parseColumnHeader(String sheetName, String columnName){
         MappingRuleParser parser = new MappingRuleParser(this.prefixManager);
-       MappingRule columnHeader = parser.parse(this.mappingProperties.getProperty(sheetName + "." + columnName));
+        MappingRule columnHeader = parser.parse(this.mappingProperties.getProperty(sheetName + "." + columnName));
         if(columnHeader.getProperty() == null)
         this.columnHeaders.put(columnName, columnHeader);
         return columnHeader;

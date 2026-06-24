@@ -89,7 +89,7 @@ public class GristSheetTest {
             int index = 0;
             while(iter.hasNext()){
                 Row r = iter.next();
-                System.out.println("Itereratio en cours sur les records de = " + r.getSheet().getSheetName());
+                System.out.println("Iteration en cours sur les records de = " + r.getSheet().getSheetName());
                 Assert.assertNotNull("Row is null.", r);
                 Assert.assertEquals("Row num is not correct", index++, r.getRowNum());
             }

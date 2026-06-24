@@ -1,12 +1,11 @@
 package fr.sparna.rdf.xls2rdf;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HeaderLine {
 
@@ -30,8 +29,7 @@ public class HeaderLine {
             if (StringUtils.isBlank(columnName)) {
                 break;
             }
-
-            headers.add(columnName);
+            this.headers.add(columnName);
         }
     }
 
