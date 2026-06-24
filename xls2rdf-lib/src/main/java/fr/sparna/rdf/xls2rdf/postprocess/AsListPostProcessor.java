@@ -31,6 +31,7 @@ public class AsListPostProcessor implements Xls2RdfPostProcessorIfc {
 		if(mainResource != null){
 			log.debug("Postprocessing : "+this.getClass().getSimpleName());
 			for (MappingRule aMappingRule : columnMapping.values()) {
+				System.out.println("Examining mapping rule "+aMappingRule.getOriginalValue());
 				if(aMappingRule.isAsList()) {
 					Model toRemove = new LinkedHashModel();
 					Model toAdd = new LinkedHashModel();
@@ -47,6 +48,9 @@ public class AsListPostProcessor implements Xls2RdfPostProcessorIfc {
 						// add instead triple to the list
 						toAdd.add(aSubject, aMappingRule.getProperty(), listHead);
 					}
+					// remove everything that needs to be removed
+					model.removeAll(toRemove);
+					model.addAll(toAdd);
 				}
 			}
 		}

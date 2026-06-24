@@ -265,10 +265,9 @@ public class Xls2RdfConverter {
 		int headerRowIndex;
 
 		HeaderLine headerLine = rdfizableSheet.getHeaderLine();
+
 		// si la ligne d'entete n'a pas été trouvée, on ne génère que la ressource d'entête
-
 		if(headerLine == null) {
-
 			log.info("Could not find header row index in sheet "+sheet.getSheetName()+", will parse header object until end of sheet (last rowNum = "+ sheet.getLastRowNum() +")");
 			headerRowIndex = sheet.getLastRowNum()+1;
 		} else {
@@ -405,20 +404,15 @@ public class Xls2RdfConverter {
 		} else {
 			log.info("Sheet has no title row, skipping data processing.");
 		}
-
-
 		
 		// always post-process with asList
 		AsListPostProcessor alpp = new AsListPostProcessor();
 		alpp.afterSheet(model, csResource, rowResources, mappingRules);
 
-
 		if(this.postProcessors != null && this.postProcessors.size() > 0) {
 			log.info("Applying SKOS post-processings on the result");
 			for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
-
 				aProcessor.afterSheet(model, csResource, rowResources, mappingRules);
-
 			}
 		} else {
 			log.info("No post-processings to apply");
