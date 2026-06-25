@@ -6,6 +6,7 @@ import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristEntityFactory;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.column.GristColumns;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.record.GristRecords;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristTablesParser;
 import org.jetbrains.annotations.NotNull;
@@ -23,15 +24,24 @@ public class GristSheet implements Sheet {
     private final Workbook parentWorkbook;
     private final JsonNode tableNode;
     private final GristRecords gristRecords;
+    private final GristColumns gristColumns;
     private final List<String> columnNames;
 
     public GristSheet(JsonNode tableNode, GristWorkbook delegate){
         this.tableNode = tableNode;
         this.parentWorkbook = delegate;
         this.gristRecords = GristEntityFactory.getRecords(this.getGristClient().getRecords(((GristWorkbook)this.parentWorkbook).getGristDocumentId(), this.getSheetName()));
+        this.gristColumns = GristEntityFactory.getColumns(this.getGristClient().getColumns(((GristWorkbook)this.parentWorkbook).getGristDocumentId(), this.getSheetName()));
         this.columnNames = new ArrayList<>();
-        Iterator<String> iter = this.gristRecords.getColumnNames(0);
-        iter.forEachRemaining(columnNames::add);
+        this.getColumnNames();
+    }
+
+    private void getColumnNames(){
+        for(int i = 0; true; i++){
+            JsonNode columnName = this.gristColumns.getColumnName(i);
+            if(columnName == null) break;
+            else this.columnNames.add(columnName.asText());
+        }
     }
 
     @Override
@@ -46,7 +56,7 @@ public class GristSheet implements Sheet {
 
     @Override
     public Row getRow(int rowIndex) {
-
+        if(rowIndex == 0) return new GristHeaderRow(this.columnNames, this);
         return new GristRow(this.gristRecords.getRecord(rowIndex), this.columnNames, this);
     }
 

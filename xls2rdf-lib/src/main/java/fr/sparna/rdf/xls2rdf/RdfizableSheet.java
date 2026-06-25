@@ -118,10 +118,8 @@ public class RdfizableSheet {
 				try {
 					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
 					String cellValue = c.getCellValue();
+					if(cellValue == null) continue;
 					if(this.findMappingRuleByHeader(cellValue) != null) {
-						numFound++;
-					}
-					else if(this.findMappingRuleByHeader(sheet.getSheetName() + "." + cellValue) != null){
 						numFound++;
 					}
 				} catch (Exception e) {

@@ -33,7 +33,7 @@ public class GristRecords extends AbstractGristEntity<GristRecordsParser> {
     }
 
     public JsonNode getRecord(int recordIndex){
-        return this.getParser().getNodeFromIndex(recordIndex);
+        return this.getParser().getNodeFromIndex(recordIndex - 1);
     }
 
     public JsonNode getCells(int recordIndex){

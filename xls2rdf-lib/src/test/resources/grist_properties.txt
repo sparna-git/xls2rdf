@@ -1,0 +1,2 @@
+Table_test.nom=http://www.w3.org/2004/02/skos/core#prefLabel@fr
+Table_test.synonyme=http://www.w3.org/2004/02/skos/core#altLabel@fr

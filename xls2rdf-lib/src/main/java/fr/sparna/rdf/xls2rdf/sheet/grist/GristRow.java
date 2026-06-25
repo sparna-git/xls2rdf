@@ -35,8 +35,7 @@ public class GristRow implements Row {
 
     @Override
     public String getColumnValue(int columnIndex) {
-        if(columnIndex >= this.columnNames.size()) return null;
-        System.out.print("ColumnName: " + this.columnNames.get(columnIndex) + " Value === ");// <---- a retirer juste pour les tests
+        if(columnIndex >= this.columnNames.size() || this.rowNode == null) return null;
         JsonNode cellNode = this.rowNode.get(GristRecordsParser.FIELDS_ID).get(this.columnNames.get(columnIndex));
         String convertResult = GristCellConverter.getInstance().convertIf(cellNode);
         if(convertResult != null) return convertResult;
@@ -45,7 +44,7 @@ public class GristRow implements Row {
 
     @Override
     public int getRowNum() {
-        return this.rowNode.get(GristRecordsParser.RECORD_POSITION).asInt() - 1;
+        return this.rowNode.get(GristRecordsParser.RECORD_POSITION).asInt();
     }
 
     @Override

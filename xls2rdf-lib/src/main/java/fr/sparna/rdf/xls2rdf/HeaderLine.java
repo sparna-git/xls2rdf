@@ -22,7 +22,7 @@ public class HeaderLine {
         this.headers = new ArrayList<String>();
         for (short i = 0; true; i++) {
             Cell cell = row.getCell(i);
-            if (null == cell) break;
+            if (cell == null) break;
             String columnName = cell.getCellValue();
 
             // stop at the first empty value
