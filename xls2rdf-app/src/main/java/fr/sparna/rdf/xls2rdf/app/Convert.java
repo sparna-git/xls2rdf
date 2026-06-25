@@ -1,5 +1,6 @@
 package fr.sparna.rdf.xls2rdf.app;
 
+import fr.sparna.rdf.xls2rdf.WorkbookMapping;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverterBuilder;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -21,6 +22,13 @@ public class Convert implements CliCommandIfc {
 		//Cast args to ArgumentsConvert
 		ArgumentsConvert arg = (ArgumentsConvert)args;
 		FileOutputStream out = null;
+		Properties properties = null;
+		WorkbookMapping workbookMapping = null;
+		if(arg.getPropertiesFile() != null){
+			properties = new Properties();
+			properties.load(new FileInputStream(arg.getPropertiesFile()));
+			workbookMapping = new WorkbookMapping(properties);
+		}
 
 		Xls2RdfConverterBuilder builder = Xls2RdfConverterBuilder.getInstance()
 						.withLanguage(arg.getLang())
@@ -33,7 +41,8 @@ public class Convert implements CliCommandIfc {
 						.withFormat(() -> {
 							if(arg.getRdfFormat() != null) return RDFWriterRegistry.getInstance().getFileFormatForMIMEType(arg.getRdfFormat()).orElse(RDFFormat.TURTLE);
 							else return RDFWriterRegistry.getInstance().getFileFormatForFileName(arg.getOutput().getName()).orElse(RDFFormat.TURTLE);
-						});
+						})
+						.withWorkbookMapping(workbookMapping);
 
 		//if the options -i and -o and -w are present
 		if(arg.isWatch() && arg.getOutput() != null && arg.getInput() != null){
@@ -94,11 +103,9 @@ public class Convert implements CliCommandIfc {
 			else {
 				try(InputStream in = new FileInputStream(arg.getInput());){
 					log.debug("Will use ModelWriter : {}", builder.getModelWriter().getClass().getName());
-
 					builder.buildConverter().processInputStream(in);
 				}
 			}
-
 			flushAndClose(out);
 		}
 	}
@@ -116,7 +123,5 @@ public class Convert implements CliCommandIfc {
 		if(out != null) out.flush();
 		if(out != null) out.close();
 	}
-
-
 
 }

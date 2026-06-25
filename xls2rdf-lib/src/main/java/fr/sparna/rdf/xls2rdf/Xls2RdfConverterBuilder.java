@@ -27,7 +27,6 @@ public class Xls2RdfConverterBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(Xls2RdfConverterBuilder.class);
 
-
     /*
     PROPERTIES
      */
@@ -41,7 +40,7 @@ public class Xls2RdfConverterBuilder {
 
     private String language;
 
-    private SheetMapping sheetMapping;
+    private WorkbookMapping workbookMapping;
 
     private boolean applyPostProcessing;
 
@@ -82,8 +81,8 @@ public class Xls2RdfConverterBuilder {
         return this;
     }
 
-    public Xls2RdfConverterBuilder withSheetMapping(SheetMapping sheetMapping){
-        this.sheetMapping = sheetMapping;
+    public Xls2RdfConverterBuilder withWorkbookMapping(WorkbookMapping workbookMapping){
+        this.workbookMapping = workbookMapping;
         return this;
     }
 
@@ -183,7 +182,7 @@ public class Xls2RdfConverterBuilder {
 
         converter.setFailIfNoReconcile(!this.failOnReconcile);
         converter.setSkipHidden(this.skipHidden);
-        converter.setPropertiesMapping(this.sheetMapping);
+        converter.setWorkbookMapping(this.workbookMapping);
 
         return converter;
     }
@@ -235,7 +234,7 @@ public class Xls2RdfConverterBuilder {
         return this.skipHidden;
     }
 
-    public SheetMapping getPropertiesMapping() {return this.sheetMapping;}
+    public WorkbookMapping getWorkbookMapping() {return this.workbookMapping;}
 
 
 }

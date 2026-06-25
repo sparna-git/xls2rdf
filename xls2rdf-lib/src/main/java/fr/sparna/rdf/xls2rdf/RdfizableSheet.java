@@ -28,19 +28,17 @@ public class RdfizableSheet {
 	protected Sheet sheet;
 	protected PrefixManager prefixManager;
 
-	protected Map<String, MappingRule> mappingRules;
+	protected SheetMapping sheetMapping;
 	protected HeaderLine headerLine;
 
 	public RdfizableSheet(
 		Sheet sheet,
 		PrefixManager prefixManager,
-		Map<String, MappingRule> mappingRules
+		SheetMapping sheetMapping
 	) {
-		super();
 		this.sheet = sheet;
 		this.prefixManager = prefixManager;
-		this.mappingRules = mappingRules;
-
+		this.sheetMapping = sheetMapping;
 		int titleRowIndex = this.findHeaderLineIndex();
 		// if we found a title row somewhere...
 		if(titleRowIndex > -1) {
@@ -101,8 +99,8 @@ public class RdfizableSheet {
 		return sheet.getRow(0).getCell(1).getCellValue();
 	}
 
-	public Map<String, MappingRule> getMappingRules() {
-		return mappingRules;
+	public SheetMapping getSheetMapping() {
+		return this.sheetMapping;
 	}
 
 	/**
@@ -119,7 +117,11 @@ public class RdfizableSheet {
 			for (short colIndex = 1; colIndex < 10; colIndex++) {
 				try {
 					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
-					if(this.findMappingRuleByHeader(c.getCellValue()) != null) {
+					String cellValue = c.getCellValue();
+					if(this.findMappingRuleByHeader(cellValue) != null) {
+						numFound++;
+					}
+					else if(this.findMappingRuleByHeader(sheet.getSheetName() + "." + cellValue) != null){
 						numFound++;
 					}
 				} catch (Exception e) {
@@ -166,13 +168,13 @@ public class RdfizableSheet {
 		MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
 		// look for it in either the lastRowNum or 200, whichever is smaller - don't scan very large tables below row 200
 		for (int rowIndex = headerRowIndex; rowIndex <= Math.min(sheet.getLastRowNum(), 200); rowIndex++) {
-
 			int numFound = 0;
 			// we start to check on the second column to avoid detecting a column header in ConceptScheme metadata
 			for (short colIndex = 1; colIndex < 10; colIndex++) {
 				try {
 					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
-					MappingRule rule = headerParser.parse(c.getCellValue());
+					String cellValue = c.getCellValue();
+					MappingRule rule = headerParser.parse(cellValue);
 					if(rule.getProperty() != null) {
 						log.debug("Found proper property in header : "+rule.getProperty().toString());
 						numFound++;
@@ -221,17 +223,16 @@ public class RdfizableSheet {
 	/**
 	 * @return Attempt to auto-detect mapping rules in a given sheet, by looking up the title row and parsing it
 	 */
-	public static Map<String, MappingRule> autoDetectMappingRules(Sheet sheet, PrefixManager prefixManager) {
-		Map<String, MappingRule> mappingRules = new HashMap<>();
+	public static SheetMapping autoDetectMappingRules(Sheet sheet, PrefixManager prefixManager) {
+		SheetMapping sheetMapping = new SheetMapping(sheet.getSheetName(), prefixManager);
 
 		// first lookup the title row
 		int titleRowIndex = computeTitleRowIndex(sheet, prefixManager);
 
-		if(titleRowIndex < 0) return mappingRules;
+		if(titleRowIndex < 0) return sheetMapping;
 
 		Row row = sheet.getRow(titleRowIndex);
 
-		MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
 		if(row != null) {
 			for (short i = 0; true; i++) {
 				Cell cell = row.getCell(i);
@@ -242,11 +243,10 @@ public class RdfizableSheet {
 				if (StringUtils.isBlank(columnName)) {
 					break;
 				}
-
-				mappingRules.put(columnName, headerParser.parse(columnName));
+				sheetMapping.addMappingRule(columnName, columnName);
 			}
 		}
-		return mappingRules;
+		return sheetMapping;
 	}
 
 	/**
@@ -284,7 +284,7 @@ public class RdfizableSheet {
 	 * @return the mapping rule associated to this header
 	 */
 	public MappingRule findMappingRuleByHeader(String title) {
-		return this.mappingRules.get(title);
+		return this.sheetMapping.getMappingRule().get(title);
 	}
 
 	public HeaderLine getHeaderLine() {
@@ -316,8 +316,8 @@ public class RdfizableSheet {
 			}
 		}
 
-		if(this.mappingRules != null) {
-			for(Map.Entry<String, MappingRule> oneMapping : this.mappingRules.entrySet()) {
+		if(this.sheetMapping != null) {
+			for(Map.Entry<String, MappingRule> oneMapping : this.sheetMapping.getMappingRule().entrySet()) {
 				MappingRule mappingRule = oneMapping.getValue();
 				if(oneMapping.getValue().getProperty() != null) {
 					log.debug("Validating header property "+mappingRule.getProperty()+" (originally declared as "+mappingRule.getDeclaredProperty()+")");
@@ -346,7 +346,7 @@ public class RdfizableSheet {
 	 * Finds the column index based on a column ID reference or an Excel column reference.
 	 * Returns -1 if not found.
 	 *
-	 * @param headers
+	 * @param rdfizableSheet
 	 * @param idRef
 	 * @return
 	 */

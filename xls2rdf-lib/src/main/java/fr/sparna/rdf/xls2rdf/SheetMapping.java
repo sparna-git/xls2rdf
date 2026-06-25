@@ -2,47 +2,33 @@ package fr.sparna.rdf.xls2rdf;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 public class SheetMapping {
 
-    private Map<String, String> mapper;
-    private Map<String, MappingRule> columnHeaders;
-    private Properties mappingProperties;
+    private final Map<String, MappingRule> mappingRule;
     private String subjectColumn;
     private PrefixManager prefixManager;
+    private String sheetName;
 
-    public SheetMapping(Properties mappingProperties){
-        this();
-        this.mappingProperties = mappingProperties;
+    public SheetMapping(String sheetName, PrefixManager prefixManager){
+        this.mappingRule = new HashMap<>();
+        this.sheetName = sheetName;
+        this.prefixManager = prefixManager;
     }
 
-    public SheetMapping(){
-        this.mapper = new HashMap<>();
-        this.columnHeaders = new HashMap<>();
-    }
-
-   public MappingRule parseColumnHeader(String sheetName, String columnName){
+    public void addMappingRule(String columnName, String predicate){
         MappingRuleParser parser = new MappingRuleParser(this.prefixManager);
-        MappingRule columnHeader = parser.parse(this.mappingProperties.getProperty(sheetName + "." + columnName));
-        if(columnHeader.getProperty() == null)
-        this.columnHeaders.put(columnName, columnHeader);
-        return columnHeader;
-   }
+        MappingRule rule = parser.parse(predicate);
+        this.mappingRule.put(columnName, rule);
+    }
 
-   public Map<String, MappingRule> getColumnHeaders(){
-        return this.columnHeaders;
+
+   public Map<String, MappingRule> getMappingRule(){
+        return this.mappingRule;
    }
 
    public void setPrefixManager(PrefixManager prefixManager){
-        this.prefixManager = prefixManager;}
-
-
-    public int getColumnNameIndex(String columnName){
-        return 0;
+        this.prefixManager = prefixManager;
     }
 
-    public void clearCache(){
-        this.columnHeaders.clear();
-    }
 }

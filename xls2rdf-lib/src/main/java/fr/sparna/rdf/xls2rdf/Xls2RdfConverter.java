@@ -107,7 +107,7 @@ public class Xls2RdfConverter {
 	 */
 	private boolean skipHidden = false;
 
-	private SheetMapping sheetMapping;
+	private WorkbookMapping workbookMapping;
 
 	public Xls2RdfConverter(ModelWriterIfc modelWriter) {		
 		this(modelWriter, null);
@@ -225,7 +225,7 @@ public class Xls2RdfConverter {
 
 		this.prefixManager.register(PrefixManager.readPrefixes(sheet));
 		String baseIri = PrefixManager.readBaseIri(sheet);
-		// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaratio
+		// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaration
 
 		if(baseIri != null) {
 			this.prefixManager.setBaseUri(baseIri);
@@ -242,9 +242,16 @@ public class Xls2RdfConverter {
 
 		// initialize target Model
 		Model model = new LinkedHashModelFactory().createEmptyModel();
-
 		SimpleValueFactory svf = SimpleValueFactory.getInstance();
-		RdfizableSheet rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager, RdfizableSheet.autoDetectMappingRules(sheet, prefixManager));
+		RdfizableSheet rdfizableSheet;
+		SheetMapping sheetMapping = null;
+
+		if(this.workbookMapping != null){
+			this.workbookMapping.setPrefixManager(this.prefixManager);
+			sheetMapping = workbookMapping.doSheetMappingFor(sheet.getSheetName());
+			rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager, sheetMapping);
+		}
+		else rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager, RdfizableSheet.autoDetectMappingRules(sheet, prefixManager));
 		
 		if(!rdfizableSheet.canRDFize()) {
 			log.debug(sheet.getSheetName()+" : Ignoring sheet.");
@@ -343,7 +350,7 @@ public class Xls2RdfConverter {
 
 		if(rdfizableSheet.hasDataSection()) {
 			// read the column names from the header row
-			mappingRules = rdfizableSheet.getMappingRules();
+			mappingRules = rdfizableSheet.getSheetMapping().getMappingRule();
 			
 			log.debug("Converting data with these columns : ");
 			for(String oneHeader : rdfizableSheet.headerLine.getHeaders()) {
@@ -357,7 +364,9 @@ public class Xls2RdfConverter {
 				// find corresponding mapping rule
 				int columnIndex = i;
 				MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(oneHeader);
-
+				if(mappingRule == null){
+					continue;
+				}
 				if(mappingRule.isReconcileExternal() && this.reconcileService != null) {
 					    PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
 							reconcileService,
@@ -394,7 +403,7 @@ public class Xls2RdfConverter {
 					}
 					Resource rowResource;
 					try {
-						rowResource = handleRow(r, model, csResource, rdfizableSheet, prefixManager);
+						rowResource = handleRow(r, model, csResource, rdfizableSheet, prefixManager, sheet.getSheetName());
 					} catch (Exception e) {
 						throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName()+" : "+e.getMessage(), (Object[])null);
 					}
@@ -429,7 +438,7 @@ public class Xls2RdfConverter {
 		return model;
 	}
 
-	private Resource handleRow(Row row, Model model, Resource headerResource, RdfizableSheet rdfizableSheet, PrefixManager prefixManager) {
+	private Resource handleRow(Row row, Model model, Resource headerResource, RdfizableSheet rdfizableSheet, PrefixManager prefixManager, String sheetName) {
 		RowBuilder rowBuilder = null;
 		for (int colIndex = 0; colIndex < rdfizableSheet.getHeaderLine().getHeaders().size(); colIndex++) {
 			// skip hidden columns
@@ -440,7 +449,6 @@ public class Xls2RdfConverter {
 			// get corresponding ColumnHeader + MappingRule
 			String header = rdfizableSheet.getHeaderLine().getHeaders().get(colIndex);
 			MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(header);
-			
 			Cell cell = row.getCell(colIndex);            
 			String value = (cell != null)?cell.getCellValue():null;
 			// if it is the first column...
@@ -475,7 +483,9 @@ public class Xls2RdfConverter {
 				rowBuilder = new RowBuilder(model, subjectResource);
 				continue;
 			}
-			
+
+			if(mappingRule == null) continue;
+
 			if (StringUtils.isBlank(value)) {
 				continue;
 			}
@@ -774,8 +784,8 @@ public class Xls2RdfConverter {
 		this.skipHidden = skipHidden;
 	}
 
-	public void setPropertiesMapping(SheetMapping sheetMapping) {
-		this.sheetMapping = sheetMapping;
+	public void setWorkbookMapping(WorkbookMapping workbookMapping) {
+		this.workbookMapping = workbookMapping;
 	}
 
 
@@ -820,7 +830,5 @@ public class Xls2RdfConverter {
 		converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor(false)));
 		converter.processInputStream(input);
 	}
-	
-	
 
 }

@@ -69,6 +69,7 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 	 */
 	@Override
 	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri) {
+
 		try {
 			// declare a new ZipEntry in the Zip file
 			if(graph != null){
@@ -79,10 +80,10 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 			}
 
 			
-			String entryname = URLEncoder.encode(graph, "UTF-8") + "." + format.getDefaultFileExtension();
-			// String entryname = graph.substring(graph.lastIndexOf('/')+1) + "." + format.getDefaultFileExtension();
-			System.out.println(entryname);
-			out.putNextEntry(new ZipEntry(entryname));
+			String entryName = URLEncoder.encode(graph, "UTF-8") + "." + format.getDefaultFileExtension();
+			// String entryName = graph.substring(graph.lastIndexOf('/')+1) + "." + format.getDefaultFileExtension();
+			System.out.println(entryName);
+			out.putNextEntry(new ZipEntry(entryName));
 			
 			// writes in the entry
 			RDFHandler handler = RDFHandlerFactory.buildHandler(grouping, baseIri, format, out);
@@ -92,7 +93,7 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 			out.closeEntry();
 			
 			if(saveGraphFile) {
-				String graphFileName = entryname + ".graph";
+				String graphFileName = entryName + ".graph";
 				out.putNextEntry(new ZipEntry(graphFileName));
 				out.write(graph.getBytes());
 			}

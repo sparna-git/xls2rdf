@@ -108,7 +108,13 @@ public class ArgumentsConvert {
 			names = {"-w", "--watch"},
 			description = "Run a separated thread to scan the input for conversion."
 	)
-	boolean watch;
+	private boolean watch;
+
+	@Parameter(
+			names = {"-c", "--configuration"},
+			description = "Add a configuration file to map header column to properties file."
+	)
+	private File propertiesFile;
 
 	public boolean isWatch() {
 		return this.watch;
@@ -229,5 +235,14 @@ public class ArgumentsConvert {
 	public void setSkipHidden(boolean skipHidden) {
 		this.skipHidden = skipHidden;
 	}
-	
+
+	public File getPropertiesFile() {
+		return propertiesFile;
+	}
+
+	public void setPropertiesFile(File propertiesFile) {
+		this.propertiesFile = propertiesFile;
+	}
+
+
 }
