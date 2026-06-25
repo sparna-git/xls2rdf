@@ -33,16 +33,10 @@ public class GristSheet implements Sheet {
         this.gristRecords = GristEntityFactory.getRecords(this.getGristClient().getRecords(((GristWorkbook)this.parentWorkbook).getGristDocumentId(), this.getSheetName()));
         this.gristColumns = GristEntityFactory.getColumns(this.getGristClient().getColumns(((GristWorkbook)this.parentWorkbook).getGristDocumentId(), this.getSheetName()));
         this.columnNames = new ArrayList<>();
-        this.getColumnNames();
+        Iterator<String> iter = this.gristRecords.getColumnNames(0);
+        iter.forEachRemaining(columnNames::add);
     }
 
-    private void getColumnNames(){
-        for(int i = 0; true; i++){
-            JsonNode columnName = this.gristColumns.getColumnName(i);
-            if(columnName == null) break;
-            else this.columnNames.add(columnName.asText());
-        }
-    }
 
     @Override
     public String getSheetName() {

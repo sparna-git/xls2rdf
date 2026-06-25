@@ -26,9 +26,7 @@ public class GristTablesParser extends AbstractGristParser implements GettableTa
 
     @Override
     public JsonNode getValueFieldFromIndexAndName(int entityIndex, String fieldName) {
-        JsonNode node = this.getFieldsFromIndex(entityIndex);
-        if(node == null) return null;
-        return node.get(fieldName);
+        return this.getFieldsFromIndex(entityIndex).get(fieldName);
     }
 
     @Override
@@ -43,16 +41,12 @@ public class GristTablesParser extends AbstractGristParser implements GettableTa
 
     @Override
     public JsonNode getFieldsFromIndex(int entityIndex) {
-        JsonNode node = this.getNodeFromIndex(entityIndex);
-        if(node == null) return null;
-        return node.get(FIELDS_ID);
+        return this.getNodeFromIndex(entityIndex).get(FIELDS_ID);
     }
 
     @Override
     public Iterator<String> getFieldNamesIteratorFromIndex(int entityIndex) {
-        JsonNode node = this.getFieldsFromIndex(entityIndex);
-        if(node == null) return null;
-        return node.fieldNames();
+        return this.getFieldsFromIndex(entityIndex).fieldNames();
     }
 
     @Override
@@ -65,23 +59,17 @@ public class GristTablesParser extends AbstractGristParser implements GettableTa
 
     @Override
     public JsonNode getFieldsFromName(String entityName) {
-        JsonNode node = this.getNodeFromName(entityName);
-        if(node == null) return null;
-        return node.get(FIELDS_ID);
+        return this.getNodeFromName(entityName).get(FIELDS_ID);
     }
 
     @Override
     public Iterator<String> getFieldNamesIteratorFromName(String entityName) {
-        JsonNode node = this.getFieldsFromName(entityName);
-        if(node == null) return null;
-        return node.fieldNames();
+        return this.getFieldsFromName(entityName).fieldNames();
     }
 
     @Override
     public JsonNode getValueFieldFromName(String entityName, String fieldName) {
-        JsonNode node = this.getFieldsFromName(entityName);
-        if(node == null) return null;
-        return node.get(fieldName);
+        return this.getFieldsFromName(entityName).get(fieldName);
     }
 
     @Override
