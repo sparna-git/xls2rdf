@@ -403,7 +403,7 @@ public class Xls2RdfConverter {
 					}
 					Resource rowResource;
 					try {
-						rowResource = handleRow(r, model, csResource, rdfizableSheet, prefixManager, sheet.getSheetName());
+						rowResource = handleRow(r, model, csResource, rdfizableSheet, prefixManager);
 					} catch (Exception e) {
 						throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName()+" : "+e.getMessage(), (Object[])null);
 					}
@@ -438,7 +438,7 @@ public class Xls2RdfConverter {
 		return model;
 	}
 
-	private Resource handleRow(Row row, Model model, Resource headerResource, RdfizableSheet rdfizableSheet, PrefixManager prefixManager, String sheetName) {
+	private Resource handleRow(Row row, Model model, Resource headerResource, RdfizableSheet rdfizableSheet, PrefixManager prefixManager) {
 		RowBuilder rowBuilder = null;
 		for (int colIndex = 0; colIndex < rdfizableSheet.getHeaderLine().getHeaders().size(); colIndex++) {
 			// skip hidden columns
@@ -449,6 +449,7 @@ public class Xls2RdfConverter {
 			// get corresponding ColumnHeader + MappingRule
 			String header = rdfizableSheet.getHeaderLine().getHeaders().get(colIndex);
 			MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(header);
+			
 			Cell cell = row.getCell(colIndex);            
 			String value = (cell != null)?cell.getCellValue():null;
 			// if it is the first column...
