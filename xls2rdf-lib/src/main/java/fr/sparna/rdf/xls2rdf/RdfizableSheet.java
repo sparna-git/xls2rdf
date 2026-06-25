@@ -358,8 +358,8 @@ public class RdfizableSheet {
 			MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(oneHeader);
 			if(
 					mappingRule != null
-							&&
-							(mappingRule.getId() != null && mappingRule.getId().equals(idRef))
+					&&
+					(mappingRule.getId() != null && mappingRule.getId().equals(idRef))
 			) {
 				return i;
 			}
@@ -391,12 +391,12 @@ public class RdfizableSheet {
 			MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(oneHeader);
 			if(
 					mappingRule != null
-							&&
-							(
-									(mappingRule.getId() != null && mappingRule.getId().equals(idOrPropertyRef))
-											||
-											(mappingRule.getDeclaredProperty() != null && mappingRule.getDeclaredProperty().equals(idOrPropertyRef))
-							)
+					&&
+					(
+						(mappingRule.getId() != null && mappingRule.getId().equals(idOrPropertyRef))
+						||
+						(mappingRule.getDeclaredProperty() != null && mappingRule.getDeclaredProperty().equals(idOrPropertyRef))
+					)
 			) {
 				return i;
 			}

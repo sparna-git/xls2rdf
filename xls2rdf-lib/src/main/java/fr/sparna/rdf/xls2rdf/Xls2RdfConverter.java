@@ -358,31 +358,33 @@ public class Xls2RdfConverter {
 				int columnIndex = i;
 				MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(oneHeader);
 
-				if(mappingRule.isReconcileExternal() && this.reconcileService != null) {
-					    PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
-							reconcileService,
-							this.failIfNoReconcile
-					);
-					    reconciliableValueSet.initReconciledValues(
-						    PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnIndex, headerRowIndex),
-							mappingRule.getReconcileOn(),
-							this.messageListener
-					);
-					
-					this.reconcileColumnsValues.put(mappingRule, reconciliableValueSet);
-					
-				} else if (mappingRule.isReconcileLocal()) {
-					SparqlReconcileService reconcileService = new SparqlReconcileService(this.globalRepository);
-					
-					DynamicReconciliableValueSet reconciliableValueSet = new DynamicReconciliableValueSet(
-							reconcileService,
-							mappingRule.getReconcileOn(),
-							this.failIfNoReconcile,
-							this.messageListener
-					);
+				if(mappingRule != null) {
+					if(mappingRule.isReconcileExternal() && this.reconcileService != null) {
+							PreloadedReconciliableValueSet reconciliableValueSet = new PreloadedReconciliableValueSet(
+								reconcileService,
+								this.failIfNoReconcile
+						);
+							reconciliableValueSet.initReconciledValues(
+								PreloadedReconciliableValueSet.extractDistinctValues(sheet, columnIndex, headerRowIndex),
+								mappingRule.getReconcileOn(),
+								this.messageListener
+						);
+						
+						this.reconcileColumnsValues.put(mappingRule, reconciliableValueSet);
+						
+					} else if (mappingRule.isReconcileLocal()) {
+						SparqlReconcileService reconcileService = new SparqlReconcileService(this.globalRepository);
+						
+						DynamicReconciliableValueSet reconciliableValueSet = new DynamicReconciliableValueSet(
+								reconcileService,
+								mappingRule.getReconcileOn(),
+								this.failIfNoReconcile,
+								this.messageListener
+						);
 
-					this.reconcileColumnsValues.put(mappingRule, reconciliableValueSet);
-				} 
+						this.reconcileColumnsValues.put(mappingRule, reconciliableValueSet);
+					} 
+				}
 			}
 			// read the rows after the header line and process each row
 			log.info("Converting rows...");
