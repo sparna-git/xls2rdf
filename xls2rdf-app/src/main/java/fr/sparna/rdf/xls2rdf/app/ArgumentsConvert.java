@@ -13,7 +13,6 @@ public class ArgumentsConvert {
 			names = { "-i", "--input" },
 			description = "Input Excel file",
 			converter = FileConverter.class,
-			required = true,
 			validateWith = FileExistsValidator.class
 	)
 	private File input;
@@ -115,6 +114,24 @@ public class ArgumentsConvert {
 			description = "Add a configuration file to map header column to properties file."
 	)
 	private File propertiesFile;
+
+	@Parameter(
+			names = {"-gr", "--grist"},
+			description = "Add grist token API in order to perform request."
+	)
+	private String apiToken;
+
+	@Parameter(
+			names = {"-doc", "--document"},
+			description = "Add a document id for Grist API request."
+	)
+	private String documentId;
+
+	@Parameter(
+			names = {"-ca", "--cache"},
+			description = "Use cache for Grist API request."
+	)
+	private boolean useCache;
 
 	public boolean isWatch() {
 		return this.watch;
@@ -244,5 +261,15 @@ public class ArgumentsConvert {
 		this.propertiesFile = propertiesFile;
 	}
 
+	public String getDocumentId() {
+		return documentId;
+	}
 
+	public String getApiToken() {
+		return apiToken;
+	}
+
+	public boolean isUseCache() {
+		return useCache;
+	}
 }

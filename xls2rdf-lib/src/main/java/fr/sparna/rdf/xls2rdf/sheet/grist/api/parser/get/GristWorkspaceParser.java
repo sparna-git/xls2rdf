@@ -18,29 +18,42 @@ public class GristWorkspaceParser extends AbstractGristParser implements Gettabl
     }
 
     //GET METHODS
+
+    //GET METHODS
     @Override
     public JsonNode getNameNode() {
-        return this.getTopNode().get(WORKSPACE_NAME);
+        JsonNode node = this.getTopNode();
+        if (node == null) return null;
+        return node.get(WORKSPACE_NAME);
     }
 
     @Override
     public JsonNode getCreateAtNode() {
-        return this.getTopNode().get(CREATE_AT);
+        JsonNode node = this.getTopNode();
+        if (node == null) return null;
+        return node.get(CREATE_AT);
     }
 
     @Override
     public JsonNode getUpdateAtNode() {
-        return this.getTopNode().get(UPDATE_AT);
+        JsonNode node = this.getTopNode();
+        if (node == null) return null;
+        return node.get(UPDATE_AT);
     }
 
     @Override
     public JsonNode getTopNode() {
-        return this.getRootNode();
+        JsonNode node = this.getRootNode();
+        if (node == null) return null;
+        return node;
     }
 
     @Override
     public JsonNode getIdNode() {
-        return this.getTopNode().get(WORKSPACE_ID);
+        JsonNode node = this.getTopNode();
+        if (node == null) return null;
+        return node.get(WORKSPACE_ID);
     }
 
 }
+

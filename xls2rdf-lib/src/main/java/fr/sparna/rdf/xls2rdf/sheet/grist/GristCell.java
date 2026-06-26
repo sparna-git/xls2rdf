@@ -32,7 +32,8 @@ public class GristCell implements Cell {
     public String getCellValue() {
         String convertResult = GristCellConverter.getInstance().convertIf(cellNode);
         if(convertResult != null) return convertResult;
-        else return cellNode.asText();
+        else if(cellNode != null) return cellNode.asText();
+        else return "";
     }
 
     @Override

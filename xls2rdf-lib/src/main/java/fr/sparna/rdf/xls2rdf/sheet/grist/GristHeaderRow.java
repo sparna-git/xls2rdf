@@ -18,12 +18,13 @@ public class GristHeaderRow implements Row {
 
     @Override
     public Cell getCell(int columnIndex) {
+        if(columnIndex >= this.columnNames.size()) return null;
         return new GristHeaderCell(columnNames, columnIndex, this.getRowNum(), this);
     }
 
     @Override
     public String getColumnValue(int columnIndex) {
-        if(columnIndex >= this.columnNames.size()) return null;
+        if(columnIndex >= this.columnNames.size()) return "";
         return this.columnNames.get(columnIndex);
     }
 

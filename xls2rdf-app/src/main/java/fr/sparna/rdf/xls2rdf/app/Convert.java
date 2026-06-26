@@ -2,6 +2,8 @@ package fr.sparna.rdf.xls2rdf.app;
 
 import fr.sparna.rdf.xls2rdf.WorkbookMapping;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverterBuilder;
+import fr.sparna.rdf.xls2rdf.sheet.Workbook;
+import fr.sparna.rdf.xls2rdf.sheet.grist.GristWorkbookFactory;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -23,6 +25,11 @@ public class Convert implements CliCommandIfc {
 		ArgumentsConvert arg = (ArgumentsConvert)args;
 		FileOutputStream out = null;
 		Properties properties = null;
+		/*
+		 **************************************
+		 * IF FILE MAPPING HAS BEEN PROVIDED  *
+		 * ************************************
+		 */
 		WorkbookMapping workbookMapping = null;
 		if(arg.getPropertiesFile() != null){
 			properties = new Properties();
@@ -30,6 +37,7 @@ public class Convert implements CliCommandIfc {
 			workbookMapping = new WorkbookMapping(properties);
 		}
 
+		//PREPARE THE Xls2RdfConvertBuilder WITH COMMONS PROPERTIES
 		Xls2RdfConverterBuilder builder = Xls2RdfConverterBuilder.getInstance()
 						.withLanguage(arg.getLang())
 						.withApplyPostProcessing(!arg.isNoPostProcessings())
@@ -44,11 +52,17 @@ public class Convert implements CliCommandIfc {
 						})
 						.withWorkbookMapping(workbookMapping);
 
+		/*
+		****************************
+		* ONLY INPUT/OUPUT PROCESS *
+		* **************************
+		*/
 		//if the options -i and -o and -w are present
 		if(arg.isWatch() && arg.getOutput() != null && arg.getInput() != null){
-			//Run the thread parsing
-			//lance la conversion une première du fichier -i vers -o
+			//Run the conversion from -i to -o
 			out = new FileOutputStream(arg.getOutput());
+			//add the modelWriter and the outputStream to write
+			//we first convert once from -i to -o before launching the DirectoryWatcher,
 			builder
 					.withModelWriterFactory(false, arg.isGenerateGraphFiles(), arg.isPretty())
 					.withOutputStream(out)
@@ -59,6 +73,11 @@ public class Convert implements CliCommandIfc {
 			watcher.runWatchService();
 		}
 
+		/*
+		 *********************************
+		 * ONLY FOR INPUT/OUTPUT PROCESS *
+		 * *******************************
+		 */
 		//verify is -i and -o are present to run conversion process
 		else if(arg.getInput() != null && arg.getOutput() != null){
 			if(!arg.getInput().exists()) {
@@ -71,6 +90,7 @@ public class Convert implements CliCommandIfc {
 				return;
 			}
 
+			//Add the modeWriter and the supportRepository
 			builder
 					.withModelWriterFactory(arg.getOutput().getName().endsWith("zip"), arg.isGenerateGraphFiles(), arg.isPretty())
 					.withSupportRepository(arg.getExternalData());
@@ -107,6 +127,21 @@ public class Convert implements CliCommandIfc {
 				}
 			}
 			flushAndClose(out);
+		}
+
+		/*
+		 ****************************
+		 * ONLY FOR GRIST PROCESS   *
+		 * **************************
+		 */
+		else if(arg.getApiToken() != null && arg.getDocumentId() != null && arg.getOutput() != null){
+			out = new FileOutputStream(arg.getOutput());
+			builder.withModelWriterFactory(false, arg.isGenerateGraphFiles(), arg.isPretty())
+					.withOutputStream(out);
+			Workbook workbook = GristWorkbookFactory.open(arg.getDocumentId(), arg.getApiToken(), arg.isUseCache());
+			builder.buildConverter().processWorkbook(workbook);
+
+			this.flushAndClose(out);
 		}
 	}
 

@@ -1,0 +1,70 @@
+{
+  "columns": [
+    {
+      "id": "A",
+      "fields": {
+        "colRef": 63,
+        "label": "A",
+        "isFormula": false,
+        "type": "Text",
+        "parentId": 4,
+        "parentPos": 61,
+        "widgetOptions": "",
+        "formula": "",
+        "description": "",
+        "untieColIdFromLabel": false,
+        "summarySourceCol": 0,
+        "displayCol": 0,
+        "visibleCol": 0,
+        "rules": null,
+        "reverseCol": 0,
+        "recalcWhen": 0,
+        "recalcDeps": null
+      }
+    },
+    {
+      "id": "B",
+      "fields": {
+        "colRef": 64,
+        "label": "B",
+        "isFormula": false,
+        "type": "Text",
+        "parentId": 4,
+        "parentPos": 62,
+        "widgetOptions": "",
+        "formula": "",
+        "description": "",
+        "untieColIdFromLabel": false,
+        "summarySourceCol": 0,
+        "displayCol": 0,
+        "visibleCol": 0,
+        "rules": null,
+        "reverseCol": 0,
+        "recalcWhen": 0,
+        "recalcDeps": null
+      }
+    },
+    {
+      "id": "C",
+      "fields": {
+        "colRef": 85,
+        "label": "C",
+        "isFormula": false,
+        "type": "Numeric",
+        "parentId": 4,
+        "parentPos": 83,
+        "widgetOptions": "",
+        "formula": "",
+        "description": "",
+        "untieColIdFromLabel": false,
+        "summarySourceCol": 0,
+        "displayCol": 0,
+        "visibleCol": 0,
+        "rules": null,
+        "reverseCol": 0,
+        "recalcWhen": 0,
+        "recalcDeps": null
+      }
+    }
+  ]
+}

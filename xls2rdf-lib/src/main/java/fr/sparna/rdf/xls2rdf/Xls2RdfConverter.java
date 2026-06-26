@@ -245,7 +245,7 @@ public class Xls2RdfConverter {
 		SimpleValueFactory svf = SimpleValueFactory.getInstance();
 		RdfizableSheet rdfizableSheet;
 		SheetMapping sheetMapping = null;
-
+		System.out.println(sheet.getSheetName());
 		if(this.workbookMapping != null){
 			this.workbookMapping.setPrefixManager(this.prefixManager);
 			sheetMapping = workbookMapping.doSheetMappingFor(sheet.getSheetName());

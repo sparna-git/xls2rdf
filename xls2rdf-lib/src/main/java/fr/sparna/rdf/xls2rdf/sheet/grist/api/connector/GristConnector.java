@@ -4,20 +4,20 @@ import java.net.URI;
 
 public class GristConnector {
 
-    public static final URI GRIST_PERSONAL_URI = URI.create("https://docs.getgrist.com/api/");
+    public static final URI GRIST_DEFAULT_PERSONAL_URI = URI.create("https://docs.getgrist.com/api/");
 
     private final String tokenAPI;
     private URI baseAddress;
 
     public GristConnector(String tokenAPI) {
         this.tokenAPI = tokenAPI;
-        this.baseAddress = GRIST_PERSONAL_URI;
+        this.baseAddress = GRIST_DEFAULT_PERSONAL_URI;
     }
 
     public GristConnector(String APIToken, URI baseAddress){
         this(APIToken);
         if(baseAddress != null) this.baseAddress = baseAddress;
-        else this.baseAddress = GRIST_PERSONAL_URI;
+        else this.baseAddress = GRIST_DEFAULT_PERSONAL_URI;
     }
 
     public URI getBaseAddress() {

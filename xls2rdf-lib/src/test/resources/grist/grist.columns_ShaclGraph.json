@@ -1,0 +1,158 @@
+{
+  "columns": [
+    {
+      "id": "UUID",
+      "fields": {
+        "colRef": 29,
+        "label": "UUID",
+        "isFormula": false,
+        "type": "Text",
+        "parentId": 3,
+        "parentPos": 28,
+        "widgetOptions": "",
+        "formula": "UUID()",
+        "description": "",
+        "untieColIdFromLabel": false,
+        "summarySourceCol": 0,
+        "displayCol": 0,
+        "visibleCol": 0,
+        "rules": null,
+        "reverseCol": 0,
+        "recalcWhen": 0,
+        "recalcDeps": null
+      }
+    },
+    {
+      "id": "rdfs_label_en",
+      "fields": {
+        "colRef": 30,
+        "label": "rdfs:label@en",
+        "isFormula": false,
+        "type": "Text",
+        "parentId": 3,
+        "parentPos": 29,
+        "widgetOptions": "",
+        "formula": "",
+        "description": "",
+        "untieColIdFromLabel": false,
+        "summarySourceCol": 0,
+        "displayCol": 0,
+        "visibleCol": 0,
+        "rules": null,
+        "reverseCol": 0,
+        "recalcWhen": 0,
+        "recalcDeps": null
+      }
+    },
+    {
+      "id": "owl_versionInfo",
+      "fields": {
+        "colRef": 31,
+        "label": "owl:versionInfo",
+        "isFormula": false,
+        "type": "Text",
+        "parentId": 3,
+        "parentPos": 30,
+        "widgetOptions": "",
+        "formula": "",
+        "description": "",
+        "untieColIdFromLabel": false,
+        "summarySourceCol": 0,
+        "displayCol": 0,
+        "visibleCol": 0,
+        "rules": null,
+        "reverseCol": 0,
+        "recalcWhen": 0,
+        "recalcDeps": null
+      }
+    },
+    {
+      "id": "rdf_type_separator_",
+      "fields": {
+        "colRef": 32,
+        "label": "rdf:type(separator=\",\")",
+        "isFormula": false,
+        "type": "Text",
+        "parentId": 3,
+        "parentPos": 31,
+        "widgetOptions": "",
+        "formula": "",
+        "description": "",
+        "untieColIdFromLabel": false,
+        "summarySourceCol": 0,
+        "displayCol": 0,
+        "visibleCol": 0,
+        "rules": null,
+        "reverseCol": 0,
+        "recalcWhen": 0,
+        "recalcDeps": null
+      }
+    },
+    {
+      "id": "dcterms_modified",
+      "fields": {
+        "colRef": 33,
+        "label": "dcterms:modified",
+        "isFormula": false,
+        "type": "DateTime:Europe/Paris",
+        "parentId": 3,
+        "parentPos": 32,
+        "widgetOptions": "",
+        "formula": "NOW()",
+        "description": "",
+        "untieColIdFromLabel": false,
+        "summarySourceCol": 0,
+        "displayCol": 0,
+        "visibleCol": 0,
+        "rules": null,
+        "reverseCol": 0,
+        "recalcWhen": 2,
+        "recalcDeps": null
+      }
+    },
+    {
+      "id": "adms_versionNotes_en",
+      "fields": {
+        "colRef": 60,
+        "label": "adms:versionNotes@en",
+        "isFormula": true,
+        "type": "Text",
+        "parentId": 3,
+        "parentPos": 58,
+        "widgetOptions": "{\"widget\":\"Markdown\"}",
+        "formula": "",
+        "description": "",
+        "untieColIdFromLabel": false,
+        "summarySourceCol": 0,
+        "displayCol": 0,
+        "visibleCol": 0,
+        "rules": null,
+        "reverseCol": 0,
+        "recalcWhen": 0,
+        "recalcDeps": null
+      }
+    },
+    {
+      "id": "adms_status",
+      "fields": {
+        "colRef": 61,
+        "label": "adms:status",
+        "isFormula": true,
+        "type": "Text",
+        "parentId": 3,
+        "parentPos": 59,
+        "widgetOptions": "",
+        "formula": "",
+        "description": "",
+        "untieColIdFromLabel": false,
+        "summarySourceCol": 0,
+        "displayCol": 0,
+        "visibleCol": 0,
+        "rules": null,
+        "reverseCol": 0,
+        "recalcWhen": 0,
+        "recalcDeps": null
+      }
+    }
+  ]
+}

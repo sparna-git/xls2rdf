@@ -8,12 +8,14 @@ import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristEntityFactory;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.column.GristColumns;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.record.GristRecords;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristColumnsParser;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristTablesParser;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,18 +27,32 @@ public class GristSheet implements Sheet {
     private final JsonNode tableNode;
     private final GristRecords gristRecords;
     private final GristColumns gristColumns;
-    private final List<String> columnNames;
+    private List<String> columnNames;
+    private List<JsonNode> col;
 
     public GristSheet(JsonNode tableNode, GristWorkbook delegate){
         this.tableNode = tableNode;
         this.parentWorkbook = delegate;
         this.gristRecords = GristEntityFactory.getRecords(this.getGristClient().getRecords(((GristWorkbook)this.parentWorkbook).getGristDocumentId(), this.getSheetName()));
         this.gristColumns = GristEntityFactory.getColumns(this.getGristClient().getColumns(((GristWorkbook)this.parentWorkbook).getGristDocumentId(), this.getSheetName()));
-        this.columnNames = new ArrayList<>();
-        Iterator<String> iter = this.gristRecords.getColumnNames(0);
-        iter.forEachRemaining(columnNames::add);
+        this.col = new ArrayList<>();
+        this.columnNames = this.sortColumnNamesByParentPos();
+        //this.columnNames = new ArrayList<>();
+        //Iterator<String> iter = this.gristRecords.getColumnNames(0);
+        //iter.forEachRemaining(columnNames::add);
     }
 
+    //Sort columns by parentPos attribute from columns API call
+    private List<String> sortColumnNamesByParentPos(){
+        for(int i = 0; true; i++){
+            JsonNode node = this.gristColumns.getColumnFromIndex(i);
+            if(node == null) break;
+            this.col.add(node);
+        }
+        return this.col.stream()
+                .sorted(Comparator.comparingInt(o -> o.get(GristColumnsParser.FIELDS_ID).get(GristColumnsParser.PARENT_POS).asInt()))
+                .map(jsonNode -> jsonNode.get(GristColumnsParser.COLUMN_NAME).asText()).toList();
+    }
 
     @Override
     public String getSheetName() {

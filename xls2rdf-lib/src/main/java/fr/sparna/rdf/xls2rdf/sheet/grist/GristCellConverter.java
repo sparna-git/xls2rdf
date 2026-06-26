@@ -19,7 +19,8 @@ public class GristCellConverter {
     }
 
     public String convertIf(JsonNode node) {
-       if (node.isArray()) {
+        if(node == null) return "";
+        if (node.isArray()) {
             if ("D".equals(node.get(0).asText())) {
                 //dans le second emplacement du tableau se trouve le timestamp de Grist en second sous la forme 1.xxxxxx * 10^n
                 double timestamp = node.get(1).asDouble();
@@ -30,8 +31,8 @@ public class GristCellConverter {
                 //on multiplie donc le timestamp de grist par 1000
                 ZonedDateTime dateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (timestamp * 1000)), ZoneId.of(timeZone));
                 return dateTime.format(DateTimeFormatter.ISO_INSTANT);
-
-            } else if ("L".equals(node.get(0).asText())) {
+                }
+            else if ("L".equals(node.get(0).asText())) {
                 StringJoiner j = new StringJoiner(",");
                 //On parse à partir de l'index 1 car l'indice 0 représente le type de données du tablea "L" pour List.
                 for (int i = 1; i < node.size(); i++) {
@@ -40,8 +41,6 @@ public class GristCellConverter {
                 return j.toString();
             }
         }
-
-
         return null;
     }
 

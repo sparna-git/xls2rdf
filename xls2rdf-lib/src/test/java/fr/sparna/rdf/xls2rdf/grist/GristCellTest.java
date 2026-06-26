@@ -39,15 +39,19 @@ public class GristCellTest {
         switch (tableName){
             case "NodeShapes" -> {
                 Mockito.when(mockClient.getRecords(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist_NodeShapes_records.json")));
+                Mockito.when(mockClient.getColumns(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist.columns_NodeShapes.json")));
             }
             case "PropertyShapes" -> {
                 Mockito.when(mockClient.getRecords(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist.PropertyShapes_records.json")));
+                Mockito.when(mockClient.getColumns(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist.columns_PropertyShapes.json")));
             }
             case "Prefixes" -> {
                 Mockito.when(mockClient.getRecords(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist_Prefiixes_records.json")));
+                Mockito.when(mockClient.getColumns(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist.columns_Prefixes.json")));
             }
             case "ShaclGraph" -> {
                 Mockito.when(mockClient.getRecords(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist_ShaclGraph_records.json")));
+                Mockito.when(mockClient.getColumns(Mockito.anyString(), Mockito.anyString())).thenReturn(this.m.readTree(this.getClass().getResourceAsStream("/grist/grist.columns_ShaclGraph.json")));
             }
         }
     }
@@ -73,9 +77,9 @@ public class GristCellTest {
             while(iter.hasNext()){
                 Row r = iter.next();
                 Assert.assertNotNull("Row is null.", r);
-                for (int i = 0; i < 30 ; i++) {
+                for (int i = 0; true ; i++) {
                     Cell c = r.getCell(i);
-                    if(c == null) continue;
+                    if(c == null) break;
                     System.out.println(c.getCellValue());
                 }
             }
@@ -94,9 +98,9 @@ public class GristCellTest {
             while(iter.hasNext()){
                 Row r = iter.next();
                 Assert.assertNotNull("Row is null.", r);
-                for (int i = 0; i < 30 ; i++) {
+                for (int i = 0; true ; i++) {
                     Cell c = r.getCell(i);
-                    if(c == null) continue;
+                    if(c == null) break;
                     System.out.println("row index is " + c.getRowIndex() + " for " + c.getCellValue());
                 }
             }
@@ -114,9 +118,9 @@ public class GristCellTest {
             while(iter.hasNext()){
                 Row r = iter.next();
                 Assert.assertNotNull("Row is null.", r);
-                for (int i = 0; i < 30 ; i++) {
+                for (int i = 0; true ; i++) {
                     Cell c = r.getCell(i);
-                    if(c == null) continue;
+                    if(c == null) break;
                     System.out.println("column index is " + c.getColumnIndex() + " for " + c.getCellValue());
                 }
             }
@@ -134,9 +138,9 @@ public class GristCellTest {
             while(iter.hasNext()){
                 Row r = iter.next();
                 Assert.assertNotNull("Row is null.", r);
-                for (int i = 0; i < 10 ; i++) {
+                for (int i = 0; true ; i++) {
                     Cell c = r.getCell(i);
-                    if(c == null) continue;
+                    if(c == null) break;
                     System.out.println(c.getCellExcelReference());
                 }
             }

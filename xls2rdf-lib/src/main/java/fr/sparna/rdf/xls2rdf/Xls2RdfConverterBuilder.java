@@ -87,7 +87,7 @@ public class Xls2RdfConverterBuilder {
     }
 
     public Xls2RdfConverterBuilder withOutputDirectory(File output) {
-        this.modelWriter = this.modelWriterFactory.buildNewModelWriter(output);
+        this.modelWriter = this.getModelWriterFactory().buildNewModelWriter(output);
         return this;
     }
 

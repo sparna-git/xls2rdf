@@ -21,60 +21,84 @@ public class GristTablesParser extends AbstractGristParser implements GettableTa
     //GET METHODS
     @Override
     public JsonNode getIdNode(int index) {
-        return this.getNodeFromIndex(index).get(TABLE_NAME);
+        JsonNode node = this.getNodeFromIndex(index);
+        if (node == null) return null;
+        return node.get(TABLE_NAME);
     }
 
     @Override
     public JsonNode getValueFieldFromIndexAndName(int entityIndex, String fieldName) {
-        return this.getFieldsFromIndex(entityIndex).get(fieldName);
+        JsonNode node = this.getFieldsFromIndex(entityIndex);
+        if (node == null) return null;
+        return node.get(fieldName);
     }
 
     @Override
     public JsonNode getTopNode() {
-        return this.getRootNode().get(TABLES_ID);
+        JsonNode node = this.getRootNode();
+        if (node == null) return null;
+        return node.get(TABLES_ID);
     }
 
     @Override
     public JsonNode getNodeFromIndex(int entityIndex) {
-        return this.getTopNode().get(entityIndex);
+        JsonNode node = this.getTopNode();
+        if (node == null) return null;
+        return node.get(entityIndex);
     }
 
     @Override
     public JsonNode getFieldsFromIndex(int entityIndex) {
-        return this.getNodeFromIndex(entityIndex).get(FIELDS_ID);
+        JsonNode node = this.getNodeFromIndex(entityIndex);
+        if (node == null) return null;
+        return node.get(FIELDS_ID);
     }
 
     @Override
     public Iterator<String> getFieldNamesIteratorFromIndex(int entityIndex) {
-        return this.getFieldsFromIndex(entityIndex).fieldNames();
+        JsonNode node = this.getFieldsFromIndex(entityIndex);
+        if (node == null) return null;
+        return node.fieldNames();
     }
 
     @Override
     public JsonNode getNodeFromName(String entityName) {
-        for(JsonNode n : this.getTopNode()){
-            if(n.get(TABLE_NAME).asText().equals(entityName)) return n;
+        JsonNode node = this.getTopNode();
+        if (node == null) return null;
+
+        for (JsonNode n : node) {
+            if (n.get(TABLE_NAME).asText().equals(entityName)) {
+                return n;
+            }
         }
         return null;
     }
 
     @Override
     public JsonNode getFieldsFromName(String entityName) {
-        return this.getNodeFromName(entityName).get(FIELDS_ID);
+        JsonNode node = this.getNodeFromName(entityName);
+        if (node == null) return null;
+        return node.get(FIELDS_ID);
     }
 
     @Override
     public Iterator<String> getFieldNamesIteratorFromName(String entityName) {
-        return this.getFieldsFromName(entityName).fieldNames();
+        JsonNode node = this.getFieldsFromName(entityName);
+        if (node == null) return null;
+        return node.fieldNames();
     }
 
     @Override
     public JsonNode getValueFieldFromName(String entityName, String fieldName) {
-        return this.getFieldsFromName(entityName).get(fieldName);
+        JsonNode node = this.getFieldsFromName(entityName);
+        if (node == null) return null;
+        return node.get(fieldName);
     }
 
     @Override
     public int getTablesSizes() {
-        return this.getTopNode().size();
+        JsonNode node = this.getTopNode();
+        if (node == null) return 0;
+        return node.size();
     }
-
 }

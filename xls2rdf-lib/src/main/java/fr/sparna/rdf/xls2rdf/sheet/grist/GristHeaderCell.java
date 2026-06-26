@@ -24,7 +24,7 @@ public class GristHeaderCell implements Cell {
 
     @Override
     public String getCellValue() {
-        if(columnIndex >= this.columnNames.size()) return null;
+        if(columnIndex >= this.columnNames.size()) return "";
         return this.columnNames.get(this.columnIndex);
     }
 
