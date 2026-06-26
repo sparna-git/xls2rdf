@@ -440,6 +440,15 @@ public class Xls2RdfConverter {
 
 	private Resource handleRow(Row row, Model model, Resource headerResource, RdfizableSheet rdfizableSheet, PrefixManager prefixManager) {
 		RowBuilder rowBuilder = null;
+
+		// first determine the main subject resource
+		Resource mainSubject = this.findMainSubject(row, rdfizableSheet, prefixManager);
+		if(mainSubject == null) {
+			return null;
+		} else {
+			rowBuilder = new RowBuilder(model, mainSubject);
+		}
+
 		for (int colIndex = 0; colIndex < rdfizableSheet.getHeaderLine().getHeaders().size(); colIndex++) {
 			// skip hidden columns
 			if(skipHidden && row.getSheet().isColumnHidden(colIndex)) {
@@ -449,53 +458,22 @@ public class Xls2RdfConverter {
 			// get corresponding ColumnHeader + MappingRule
 			String header = rdfizableSheet.getHeaderLine().getHeaders().get(colIndex);
 			MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(header);
-			
-			Cell cell = row.getCell(colIndex);            
-			String value = (cell != null)?cell.getCellValue():null;
-			// if it is the first column...
-			if (null == rowBuilder) {
-				// if the value of the first column is empty, or is struck through, or if it is hidden, skip the whole row
-				if (
-						StringUtils.isBlank(value)
-						||
-						(cell != null && cell.isStruckThrough())
-						||
-						(skipHidden && row.isHidden())
-						
-				) {
-					return null;
-				}
-				// create the RowBuilder with the URI in the first column
-				// the URI could be null
-
-				Resource subjectResource = null;
-				if(value != null) {
-					if(value.startsWith("_:")) {
-						subjectResource = SimpleValueFactory.getInstance().createBNode(value.substring(2));
-					} else {
-						String iriPossiblyNull = prefixManager.isValidURI(value, false);
-						// this can be null in the case column A does not contain a valid full or prefixed IRI
-						if(iriPossiblyNull != null) {
-							subjectResource = SimpleValueFactory.getInstance().createIRI(iriPossiblyNull);
-						}
-					}
-				}
-
-				rowBuilder = new RowBuilder(model, subjectResource);
-				continue;
-			}
-
+			// if the column is not mapped, skip - don't even bother reading cell content
 			if(mappingRule == null) continue;
 
-			if (StringUtils.isBlank(value)) {
+			Cell cell = row.getCell(colIndex);            
+			String value = (cell != null)?cell.getCellValue():null;
+
+			// if nothing, skip
+			if (value == null || StringUtils.isBlank(value)) {
 				continue;
 			}
 			
-			// process the cell for each subsequent columns after the first one
-			if(cell != null && cell.isStruckThrough()) {
-				// skip the cell if it is striked out
+			// skip the cell if it is striked out
+			if(cell != null && cell.isStruckThrough()) {				
 				continue;
 			}
+
 			// test if cell should be ignored
 			if(mappingRule.getParameters().get(MappingRule.PARAMETER_IGNORE_IF) != null) {
 				if(value.equals(mappingRule.getParameters().get(MappingRule.PARAMETER_IGNORE_IF))) {
@@ -505,9 +483,7 @@ public class Xls2RdfConverter {
 			}
 			
 			ValueProcessorFactory processorFactory = new ValueProcessorFactory(this.messageListener);
-			ValueProcessorIfc cellProcessor = null;
-			
-			
+			ValueProcessorIfc cellProcessor = null;			
 			
 			if(mappingRule.getParameters().get(MappingRule.PARAMETER_LOOKUP_COLUMN) != null) {
 				// finds the index of the column corresponding to lookupColumn reference
@@ -687,6 +663,81 @@ public class Xls2RdfConverter {
 		}
 		
 		return null == rowBuilder ? null : rowBuilder.rowMainResource;
+	}
+
+	private Resource findMainSubject(Row row, RdfizableSheet rdfizableSheet, PrefixManager prefixManager) {
+		int subjectColumnIndex = findSubjectColumnIndex(row, rdfizableSheet, prefixManager);
+		Resource subjectResource = null;
+		if(subjectColumnIndex >= 0) {
+			Cell cell = row.getCell(subjectColumnIndex);            
+			String value = (cell != null)?cell.getCellValue():null;
+
+			if(value != null) {
+				if(value.startsWith("_:")) {
+					subjectResource = SimpleValueFactory.getInstance().createBNode(value.substring(2));
+				} else {
+					String iriPossiblyNull = prefixManager.isValidURI(value, false);
+					// this can be null in the case column A does not contain a valid full or prefixed IRI
+					if(iriPossiblyNull != null) {
+						subjectResource = SimpleValueFactory.getInstance().createIRI(iriPossiblyNull);
+					}
+				}
+			}
+		}
+
+		return subjectResource;
+	}
+
+	private int findSubjectColumnIndex(Row row, RdfizableSheet rdfizableSheet, PrefixManager prefixManager) {
+		int subjectColumnIndex = -1;
+
+		// first look for a column named "URI"
+		for (int colIndex = 0; colIndex < rdfizableSheet.getHeaderLine().getHeaders().size(); colIndex++) {
+			String header = rdfizableSheet.getHeaderLine().getHeaders().get(colIndex);
+			if(header.equals("URI") || header.equals("IRI")) {
+				Cell cell = row.getCell(colIndex);            
+				String value = (cell != null)?cell.getCellValue():null;
+
+				// if the value is empty, or is struck through, or if it is hidden, don't use it
+				if (
+					!(
+						StringUtils.isBlank(value)
+						||
+						(cell != null && cell.isStruckThrough())
+						||
+						(skipHidden && row.isHidden())	
+					)						
+				) {
+					subjectColumnIndex = colIndex;
+					break;
+				}
+			}
+		}
+
+		// not found, find the first (left-most) non-empty column
+		if(subjectColumnIndex == -1) {
+			for (int colIndex = 0; colIndex < rdfizableSheet.getHeaderLine().getHeaders().size(); colIndex++) {
+				Cell cell = row.getCell(colIndex);            
+				String value = (cell != null)?cell.getCellValue():null;
+
+				// use the first non-empty cell
+				if (
+					!(
+						StringUtils.isBlank(value)
+						||
+						(cell != null && cell.isStruckThrough())
+						||
+						(skipHidden && row.isHidden())		
+					)				
+				) {
+					subjectColumnIndex = colIndex;
+					break;
+				}
+
+			}
+		}
+
+		return subjectColumnIndex;
 	}
 
 	private class RowBuilder {

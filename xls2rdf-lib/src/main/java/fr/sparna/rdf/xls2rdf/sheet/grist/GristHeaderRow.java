@@ -1,6 +1,5 @@
 package fr.sparna.rdf.xls2rdf.sheet.grist;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
