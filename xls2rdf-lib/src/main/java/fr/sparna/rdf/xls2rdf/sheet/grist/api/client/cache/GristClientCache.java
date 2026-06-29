@@ -6,18 +6,12 @@ import java.util.*;
 
 public class GristClientCache implements Cachable{
 
-    private static final GristClientCache CACHE = new GristClientCache();
-
     private final Set<NodeCache> cache;
     private boolean override;
 
-    private GristClientCache (){
+    public GristClientCache (){
         this.cache = new HashSet<>();
         this.override = true;
-    }
-
-    public static GristClientCache getInstance(){
-        return GristClientCache.CACHE;
     }
 
     @Override

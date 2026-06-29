@@ -77,36 +77,36 @@ public class GristClient extends AbstractGristClient {
 
     @Override
     public boolean addCache(CacheItem item, JsonNode jsonNode, String... identifiers) {
-        return CACHE.addCache(item, jsonNode, identifiers);
+        return this.getGristClientCache().addCache(item, jsonNode, identifiers);
     }
 
     @Override
     public boolean removeCache(CacheItem item, String... identifiers) {
-        return CACHE.removeCache(item, identifiers);
+        return this.getGristClientCache().removeCache(item, identifiers);
     }
 
     @Override
     public GristClientCache.NodeCache getNodeCache(CacheItem item, String... identifiers) {
-        return CACHE.getNodeCache(item, identifiers);
+        return this.getGristClientCache().getNodeCache(item, identifiers);
     }
 
     @Override
     public Set<GristClientCache.NodeCache> getCache() {
-        return CACHE.getCache();
+        return this.getGristClientCache().getCache();
     }
 
     @Override
     public boolean isCached(CacheItem item, String... identifiers) {
-        return CACHE.isCached(item, identifiers);
+        return this.getGristClientCache().isCached(item, identifiers);
     }
 
     @Override
     public void setOverrideCache(boolean override) {
-        CACHE.setOverrideCache(override);
+        this.getGristClientCache().setOverrideCache(override);
     }
 
     @Override
     public boolean isOverrideCache() {
-        return CACHE.isOverrideCache();
+        return this.getGristClientCache().isOverrideCache();
     }
 }

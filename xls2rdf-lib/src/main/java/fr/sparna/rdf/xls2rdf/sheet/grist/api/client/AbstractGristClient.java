@@ -15,8 +15,7 @@ import java.util.Map;
 
 public abstract class AbstractGristClient implements Client, Cachable {
 
-    protected static final GristClientCache CACHE = GristClientCache.getInstance();
-
+    private GristClientCache cache;
     private final CallableGrist caller;
     private final ObjectMapper mapper;
     private boolean useCache;
@@ -25,6 +24,7 @@ public abstract class AbstractGristClient implements Client, Cachable {
         this.caller = caller;
         this.useCache = useCache;
         this.mapper = new ObjectMapper();
+        this.cache = new GristClientCache();
     }
 
     public boolean isUseCache() {
@@ -41,6 +41,14 @@ public abstract class AbstractGristClient implements Client, Cachable {
 
     public CallableGrist getCaller() {
         return caller;
+    }
+
+    protected GristClientCache getGristClientCache(){
+        return this.cache;
+    }
+
+    public void setCache(GristClientCache cache) {
+        this.cache = cache;
     }
 
     protected HttpResponse<String> processGetRequest(GristPath path, Map<GristPath.GristPlaceholder, String> values){
