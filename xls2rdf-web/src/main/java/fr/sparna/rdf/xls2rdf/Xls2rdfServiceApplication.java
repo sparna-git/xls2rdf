@@ -3,6 +3,7 @@ package fr.sparna.rdf.xls2rdf;
 
 import fr.sparna.rdf.xls2rdf.web.ApplicationData;
 import fr.sparna.rdf.xls2rdf.web.SwaggerUICustom;
+
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springdoc.core.properties.SwaggerUiOAuthProperties;
@@ -22,7 +23,6 @@ import org.springframework.context.annotation.PropertySources;
 	@PropertySource("classpath:version.properties"),
 })
 @SpringBootApplication
-//@OpenAPIDefinition(servers = {@io.swagger.v3.oas.annotations.servers.Server(url = "/web")}, info = @io.swagger.v3.oas.annotations.info.Info(description = "xls2rdf API"))
 public class Xls2rdfServiceApplication extends SpringBootServletInitializer {
 	
 	//// Pour lancer l'application en dehors d'un conteneur à servlet
