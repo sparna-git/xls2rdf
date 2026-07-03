@@ -200,9 +200,7 @@ public class Xls2RdfConverter {
 			modelWriter.beginWorkbook();
 			
 			// read all prefixes in all sheets, so that prefixes are shared across all sheets
-			for (Sheet sheet : workbook) {
-				this.initPrefixManager(sheet);
-			}
+			initPrefixManager(workbook);
 			
 			// for every sheet...
 			for (Sheet sheet : workbook) {
@@ -237,24 +235,62 @@ public class Xls2RdfConverter {
 	 * INIT PREFIX REGISTRATION  *
 	 * ***************************
 	 */
-	private void initPrefixManager(Sheet sheet) {
+	private void initPrefixManager(Workbook workbook) {
 		String baseIRI = null;
-		// read the prefixes
-		//if a workbookMapping has been provided, check if prefixes are added with the YAML file
+
+		// register prefixes from the workbookMapping if any, and set the baseIRI if any
 		if(this.workbookMapping != null){
 			this.workbookMapping.setPrefixManager(this.prefixManager);//<-------- Add the common prefixManager of the current converter to register prefix FROM yaml file
 			this.workbookMapping.registerPrefixes();//<----------------- Register prefixes within the prefixManager
 			baseIRI = this.workbookMapping.getBaseIRI();//<------------- Try get the baseIRI if not null
 			if(baseIRI != null) this.prefixManager.setBaseUri(baseIRI);
 		}
-		//if no workbookMapping just register if sheet contains a @prefix or PREFIX
-		else{
-			this.prefixManager.register(PrefixManager.readPrefixes(sheet));
-			baseIRI = PrefixManager.readBaseIri(sheet);
-			// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaration
-			if(baseIRI != null) this.prefixManager.setBaseUri(baseIRI);
+
+		// auto-detect prefixes with PREFIX keyword in the first column
+		for (Sheet sheet : workbook) {
+			this.autoDetectPrefixes(sheet);
 		}
 
+		// also look for a sheet named "prefixes" containing a "prefix" column (all case-insensitive)
+		List<String> PREFIXES_SHEETS = Arrays.asList("prefixes", "PREFIXES", "Prefixes");
+		List<String> PREFIX_HEADERS = Arrays.asList("prefix", "PREFIX", "Prefix", "@prefix", "@PREFIX", "@Prefix");
+		
+		PREFIXES_SHEETS.forEach(sheetName -> {
+			Sheet sheet = workbook.getSheet(sheetName);
+			if(sheet != null) {
+				// look if there is a prefix column
+				Row firstRow = sheet.getRow(0);
+				if(firstRow != null) {
+					int prefixColumnIndex = -1;
+					if(firstRow.getColumnValue(0) != null && PREFIX_HEADERS.contains(firstRow.getColumnValue(0))) {
+						prefixColumnIndex = 0;
+					} else if(firstRow.getColumnValue(1) != null && PREFIX_HEADERS.contains(firstRow.getColumnValue(1))) {
+						prefixColumnIndex = 1;
+					}
+
+					if(prefixColumnIndex != -1) {
+
+						for (int rowIndex = 0; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+							if(sheet.getRow(rowIndex) != null) {
+								Row row = sheet.getRow(rowIndex);
+								String prefix = row.getColumnValue(prefixColumnIndex);
+								String namespace = (prefixColumnIndex == 0) ? row.getColumnValue(1) : row.getColumnValue(0);
+								if(StringUtils.isNotBlank(prefix) && StringUtils.isNotBlank(namespace)) {
+									log.debug("Found prefix : "+prefix+" : <"+namespace+">");
+									this.prefixManager.register(prefix, namespace);
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+	}	
+	private void autoDetectPrefixes(Sheet sheet) {
+		this.prefixManager.register(PrefixManager.readPrefixes(sheet));
+		String baseIRI = PrefixManager.readBaseIri(sheet);
+		// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaration
+		if(baseIRI != null) this.prefixManager.setBaseUri(baseIRI);
 	}
 
 	/*

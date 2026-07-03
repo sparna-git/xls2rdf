@@ -114,8 +114,8 @@ public class PrefixManager {
 	}
 	
 	public String isValidURI(String value, boolean fixHttp) {
-		// if the value starts with http, return it directly
-		if(value.startsWith("http") || value.startsWith("mailto")) {
+		// if the value starts with http (or htts) or mailto, return it directly
+		if(value.startsWith("http") || value.startsWith("https") || value.startsWith("mailto")) {
 			// trim the value to remove trailing whitespaces
 			return value.trim();
 		}
@@ -200,7 +200,6 @@ public class PrefixManager {
 				// if we have the "prefix" keyword...
 				// note : we add a null check here because there are problems with some sheets
 				if(prefixKeyword != null && (prefixKeyword.equalsIgnoreCase("PREFIX") || prefixKeyword.equalsIgnoreCase("@prefix"))) {
-
 					// and we have the prefix and namespaces defined...
 					String prefix = row.getColumnValue(1);
 					if(StringUtils.isNotBlank(prefix)) {
