@@ -149,12 +149,14 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
                         // test if string value has proper string format
                         if(
                                 ValueProcessorFactory.normalizeSpace(unescapedValue).matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]")
+                                ||
+                                ValueProcessorFactory.normalizeSpace(unescapedValue).matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]+[0-9][0-9]:[0-9][0-9]")
                         ) {
                             l = SimpleValueFactory.getInstance().createLiteral(ValueProcessorFactory.normalizeSpace(unescapedValue), headerDatatype);
                         }
 
                         if (l == null) {
-                            this.messageListener.onMessage(MessageCode.WRONG_FORMAT, cell.getCellExcelReference(), "Failed to parse datetime format for value '"+ value +"'. Is the cell forma");
+                            this.messageListener.onMessage(MessageCode.WRONG_FORMAT, cell.getCellExcelReference(), "Failed to parse datetime format for value '"+ value +"'. Is the cell formattd as a datetime without timezone ?");
                         }
                     }
                 } else if(headerDatatype.stringValue().equals(XMLSchema.BOOLEAN.stringValue())) {

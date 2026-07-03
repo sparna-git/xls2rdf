@@ -17,7 +17,7 @@ public class GristCellConverter {
     }
 
     public String convertIf(JsonNode node, String type) {
-        if(node == null || node.asText().isBlank()) return "";
+        if(node == null || node.asText().isBlank() || node.asText().equals("null")) return "";
         if (node.isArray()) {
             if ("D".equals(node.get(0).asText())) {
                 //dans le second emplacement du tableau se trouve le timestamp de Grist en second sous la forme 1.xxxxxx * 10^n
@@ -46,7 +46,7 @@ public class GristCellConverter {
             ZoneId id = ZoneId.of(type.substring(type.indexOf(":") + 1));
             double d = node.asDouble();
             ZonedDateTime dateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond((long)d), id);
-            return dateTime.format(DateTimeFormatter.ISO_DATE_TIME);
+            return dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         }
         return node.asText();
     }
