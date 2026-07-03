@@ -68,6 +68,15 @@ public class MappingRuleParser {
 				}
 				h.setWrapper(wrapperOperator);
 			}
+
+			// sets the vocab property from parameters, if needed
+			if(parameters.containsKey(MappingRule.PARAMETER_VOCAB)) {
+				IRI vocab = parseProperty(parameters.get(MappingRule.PARAMETER_VOCAB));
+				if(vocab == null) {
+					 throw new InvalidParameterException("Unable to parse value of "+ MappingRule.PARAMETER_VOCAB +" : '"+parameters.get(MappingRule.PARAMETER_VOCAB)+"'");
+				}
+				h.setVocab(vocab);	
+			}
 		}
 		
 		return h;

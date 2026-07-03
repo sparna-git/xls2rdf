@@ -54,9 +54,9 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 
           boolean isMainResourceConceptScheme = true;
           if (
-                  new HasRdfTypeTest(model).test(mainResource)
-                          &&
-                          model.filter(mainResource, RDF.TYPE, SKOS.CONCEPT_SCHEME).isEmpty()
+                new HasRdfTypeTest(model).test(mainResource)
+                &&
+                model.filter(mainResource, RDF.TYPE, SKOS.CONCEPT_SCHEME).isEmpty()
           ) {
               isMainResourceConceptScheme = false;
           }

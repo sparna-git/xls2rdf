@@ -24,6 +24,7 @@ public class MappingRule {
 	public static final String PARAMETER_COPY_TO = "copyTo";
 	public static final String PARAMETER_NORMALIZE_SPACE = "normalize-space";
 	public static final String PARAMETER_WRAPPER = "wrapper";
+	public static final String PARAMETER_VOCAB = "vocab";
 	
 	public static enum RECONCILE_VALUES {
 		external,
@@ -75,6 +76,8 @@ public class MappingRule {
 	 */
 	private IRI wrapper;
 
+	/** The IRI of the vocabulary to use, set by the "vocab" parameter */
+	private IRI vocab;
 
 	
 	public MappingRule(String originalValue) {
@@ -159,6 +162,14 @@ public class MappingRule {
 
 	public void setWrapper(IRI wrapper) {
 		this.wrapper = wrapper;
+	}
+
+	public IRI getVocab() {
+		return vocab;
+	}
+
+	public void setVocab(IRI vocab) {
+		this.vocab = vocab;
 	}
 
 	public void setReconcileOn(IRI reconcileOn) {

@@ -63,18 +63,23 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
         // only if no datatype or language have been explicitely specified, in which case this will default to a literal
         if(
                 headerDatatype == null
-                        &&
-                        headerLanguage == null
-                        &&
-                        (value.startsWith("http") || value.startsWith("mailto") || prefixManager.usesKnownPrefix(theCellValue))
+                &&
+                headerLanguage == null
+                &&
+                (value.startsWith("http") || value.startsWith("mailto") || prefixManager.usesKnownPrefix(theCellValue) || this.mappingRule.getVocab() != null)
         ) {
+            String actualValue = theCellValue;
+            if(this.mappingRule.getVocab() != null) {
+                actualValue = this.mappingRule.getVocab().stringValue() + theCellValue;
+            }
+
             if(!mappingRule.isInverse()) {
-                Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.isValidURI(theCellValue, false));
+                Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.isValidURI(actualValue, false));
                 Statement s = SimpleValueFactory.getInstance().createStatement(subject, mappingRule.getProperty(), v);
                 model.add(s);
                 return Collections.singletonList(s);
             } else {
-                model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.isValidURI(theCellValue, false)), mappingRule.getProperty(),subject);
+                model.add(SimpleValueFactory.getInstance().createIRI(prefixManager.isValidURI(actualValue, false)), mappingRule.getProperty(),subject);
             }
         } else if(headerDatatype == null && headerLanguage == null && value.startsWith("(") && value.endsWith(")")) {
             // handle rdf:List
@@ -84,12 +89,12 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
             return this.valueProcessorFactory.turtleParsing(mappingRule.getProperty(), prefixManager).processValue(model, subject, value, cell, language);
         } else if(
                 value.startsWith("\"")
-                        &&
-                        (
-                                value.contains("\"^^")
-                                        ||
-                                        value.contains("\"@")
-                        )
+                &&
+                (
+                    value.contains("\"^^")
+                    ||
+                    value.contains("\"@")
+                )
         ) {
             // handle cells that explicitly indicate a datatype or a language
             // in that case it has precedence over the ones indicated in the header
