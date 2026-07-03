@@ -6,11 +6,12 @@ import java.util.Iterator;
 
 public class GristColumnsParser extends AbstractGristParser implements GettableColumns {
 
-    public static final String COLUMNS_ID  = "columns";
-    public static final String COLUMN_NAME = "id";
-    public static final String FIELDS_ID   = "fields";
-    public static final String TYPE        = "type";
-    public static final String PARENT_POS  = "parentPos";
+    public static final String COLUMNS_ID   = "columns";
+    public static final String COLUMN_ID    = "id";
+    public static final String FIELDS_ID    = "fields";
+    public static final String TYPE         = "type";
+    public static final String PARENT_POS   = "parentPos";
+    public static final String COLUMN_TYPE  = "type";
 
     public GristColumnsParser(JsonNode rootNode) {
         super(rootNode);
@@ -25,7 +26,7 @@ public class GristColumnsParser extends AbstractGristParser implements GettableC
     public JsonNode getIdNode(int index) {
         JsonNode node = this.getNodeFromIndex(index);
         if (node == null) return null;
-        return node.get(COLUMN_NAME);
+        return node.get(COLUMN_ID);
     }
 
     @Override
@@ -62,7 +63,7 @@ public class GristColumnsParser extends AbstractGristParser implements GettableC
         if (node == null) return null;
 
         for (JsonNode n : node) {
-            if (n.get(COLUMN_NAME).asText().equals(entityName)) {
+            if (n.get(COLUMN_ID).asText().equals(entityName)) {
                 return n;
             }
         }

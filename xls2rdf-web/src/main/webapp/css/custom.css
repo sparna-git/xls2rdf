@@ -51,9 +51,12 @@ label{
   color: #df6919;
 }
 
-select, #file, #url, #submit, #input_Language{
+select, #file, #url, #submit, #input_Language, #gristTokenApi, #gristDocumentId{
   border-radius: 4px;
-  
+}
+
+#gristTokenApi, #gristDocumentId{
+  margin-right: 15px;
 }
 
 #submit:hover{
@@ -65,7 +68,6 @@ select, #file, #url, #submit, #input_Language{
 #submit-wrapper{
   background-color: #df6919;
 }
-
 
 #footer-logo{
   filter: brightness(400%);

@@ -16,7 +16,6 @@ import org.springframework.web.context.annotation.ApplicationScope;
 public class ApplicationData {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
-	
 	protected String buildVersion;	
 	protected String buildTimestamp;
 	protected String applicationTitle;

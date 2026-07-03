@@ -1,8 +1,6 @@
-package fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.record;
+package fr.sparna.rdf.xls2rdf.sheet.grist.api.entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.AbstractGristEntity;
-import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.table.GristTables;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristRecordsParser;
 
 import java.util.Iterator;

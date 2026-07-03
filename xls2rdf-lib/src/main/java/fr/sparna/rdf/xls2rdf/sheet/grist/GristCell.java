@@ -3,6 +3,8 @@ package fr.sparna.rdf.xls2rdf.sheet.grist;
 import com.fasterxml.jackson.databind.JsonNode;
 import fr.sparna.rdf.xls2rdf.sheet.*;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristColumns;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristColumnsParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,13 +16,14 @@ public class GristCell implements Cell {
     private final Row parentRow;
     private final int columnIndex;
     private final String columnName;
+    private GristColumns gristColumns;
 
-
-    public GristCell(JsonNode cellNode, int columnIndex, String columnName, GristRow parentRow){
+    public GristCell(JsonNode cellNode, int columnIndex, String columnName, GristRow parentRow, GristColumns gristColumns){
         this.parentRow = parentRow;
         this.cellNode = cellNode;
         this.columnIndex = columnIndex;
         this.columnName = columnName;
+        this.gristColumns = gristColumns;
     }
 
     @Override
@@ -30,9 +33,9 @@ public class GristCell implements Cell {
 
     @Override
     public String getCellValue() {
-        String convertResult = GristCellConverter.getInstance().convertIf(cellNode);
+        String type = this.gristColumns.getMetadata(this.columnName, GristColumnsParser.TYPE).asText();
+        String convertResult = GristCellConverter.getInstance().convertIf(cellNode, type);
         if(convertResult != null) return convertResult;
-        else if(cellNode != null) return cellNode.asText();
         else return "";
     }
 

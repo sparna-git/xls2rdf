@@ -40,6 +40,7 @@ public class Xls2RdfRestService {
             boolean skipHidden,
             boolean broaderTransitive,
             boolean ignorePostProc
+
     ){
         RDFFormat theFormat = RDFWriterRegistry.getInstance().getFileFormatForMIMEType(format).orElse(RDFFormat.TURTLE);
 
@@ -77,7 +78,9 @@ public class Xls2RdfRestService {
                     false,
                     // skip hidden rows and columns
                     skipHidden,
-                    false
+                    false,
+                    null,
+                    null
             );
 
             cvIds.stream().map(cv -> "Converted Graph: " + cv).forEach(log::info);

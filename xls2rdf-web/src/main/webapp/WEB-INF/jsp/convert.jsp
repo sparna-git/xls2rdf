@@ -20,16 +20,18 @@
     <!--Custom CSS-->
     <link href="css/custom.css" rel="stylesheet">
     <!--event Listener-->
-   
 		<script>
 		      function enabledInput(selected) {
 		      				document.getElementById('source-' + selected).checked = true;
 		      				document.getElementById('url').disabled = selected != 'url';
 		      				document.getElementById('example').disabled = selected != 'example';
-		      				document.getElementById('file').disabled = selected != 'file';		
+		      				document.getElementById('file').disabled = selected != 'file';
+		      				document.getElementById('gristTokenApi').disabled = selected != 'grist';
+		      				document.getElementById('gristDocumentId').disabled = selected != 'grist';
 		      			}	
 
-					function handleDownloadExample(select, downloadLink) {
+
+			   function handleDownloadExample(select, downloadLink) {
                const selectedOption = select.options[select.selectedIndex];
 
                const valueHref  = selectedOption.value;
@@ -179,6 +181,45 @@
                       </div>
               </div>
             <!--END SOURCE RADIO/INPUT = WEB-->
+            <!--START GRIST API-->
+             <div class="col-4 form-check">
+                            <input
+                            class="form-check-input"
+                            type="radio"
+                            id="source-grist"
+                            name="source"
+                            value="grist"
+                            onchange="enabledInput('grist')"/>
+                            <label class="form-label" for="url">
+                              <fmt:message key="grist"/>
+                            </label>
+                          </div>
+                          <div class="col-6">
+                              <input
+                              class="form-control mb-4"
+                              type="text"
+                              name="gristTokenApi"
+                              id="gristTokenApi"
+                              onchange="enabledInput('grist')"
+                              placeholder="Grist Token API"/>
+
+                              <input
+                              class="form-control mb-4"
+                              type="text"
+                              name="gristDocumentId"
+                              id="gristDocumentId"
+                              onchange="enabledInput('grist')"
+                              placeholder="Grist Document ID"/>
+
+                              <input
+                              class="form-control"
+                              type="file"
+                              name="gristMapping"
+                              id="gristMapping"
+                              onchange="enabledInput('grist')"
+                              />
+
+            <!--END GRIST API-->
           </div>
           <!--END PARTIES RADIO BUTTON + LABEL + INPUT-->
         

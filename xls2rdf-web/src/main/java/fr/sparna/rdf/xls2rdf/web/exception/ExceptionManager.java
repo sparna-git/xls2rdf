@@ -22,6 +22,7 @@ public enum ExceptionManager {
     IO_EXCEPTION("Input/Outputstream error! Please try again."),
     GENERIC("Something went wrong while processing your request! Please try again."),
     NULL_POINTER("Null pointer exception."),
+    GRIST_NULL("Please, verify your Grist parameters. Null received."),
     TEST("TEST");
 
 
@@ -49,6 +50,7 @@ public enum ExceptionManager {
             //Add other exceptions here ...
 	}
 
+    //Permet de récupérer la stackTrace Java formattée
     public static String getStackTrace(Throwable t){
         StringWriter writer = new StringWriter();
         t.printStackTrace(new PrintWriter(writer));

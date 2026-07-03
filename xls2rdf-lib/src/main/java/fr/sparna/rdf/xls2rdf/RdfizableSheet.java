@@ -169,7 +169,8 @@ public class RdfizableSheet {
 			// we start to check on the second column to avoid detecting a column header in ConceptScheme metadata
 			for (short colIndex = 1; colIndex < 10; colIndex++) {
 				try {
-					Cell c = sheet.getRow(rowIndex).getCell(colIndex);
+					Row r = sheet.getRow(rowIndex);
+					Cell c = r.getCell(colIndex);
 					String cellValue = c.getCellValue();
 					MappingRule rule = headerParser.parse(cellValue);
 					if(rule.getProperty() != null) {

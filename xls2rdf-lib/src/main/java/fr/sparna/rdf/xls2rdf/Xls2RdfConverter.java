@@ -119,10 +119,17 @@ public class Xls2RdfConverter {
 		this.lang = lang;
 	}
 
-	/**
-	 * Parses a File into a Workbook, and defer processing to processWorkbook(Workbook workbook)
-	 * @param input
-	 * @return
+
+	/*
+	 *****************************
+	 * PROCESS PART START        *
+	 * ***************************
+	 */
+
+	/*
+	 *****************************
+	 * PROCESS FROM FILE         *
+	 * ***************************
 	 */
 	public List<Model> processFile(File input) {
 		try {
@@ -148,16 +155,18 @@ public class Xls2RdfConverter {
 		}			
 	}
 	
-	/**
-	 * Parses an InputStream into a Workbook, and defer processing to processWorkbook(Workbook workbook)
-	 * @param input
-	 * @return
+	/*
+	 *****************************
+	 * PROCESS FROM INPUTSTREAM  *
+	 * ***************************
 	 */
 	public List<Model> processInputStream(InputStream input) {
 		Workbook workbook;
 		//On garde le contenu de l'input stream car sinon le stream une fois fermé ne peut pas être réutilisé.
 		byte[] buffer = null;
 
+		//On essaie de charger le buffer dans chaque implémentations des workbook
+		//si une erreur on passe au prochain, jusqu'à ce qu'un workbook soit chargé
 		try {
 			buffer = input.readAllBytes();
 
@@ -169,6 +178,7 @@ public class Xls2RdfConverter {
                 try {
 					workbook = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new InputStreamReader(new ByteArrayInputStream(buffer)));
                 } catch (Exception exc) {
+					//Si aucun workbook ne fonctionne on attrape la dernière exception et on lève une erreur
                     throw Xls2RdfException.rethrow(exc);
                 }
             }
@@ -176,24 +186,22 @@ public class Xls2RdfConverter {
 		return processWorkbook(workbook);
 	}
 	
-	/**
-	 * Process a Workbook
-	 * 
-	 * @param workbook
-	 * @return
+	/*
+	 *****************************
+	 * PROCESS FROM WORKBOOK     *
+	 * ***************************
 	 */
 	public List<Model> processWorkbook(Workbook workbook) {
 
 		List<Model> models = new ArrayList<>();
 
 		try {
-			
 			// notify begin
 			modelWriter.beginWorkbook();
 			
 			// read all prefixes in all sheets, so that prefixes are shared across all sheets
 			for (Sheet sheet : workbook) {
-				initPrefixManager(sheet);
+				this.initPrefixManager(sheet);
 			}
 			
 			// for every sheet...
@@ -215,28 +223,44 @@ public class Xls2RdfConverter {
 		}
 		return models;
 	}
-	
-	/**
-	 * Init the prefix manager with the prefixes declared in the Sheet
-	 * @param sheet
+
+	/*
+	 *****************************
+	 * PROCESS PART END          *
+	 * ***************************
 	 */
-	private void initPrefixManager(Sheet sheet) {        
+
+
+
+	/*
+	 *****************************
+	 * INIT PREFIX REGISTRATION  *
+	 * ***************************
+	 */
+	private void initPrefixManager(Sheet sheet) {
+		String baseIRI = null;
 		// read the prefixes
-
-		this.prefixManager.register(PrefixManager.readPrefixes(sheet));
-		String baseIri = PrefixManager.readBaseIri(sheet);
-		// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaration
-
-		if(baseIri != null) {
-			this.prefixManager.setBaseUri(baseIri);
+		//if a workbookMapping has been provided, check if prefixes are added with the YAML file
+		if(this.workbookMapping != null){
+			this.workbookMapping.setPrefixManager(this.prefixManager);//<-------- Add the common prefixManager of the current converter to register prefix FROM yaml file
+			this.workbookMapping.registerPrefixes();//<----------------- Register prefixes within the prefixManager
+			baseIRI = this.workbookMapping.getBaseIRI();//<------------- Try get the baseIRI if not null
+			if(baseIRI != null) this.prefixManager.setBaseUri(baseIRI);
 		}
+		//if no workbookMapping just register if sheet contains a @prefix or PREFIX
+		else{
+			this.prefixManager.register(PrefixManager.readPrefixes(sheet));
+			baseIRI = PrefixManager.readBaseIri(sheet);
+			// sets the value only if not null, so that sheets not containing a base will not overwrite previous base declaration
+			if(baseIRI != null) this.prefixManager.setBaseUri(baseIRI);
+		}
+
 	}
 
-	/**
-	 * Process a single sheet and returns corresponding Model
-	 * 
-	 * @param sheet
-	 * @return
+	/*
+	 *****************************
+	 * PROCESS A SINGLE SHEET    *
+	 * ***************************
 	 */
 	private Model processSheet(Sheet sheet) {
 
@@ -245,10 +269,11 @@ public class Xls2RdfConverter {
 		SimpleValueFactory svf = SimpleValueFactory.getInstance();
 		RdfizableSheet rdfizableSheet;
 		SheetMapping sheetMapping = null;
-		System.out.println(sheet.getSheetName());
+
+
+		//We check if a workbookMapping has been sent to treat it
 		if(this.workbookMapping != null){
-			this.workbookMapping.setPrefixManager(this.prefixManager);
-			sheetMapping = workbookMapping.doSheetMappingFor(sheet.getSheetName());
+			sheetMapping = workbookMapping.doSheetMappingFromYaml(sheet.getSheetName()); //<------------ init the mapping between the yaml file and RuleMapping class and return the sheetMapping
 			rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager, sheetMapping);
 		}
 		else rdfizableSheet = new RdfizableSheet(sheet, this.prefixManager, RdfizableSheet.autoDetectMappingRules(sheet, prefixManager));
@@ -259,13 +284,14 @@ public class Xls2RdfConverter {
 		}
 
 		// read the concept scheme or graph URI
-		String csUri = rdfizableSheet.b1ContainsUri()?prefixManager.isValidURI(rdfizableSheet.getSchemeOrGraph(), true):null;
+		String csUri = rdfizableSheet.b1ContainsUri() ? prefixManager.isValidURI(rdfizableSheet.getSchemeOrGraph(), true) :null;
 
 		// if the URI was already processed, output a warning (this is a possible case)
 		if(csUri != null && this.convertedVocabularyIdentifiers.contains(csUri)) {
 			log.debug("Duplicate graph declaration found: " + csUri + " (declared in more than one sheet)");
 		}
 
+		System.out.println("csURI = " + csUri);
 		Resource csResource = null;
 		if(csUri != null) {
 			csResource = svf.createIRI(csUri);
@@ -284,7 +310,6 @@ public class Xls2RdfConverter {
 			headerRowIndex = headerLine.getRowIndex();
 		}
 
-		System.out.println("headerRowIndex : "+headerRowIndex);
 		
 		// validate the sheet
 		if(this.propertyValidator != null) {

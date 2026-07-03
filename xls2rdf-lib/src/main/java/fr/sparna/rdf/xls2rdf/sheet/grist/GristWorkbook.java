@@ -4,7 +4,7 @@ import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristEntityFactory;
-import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.table.GristTables;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristTables;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -37,6 +37,12 @@ public class StringUtils {
         return buffer;
     }
 
+    public static String formatGristName(String documentId, String extension){
+        return String.format("grist-%1$s-%2$tF.%3$s", documentId, LocalDate.now(), extension);
+    }
+
+
+
     private static String formatFileName(MultipartFile file){
         return  file.getOriginalFilename().contains(".")
                 ? file.getOriginalFilename().substring(0, file.getOriginalFilename().lastIndexOf('.'))

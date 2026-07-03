@@ -23,17 +23,17 @@ import org.springframework.context.annotation.PropertySources;
 })
 @SpringBootApplication
 //@OpenAPIDefinition(servers = {@io.swagger.v3.oas.annotations.servers.Server(url = "/web")}, info = @io.swagger.v3.oas.annotations.info.Info(description = "xls2rdf API"))
-public class Xls2rdfServiceApplication extends SpringBootServletInitializer {
+public class Xls2RdfServiceApplication extends SpringBootServletInitializer {
 	
 	//// Pour lancer l'application en dehors d'un conteneur à servlet
 	public static void main(String[] args) {
-		SpringApplication.run(Xls2rdfServiceApplication.class, args);
+		SpringApplication.run(Xls2RdfServiceApplication.class, args);
 	}
 
 	//// Pour lancer l'application dans un conteneur à serlvet
 	@Override
 	public SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(Xls2rdfServiceApplication.class);
+		return application.sources(Xls2RdfServiceApplication.class);
 	}
 
 	@Bean
@@ -55,4 +55,5 @@ public class Xls2rdfServiceApplication extends SpringBootServletInitializer {
 			openApi.getInfo().setVersion(data.getBuildVersion());
 		};
 	}
+
 }

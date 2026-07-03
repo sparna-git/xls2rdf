@@ -16,7 +16,6 @@ import java.util.List;
 @RunWith(AllTests.class)
 public class Xls2RdfConverterTest {
 
-
     public static TestSuite suite() {
         TestSuite suite = new TestSuite();
         //TEST FOR EXCEL

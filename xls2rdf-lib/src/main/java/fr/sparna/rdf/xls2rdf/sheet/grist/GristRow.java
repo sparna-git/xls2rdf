@@ -6,6 +6,8 @@ import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristColumns;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristColumnsParser;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristRecordsParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,18 +21,19 @@ public class GristRow implements Row {
     private final Sheet parentSheet;
     private final JsonNode rowNode;
     private final List<String> columnNames;
+    private GristColumns gristColumns;
 
-
-    public GristRow(JsonNode rowNode, List<String> columnNames, GristSheet delegate){
+    public GristRow(JsonNode rowNode, List<String> columnNames, GristSheet delegate, GristColumns gristColumns){
         this.parentSheet = delegate;
         this.rowNode = rowNode;
         this.columnNames = columnNames;
+        this.gristColumns = gristColumns;
     }
 
     @Override
     public Cell getCell(int columnIndex) {
         if(columnIndex >= this.columnNames.size()) return null;
-        return new GristCell(this.rowNode.get(GristRecordsParser.FIELDS_ID).get(this.columnNames.get(columnIndex)), columnIndex, this.columnNames.get(columnIndex), this);
+        return new GristCell(this.rowNode.get(GristRecordsParser.FIELDS_ID).get(this.columnNames.get(columnIndex)), columnIndex, this.columnNames.get(columnIndex), this, this.gristColumns);
     }
 
     @Override
@@ -38,9 +41,10 @@ public class GristRow implements Row {
         if(columnIndex >= this.columnNames.size() || this.rowNode == null) return "";
         JsonNode cellNode = this.rowNode.get(GristRecordsParser.FIELDS_ID).get(this.columnNames.get(columnIndex));
         if(cellNode == null) return "";
-        String convertResult = GristCellConverter.getInstance().convertIf(cellNode);
+        String type = this.gristColumns.getMetadata(this.columnNames.get(columnIndex), GristColumnsParser.TYPE).asText();
+        String convertResult = GristCellConverter.getInstance().convertIf(cellNode, type);
         if(convertResult != null) return convertResult;
-        else return cellNode.asText();
+        else return "";
     }
 
     @Override

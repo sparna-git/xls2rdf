@@ -2,9 +2,7 @@ package fr.sparna.rdf.xls2rdf.sheet.grist;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.StringJoiner;
 
@@ -18,8 +16,8 @@ public class GristCellConverter {
         return GRIST_CELL_CONVERTER;
     }
 
-    public String convertIf(JsonNode node) {
-        if(node == null) return "";
+    public String convertIf(JsonNode node, String type) {
+        if(node == null || node.asText().isBlank()) return "";
         if (node.isArray()) {
             if ("D".equals(node.get(0).asText())) {
                 //dans le second emplacement du tableau se trouve le timestamp de Grist en second sous la forme 1.xxxxxx * 10^n
@@ -28,9 +26,8 @@ public class GristCellConverter {
                 String timeZone = node.get(2).asText();
                 //Grist fournit un timestamp de n secondes, Instant.ofEpcohMilli attend en milliseconds
                 //donc 1sec = 1000 millisecondes
-                //on multiplie donc le timestamp de grist par 1000
-                ZonedDateTime dateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (timestamp * 1000)), ZoneId.of(timeZone));
-                return dateTime.format(DateTimeFormatter.ISO_INSTANT);
+                ZonedDateTime dateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond((long) (timestamp)), ZoneId.of(timeZone));
+                return dateTime.format(DateTimeFormatter.ISO_DATE_TIME);
                 }
             else if ("L".equals(node.get(0).asText())) {
                 StringJoiner j = new StringJoiner(",");
@@ -41,7 +38,17 @@ public class GristCellConverter {
                 return j.toString();
             }
         }
-        return null;
+        if(type.equals("Date")){
+                return LocalDate.ofInstant(Instant.ofEpochSecond(node.asInt()), ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE);
+        }
+        if(type.startsWith("DateTime")){
+            //le type dans le retour grist est "type": "DateTime:ZoneId"
+            ZoneId id = ZoneId.of(type.substring(type.indexOf(":") + 1));
+            double d = node.asDouble();
+            ZonedDateTime dateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond((long)d), id);
+            return dateTime.format(DateTimeFormatter.ISO_DATE_TIME);
+        }
+        return node.asText();
     }
 
 }

@@ -3,6 +3,10 @@ package fr.sparna.rdf.xls2rdf;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/**
+ * Allow registration of {@link MappingRule} for a corresponding {@code SheetMapping};
+ */
 public class SheetMapping {
 
     private final Map<String, MappingRule> mappingRule;
@@ -21,7 +25,6 @@ public class SheetMapping {
         MappingRule rule = parser.parse(predicate);
         this.mappingRule.put(columnName, rule);
     }
-
 
    public Map<String, MappingRule> getMappingRule(){
         return this.mappingRule;

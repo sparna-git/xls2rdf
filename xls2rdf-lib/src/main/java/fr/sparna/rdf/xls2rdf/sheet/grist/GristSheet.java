@@ -6,8 +6,8 @@ import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.client.Client;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristEntityFactory;
-import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.column.GristColumns;
-import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.record.GristRecords;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristColumns;
+import fr.sparna.rdf.xls2rdf.sheet.grist.api.entity.GristRecords;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristColumnsParser;
 import fr.sparna.rdf.xls2rdf.sheet.grist.api.parser.get.GristTablesParser;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +29,7 @@ public class GristSheet implements Sheet {
     private final GristColumns gristColumns;
     private List<String> columnNames;
     private List<JsonNode> col;
+    private GristColumns columns;
 
     public GristSheet(JsonNode tableNode, GristWorkbook delegate){
         this.tableNode = tableNode;
@@ -37,9 +38,6 @@ public class GristSheet implements Sheet {
         this.gristColumns = GristEntityFactory.getColumns(this.getGristClient().getColumns(((GristWorkbook)this.parentWorkbook).getGristDocumentId(), this.getSheetName()));
         this.col = new ArrayList<>();
         this.columnNames = this.sortColumnNamesByParentPos();
-        //this.columnNames = new ArrayList<>();
-        //Iterator<String> iter = this.gristRecords.getColumnNames(0);
-        //iter.forEachRemaining(columnNames::add);
     }
 
     //Sort columns by parentPos attribute from columns API call
@@ -51,7 +49,7 @@ public class GristSheet implements Sheet {
         }
         return this.col.stream()
                 .sorted(Comparator.comparingInt(o -> o.get(GristColumnsParser.FIELDS_ID).get(GristColumnsParser.PARENT_POS).asInt()))
-                .map(jsonNode -> jsonNode.get(GristColumnsParser.COLUMN_NAME).asText()).toList();
+                .map(jsonNode -> jsonNode.get(GristColumnsParser.COLUMN_ID).asText()).toList();
     }
 
     @Override
@@ -67,7 +65,7 @@ public class GristSheet implements Sheet {
     @Override
     public Row getRow(int rowIndex) {
         if(rowIndex == 0) return new GristHeaderRow(this.columnNames, this);
-        return new GristRow(this.gristRecords.getRecord(rowIndex), this.columnNames, this);
+        return new GristRow(this.gristRecords.getRecord(rowIndex), this.columnNames, this, this.gristColumns);
     }
 
     @Override
