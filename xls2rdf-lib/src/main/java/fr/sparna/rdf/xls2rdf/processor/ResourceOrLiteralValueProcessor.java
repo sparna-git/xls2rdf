@@ -156,7 +156,7 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
                         }
 
                         if (l == null) {
-                            this.messageListener.onMessage(MessageCode.WRONG_FORMAT, cell.getCellExcelReference(), "Failed to parse datetime format for value '"+ value +"'. Is the cell formattd as a datetime without timezone ?");
+                            this.messageListener.onMessage(MessageCode.WRONG_FORMAT, cell.getCellExcelReference(), "Failed to parse datetime format for value '"+ value +"'. Is the cell formatted as a datetime?");
                         }
                     }
                 } else if(headerDatatype.stringValue().equals(XMLSchema.BOOLEAN.stringValue())) {
