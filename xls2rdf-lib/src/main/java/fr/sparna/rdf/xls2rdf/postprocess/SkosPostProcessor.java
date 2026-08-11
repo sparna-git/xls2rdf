@@ -122,12 +122,13 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
               // add a skos:inScheme to every skos:Concept or skos:Collection or skos:OrderedCollection that was created
               log.debug("Adding skos:inScheme");
               // we are doing this to avoid some concurrent modification exception
-              List<Statement> statements = model.filter(null, RDF.TYPE, SKOS.CONCEPT).stream().collect(Collectors.toList());
-              statements.forEach(
-                      // model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
-                      s -> {
-                          model.add(((Resource) s.getSubject()), SKOS.IN_SCHEME, mainResource);
-                      }
+              List<Statement> typeConceptStatements = model.filter(null, RDF.TYPE, SKOS.CONCEPT).stream().collect(Collectors.toList());
+
+              typeConceptStatements.forEach(
+                    // model.filter(null, RDF.TYPE, SKOS.CONCEPT).forEach(
+                    s -> {
+                        model.add(((Resource) s.getSubject()), SKOS.IN_SCHEME, mainResource);
+                    }
               );
               model.filter(null, RDF.TYPE, SKOS.COLLECTION).forEach(
                       s -> {
@@ -144,26 +145,27 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
               // or if no entry was generated at all, declare the URI in B1 as a ConceptScheme
               log.debug("Setting rdf:type skos:ConceptScheme to main resource");
               if (
-                      !model.filter(null, RDF.TYPE, SKOS.CONCEPT).isEmpty()
-                              ||
-                              model.filter(null, RDF.TYPE, null).isEmpty()
+                    !model.filter(null, RDF.TYPE, SKOS.CONCEPT).isEmpty()
+                    ||
+                    model.filter(null, RDF.TYPE, null).isEmpty()
               )
                   model.add(mainResource, RDF.TYPE, SKOS.CONCEPT_SCHEME);
 
               // add skos:topConceptOf and skos:hasTopConcept for each skos:Concept without broader/narrower
               log.debug("Adding skos:hasTopConcept / skos:topConceptOf");
-              model.filter(null, RDF.TYPE, SKOS.CONCEPT).subjects().forEach(
-                      concept -> {
-                          if (
-                                  model.filter(concept, SKOS.BROADER, null).isEmpty()
-                                          &&
-                                          model.filter(null, SKOS.NARROWER, concept).isEmpty()
-                          ) {
-                              model.add(mainResource, SKOS.HAS_TOP_CONCEPT, concept);
-                              model.add(concept, SKOS.TOP_CONCEPT_OF, mainResource);
-                          }
-                      }
+              typeConceptStatements.stream().map(s -> s.getSubject()).forEach(
+                    concept -> {
+                        if (
+                            model.filter(concept, SKOS.BROADER, null).isEmpty()
+                            &&
+                            model.filter(null, SKOS.NARROWER, concept).isEmpty()
+                        ) {
+                            model.add(mainResource, SKOS.HAS_TOP_CONCEPT, concept);
+                            model.add(concept, SKOS.TOP_CONCEPT_OF, mainResource);
+                        }
+                    }
               );
+
               if(runBroaderTransitive) {
                   addBroaderTransitive(model);
               }
