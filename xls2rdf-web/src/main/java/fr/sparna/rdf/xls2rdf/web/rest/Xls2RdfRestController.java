@@ -67,7 +67,7 @@ public class Xls2RdfRestController {
 			@RequestParam(value="skosxl", required=false, defaultValue = "false") boolean useSkosXl,
 			@RequestParam(value="skipHidden", required=false, defaultValue = "false") boolean skipHidden,
 			@RequestParam(value="broaderTransitive", required=false, defaultValue = "false") boolean broaderTransitive,
-			@RequestParam(value="noPostProcessing", required=false, defaultValue = "false") boolean ignorePostProc){
+			@RequestParam(value="noPostProcessings", required=false, defaultValue = "false") boolean ignorePostProc){
 			URL clientURL = null;
 			try{
 				if(url.isEmpty()) ExceptionManager.throwException(Xls2RdfRestControllerException.class, ExceptionManager.URL_MISSING.getMessage());
@@ -95,7 +95,7 @@ public class Xls2RdfRestController {
 			@RequestParam(value="skosxl", required=false, defaultValue = "false") boolean useSkosXl,
 			@RequestParam(value="skipHidden", required=false, defaultValue = "false") boolean skipHidden,
 			@RequestParam(value="broaderTransitive", required=false, defaultValue = "false") boolean broaderTransitive,
-			@RequestParam(value="noPostProcessing", required=false, defaultValue = "false") boolean ignorePostProc){
+			@RequestParam(value="noPostProcessings", required=false, defaultValue = "false") boolean ignorePostProc){
 			try{
 				if(clientFile.isEmpty()) ExceptionManager.throwException(Xls2RdfRestControllerException.class, ExceptionManager.FILE_MISSING.getMessage());
 			}catch(Exception ex){
