@@ -1,6 +1,6 @@
 package fr.sparna.rdf.xls2rdf.write;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
+import fr.sparna.rdf.xls2rdf.RepositoryWriterIfc;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 import java.io.File;
@@ -26,7 +26,7 @@ public class ModelWriterFactory {
 		this.useGraph = useGraph;
 	}
 
-	public ModelWriterIfc buildNewModelWriter(OutputStream out) {
+	public RepositoryWriterIfc buildNewModelWriter(OutputStream out) {
 		// if useGraph, force a ZIP output
 		if(useGraph || useZip) {
 			ZipOutputStreamModelWriter modelWriter = new ZipOutputStreamModelWriter(out);
@@ -42,7 +42,7 @@ public class ModelWriterFactory {
 		}
 	}
 	
-	public ModelWriterIfc buildNewModelWriter(File directory) {
+	public RepositoryWriterIfc buildNewModelWriter(File directory) {
 		if(!directory.exists()) {
 			directory.mkdirs();
 		}

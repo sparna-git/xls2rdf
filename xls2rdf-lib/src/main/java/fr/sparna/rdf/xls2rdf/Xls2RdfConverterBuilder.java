@@ -1,5 +1,6 @@
 package fr.sparna.rdf.xls2rdf;
 
+import fr.sparna.rdf.xls2rdf.postprocess.ModelDelegationPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.OWLPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.QBPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
@@ -34,7 +35,7 @@ public class Xls2RdfConverterBuilder {
 
     private ModelWriterFactory modelWriterFactory;
 
-    private ModelWriterIfc modelWriter;
+    private RepositoryWriterIfc modelWriter;
 
     private RDFFormat format;
 
@@ -163,14 +164,14 @@ public class Xls2RdfConverterBuilder {
         if(this.isApplyPostProcessing()) {
             List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();
             // add QB post processor
-            postProcessors.add(new QBPostProcessor());
+            postProcessors.add(new ModelDelegationPostProcessor(new QBPostProcessor()));
             // add OWL post process
-            postProcessors.add(new OWLPostProcessor());
+            postProcessors.add(new ModelDelegationPostProcessor(new OWLPostProcessor()));
             // add SKOS post processor
-            postProcessors.add(new SkosPostProcessor(this.generateBroaderTransitive));
+            postProcessors.add(new ModelDelegationPostProcessor(new SkosPostProcessor(this.generateBroaderTransitive)));
             // if needed, add SKOS-XL post-processor
             if(this.generateXl || this.generateXlDefinitions) {
-                postProcessors.add(new SkosXlPostProcessor(this.generateXl, this.generateXlDefinitions));
+                postProcessors.add(new ModelDelegationPostProcessor(new SkosXlPostProcessor(this.generateXl, this.generateXlDefinitions)));
             }
             converter.setPostProcessors(postProcessors);
         }
@@ -198,7 +199,7 @@ public class Xls2RdfConverterBuilder {
         return this.modelWriterFactory;
     }
 
-    public ModelWriterIfc getModelWriter() {
+    public RepositoryWriterIfc getModelWriter() {
         return this.modelWriter;
     }
 

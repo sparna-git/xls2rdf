@@ -1,6 +1,6 @@
 package fr.sparna.rdf.xls2rdf.write;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
+import fr.sparna.rdf.xls2rdf.RepositoryWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -8,6 +8,7 @@ import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.repository.util.RDFInserter;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFWriterRegistry;
@@ -22,7 +23,7 @@ import java.util.Map;
  * @author thomas
  *
  */
-public class OutputStreamModelWriter implements ModelWriterIfc {
+public class OutputStreamModelWriter implements RepositoryWriterIfc {
 	
 	private OutputStream out;
 	private RDFFormat format = RDFFormat.RDFXML;
@@ -51,19 +52,19 @@ public class OutputStreamModelWriter implements ModelWriterIfc {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see fr.sparna.rdf.skos.xls2skos.ModelSaverIfc#saveGraphModel(java.lang.String, org.eclipse.rdf4j.model.Model)
-	 */
 	@Override
-	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri) {
+	public void saveRepository(Repository repository, String baseIri) {
 		try {
-			try(RepositoryConnection c = this.outputRepository.getConnection()) {
-				// register the prefixes
-				prefixes.entrySet().forEach(e -> c.setNamespace(e.getKey(), e.getValue()));
-				if(graph != null){
-					c.add(model, SimpleValueFactory.getInstance().createIRI(graph));
+			try(RepositoryConnection target = this.outputRepository.getConnection()) {
+				try(RepositoryConnection source = repository.getConnection()) {
+					// register the prefixes
+					source.getNamespaces().forEach(rr -> target.setNamespace(rr.getPrefix(), rr.getName()));
+					// dump triples
+					RDFInserter inserter = new RDFInserter(target);
+					target.begin();
+    				source.export(inserter);   // exports ALL statements from ALL contexts
+    				target.commit();
 				}
-				else c.add(model);
 			}
 
 			// keep track of baseIri

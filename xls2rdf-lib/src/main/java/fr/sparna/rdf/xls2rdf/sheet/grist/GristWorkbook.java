@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.util.Iterator;
 
 public class GristWorkbook implements Workbook {
@@ -28,12 +30,16 @@ public class GristWorkbook implements Workbook {
 
     @Override
     public Sheet getSheet(int index) {
-        return new GristSheet(this.gristTables.getTable(index),this);
+        JsonNode tableNode = this.gristTables.getTable(index);
+        if(tableNode == null) return null;
+        return new GristSheet(tableNode,this);
     }
 
     @Override
     public Sheet getSheet(String name) {
-        return new GristSheet(this.gristTables.getTable(name),this);
+        JsonNode tableNode = this.gristTables.getTable(name);
+        if(tableNode == null) return null;
+        return new GristSheet(tableNode,this);
     }
 
     @NotNull

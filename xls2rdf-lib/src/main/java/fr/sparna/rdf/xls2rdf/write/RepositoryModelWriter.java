@@ -1,19 +1,17 @@
 package fr.sparna.rdf.xls2rdf.write;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
+import fr.sparna.rdf.xls2rdf.RepositoryWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.util.RDFInserter;
 
-import java.util.Map;
 
 /**
  * @author Thomas Francart
  *
  */
-public class RepositoryModelWriter implements ModelWriterIfc {
+public class RepositoryModelWriter implements RepositoryWriterIfc {
 	
 	private Repository outputRepository;
 	
@@ -23,23 +21,24 @@ public class RepositoryModelWriter implements ModelWriterIfc {
 	}
 
 	@Override
-	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri) {
+	public void saveRepository(Repository repository, String baseIri) {
 		try {
-			try(RepositoryConnection c = this.outputRepository.getConnection()) {
-				// register the prefixes
-				prefixes.entrySet().forEach(e -> c.setNamespace(e.getKey(), e.getValue()));
-				if(graph != null){
-					c.add(model, SimpleValueFactory.getInstance().createIRI(graph));
+			try(RepositoryConnection target = this.outputRepository.getConnection()) {
+				try(RepositoryConnection source = repository.getConnection()) {
+					// register the prefixes
+					source.getNamespaces().forEach(rr -> target.setNamespace(rr.getPrefix(), rr.getName()));
+					// dump triples
+					RDFInserter inserter = new RDFInserter(target);
+					target.begin();
+    				source.export(inserter);   // exports ALL statements from ALL contexts
+    				target.commit();
 				}
-				else c.add(model);
 			}
-
-			// baseIri cannot be kept here in the outputRepository
 		} catch(Exception e) {
 			throw Xls2RdfException.rethrow(e);
 		}
 	}
-	
+
 	@Override
 	public void beginWorkbook() {
 		// nothing

@@ -77,6 +77,9 @@ public class PrefixManager {
 	}
 	
 	public void register(Map<String, String> map) {
+		if(map == null) {
+			return;
+		}
 		// store both in all prefixes and explicitely declared prefixes
 		this.prefixes.putAll(map);
 		this.explicitelyDeclaredPrefixes.putAll(map);

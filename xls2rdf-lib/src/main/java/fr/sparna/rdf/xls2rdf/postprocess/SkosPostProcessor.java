@@ -28,10 +28,9 @@ import org.slf4j.LoggerFactory;
 
 import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
-import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
 
-public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
+public class SkosPostProcessor implements ModelPostProcessorIfc {
   private static final String CALCULATE_BROADER_TRANSITIVE_SPARQL = "/fr/sparna/rdf/xls2rdf/postprocessing/broaderTransitive.ru";
 
   private Logger log = LoggerFactory.getLogger(this.getClass().getName());
@@ -153,7 +152,7 @@ public class SkosPostProcessor implements Xls2RdfPostProcessorIfc {
 
               // add skos:topConceptOf and skos:hasTopConcept for each skos:Concept without broader/narrower
               log.debug("Adding skos:hasTopConcept / skos:topConceptOf");
-              typeConceptStatements.stream().map(s -> s.getSubject()).forEach(
+              model.filter(null, RDF.TYPE, SKOS.CONCEPT).subjects().forEach(
                     concept -> {
                         if (
                             model.filter(concept, SKOS.BROADER, null).isEmpty()

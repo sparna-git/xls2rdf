@@ -1,8 +1,9 @@
 package fr.sparna.rdf.xls2rdf.write;
 
-import fr.sparna.rdf.xls2rdf.ModelWriterIfc;
+import fr.sparna.rdf.xls2rdf.RepositoryWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
@@ -24,12 +25,11 @@ import java.util.zip.ZipOutputStream;
  * @author thomas
  *
  */
-public class ZipOutputStreamModelWriter implements ModelWriterIfc {
+public class ZipOutputStreamModelWriter implements RepositoryWriterIfc {
 	
 	private OutputStream underlyingStream;
 	private ZipOutputStream out;
-	private RDFFormat format = RDFFormat.RDFXML;
-	private String graphSuffix = null;
+	private RDFFormat format = RDFFormat.TURTLE;
 	private boolean saveGraphFile = false;
 	
 	private boolean grouping = true;
@@ -64,45 +64,37 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see fr.sparna.rdf.skos.xls2skos.ModelSaverIfc#saveGraphModel(java.lang.String, org.eclipse.rdf4j.model.Model)
-	 */
 	@Override
-	public void saveGraphModel(String graph, Model model, Map<String, String> prefixes, String baseIri) {
+	public void saveRepository(Repository repository, String baseIri) {
 
 		try {
-			// declare a new ZipEntry in the Zip file
-			if(graph != null){
-				graph = graph + ((this.graphSuffix != null)?graphSuffix:"");
-			}
-			else{
-				graph = "DEFAULT" + ((this.graphSuffix != null)?graphSuffix:"");
-			}
 
-			
-			String entryName = URLEncoder.encode(graph, "UTF-8") + "." + format.getDefaultFileExtension();
-			// String entryName = graph.substring(graph.lastIndexOf('/')+1) + "." + format.getDefaultFileExtension();
-			System.out.println(entryName);
-			out.putNextEntry(new ZipEntry(entryName));
-			
-			// writes in the entry
-			RDFHandler handler = RDFHandlerFactory.buildHandler(grouping, baseIri, format, out);
-			exportModel(model, handler, prefixes);
-			
-			// close the entry
-			out.closeEntry();
-			
-			if(saveGraphFile) {
-				String graphFileName = entryName + ".graph";
-				out.putNextEntry(new ZipEntry(graphFileName));
-				out.write(graph.getBytes());
+			try(RepositoryConnection source = repository.getConnection()) {
+				for(Resource context : source.getContextIDs()) {
+					String entryName = URLEncoder.encode(context.stringValue(), "UTF-8") + "." + format.getDefaultFileExtension();
+					out.putNextEntry(new ZipEntry(entryName));
+					
+					// writes in the entry
+					RDFHandler handler = RDFHandlerFactory.buildHandler(grouping, baseIri, format, out);
+					source.export(handler, context);
+					
+					// close the entry
+					out.closeEntry();
+					
+					if(saveGraphFile) {
+						String graphFileName = entryName + ".graph";
+						out.putNextEntry(new ZipEntry(graphFileName));
+						out.write(context.stringValue().getBytes());
+					}
+				}
 			}
 			
 		} catch(Exception e) {
 			throw Xls2RdfException.rethrow(e);
 		}
 	}
-	
+
+
 	public void exportModel(Model model, RDFHandler handler, Map<String, String> prefixes) {
 		Repository r = new SailRepository(new MemoryStore());
 		r.init();
@@ -113,14 +105,6 @@ public class ZipOutputStreamModelWriter implements ModelWriterIfc {
 			c.export(handler);
 		}
 	}	
-	
-	public String getGraphSuffix() {
-		return graphSuffix;
-	}
-
-	public void setGraphSuffix(String graphSuffix) {
-		this.graphSuffix = graphSuffix;
-	}
 	
 	public boolean isSaveGraphFile() {
 		return saveGraphFile;

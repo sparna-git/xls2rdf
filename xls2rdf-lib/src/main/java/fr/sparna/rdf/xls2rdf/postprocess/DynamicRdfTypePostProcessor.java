@@ -10,10 +10,9 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fr.sparna.rdf.xls2rdf.MappingRule;
-import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
 
 
-public class DynamicRdfTypePostProcessor implements Xls2RdfPostProcessorIfc {
+public class DynamicRdfTypePostProcessor implements ModelPostProcessorIfc {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 	

@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 
-public class QBPostProcessor implements Xls2RdfPostProcessorIfc {
+public class QBPostProcessor implements ModelPostProcessorIfc {
 
 	public static class QB {
 		public static final String QB = "http://purl.org/linked-data/cube#";

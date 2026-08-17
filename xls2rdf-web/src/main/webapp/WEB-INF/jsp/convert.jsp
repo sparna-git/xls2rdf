@@ -201,7 +201,7 @@
                               name="gristTokenApi"
                               id="gristTokenApi"
                               onchange="enabledInput('grist')"
-                              placeholder="Grist Token API"/>
+                              placeholder="Grist API Token"/>
 
                               <input
                               class="form-control mb-4"

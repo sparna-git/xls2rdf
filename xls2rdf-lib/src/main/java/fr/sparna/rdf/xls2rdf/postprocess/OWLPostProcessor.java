@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-public class OWLPostProcessor implements Xls2RdfPostProcessorIfc {
+public class OWLPostProcessor implements ModelPostProcessorIfc {
 	
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 	

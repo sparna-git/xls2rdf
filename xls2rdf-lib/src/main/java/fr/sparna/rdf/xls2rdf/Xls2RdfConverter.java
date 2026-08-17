@@ -3,8 +3,10 @@ package fr.sparna.rdf.xls2rdf;
 import ch.qos.logback.classic.BasicConfigurator;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import fr.sparna.rdf.RepositoryUtil;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
 import fr.sparna.rdf.xls2rdf.postprocess.AsListPostProcessor;
+import fr.sparna.rdf.xls2rdf.postprocess.ModelDelegationPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.processor.SparqlPathParserProcessor;
 import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
@@ -18,6 +20,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Namespace;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -48,7 +51,7 @@ public class Xls2RdfConverter {
 	/**
 	 * Object capable of serializing the resulting models
 	 */
-	protected ModelWriterIfc modelWriter;
+	protected RepositoryWriterIfc modelWriter;
 
 	/**
 	 * List of identifiers of all the graphs / concept schemes converted
@@ -109,11 +112,11 @@ public class Xls2RdfConverter {
 
 	private WorkbookMapping workbookMapping;
 
-	public Xls2RdfConverter(ModelWriterIfc modelWriter) {		
+	public Xls2RdfConverter(RepositoryWriterIfc modelWriter) {		
 		this(modelWriter, null);
 	}
 	
-	public Xls2RdfConverter(ModelWriterIfc modelWriter, String lang) {		
+	public Xls2RdfConverter(RepositoryWriterIfc modelWriter, String lang) {		
 		this.globalRepository.init();
 		this.modelWriter = modelWriter;
 		this.lang = lang;
@@ -129,9 +132,9 @@ public class Xls2RdfConverter {
 	/*
 	 *****************************
 	 * PROCESS FROM FILE         *
-	 * ***************************
+	 *****************************
 	 */
-	public List<Model> processFile(File input) {
+	public Repository processFile(File input) {
 		try {
 			log.info("Converting file " + input.getAbsolutePath() + "...");
 			Workbook workbook;
@@ -160,7 +163,7 @@ public class Xls2RdfConverter {
 	 * PROCESS FROM INPUTSTREAM  *
 	 * ***************************
 	 */
-	public List<Model> processInputStream(InputStream input) {
+	public Repository processInputStream(InputStream input) {
 		Workbook workbook;
 		//On garde le contenu de l'input stream car sinon le stream une fois fermé ne peut pas être réutilisé.
 		byte[] buffer = null;
@@ -191,9 +194,9 @@ public class Xls2RdfConverter {
 	 * PROCESS FROM WORKBOOK     *
 	 * ***************************
 	 */
-	public List<Model> processWorkbook(Workbook workbook) {
+	public Repository processWorkbook(Workbook workbook) {
 
-		List<Model> models = new ArrayList<>();
+		Repository outputRepository = new SailRepository(new MemoryStore());		
 
 		try {
 			// notify begin
@@ -204,14 +207,14 @@ public class Xls2RdfConverter {
 			
 			// for every sheet...
 			for (Sheet sheet : workbook) {
-
-				// process the sheet, possibly returning an empty Model
-				Model model = processSheet(sheet);
-				models.add(model);
-				try(RepositoryConnection connection = this.globalRepository.getConnection()) {
-					connection.add(model);
-				}
+				// process the sheet, possibly returning an empty result
+				Repository r = processSheet(sheet);
+				// we need both ! mrging into the global one is necessary for local reconciliation
+				RepositoryUtil.mergeRepositories(r, outputRepository);
+				RepositoryUtil.mergeRepositories(r, this.globalRepository);
 			}
+
+			
 			
 			// notify end
 			modelWriter.endWorkbook();
@@ -219,7 +222,7 @@ public class Xls2RdfConverter {
 		} catch (Exception e) {
 			throw Xls2RdfException.rethrow(e);
 		}
-		return models;
+		return outputRepository;
 	}
 
 	/*
@@ -296,10 +299,11 @@ public class Xls2RdfConverter {
 	/*
 	 *****************************
 	 * PROCESS A SINGLE SHEET    *
-	 * ***************************
+	 ****************************
 	 */
-	private Model processSheet(Sheet sheet) {
+	private Repository processSheet(Sheet sheet) {
 
+		Repository outputRepository = new SailRepository(new MemoryStore());
 		// initialize target Model
 		Model model = new LinkedHashModelFactory().createEmptyModel();
 		SimpleValueFactory svf = SimpleValueFactory.getInstance();
@@ -316,21 +320,19 @@ public class Xls2RdfConverter {
 		
 		if(!rdfizableSheet.canRDFize()) {
 			log.debug(sheet.getSheetName()+" : Ignoring sheet.");
-			return model;
+			return outputRepository;
 		}
 
 		// read the concept scheme or graph URI
-		String csUri = rdfizableSheet.b1ContainsUri() ? prefixManager.isValidURI(rdfizableSheet.getSchemeOrGraph(), true) :null;
-
-		// if the URI was already processed, output a warning (this is a possible case)
-		if(csUri != null && this.convertedVocabularyIdentifiers.contains(csUri)) {
-			log.debug("Duplicate graph declaration found: " + csUri + " (declared in more than one sheet)");
+		String graphUri = rdfizableSheet.b1ContainsUri() ? prefixManager.isValidURI(rdfizableSheet.getSchemeOrGraph(), true) : null;
+		Resource graphResource = null;
+		if(graphUri != null) {
+			graphResource = svf.createIRI(graphUri);
 		}
 
-		System.out.println("csURI = " + csUri);
-		Resource csResource = null;
-		if(csUri != null) {
-			csResource = svf.createIRI(csUri);
+		// if the URI was already processed, output a warning (this is a possible case)
+		if(graphUri != null && this.convertedVocabularyIdentifiers.contains(graphUri)) {
+			log.debug("Duplicate graph declaration found: " + graphUri + " (declared in more than one sheet)");
 		}
 
 		// find the title row index
@@ -353,7 +355,7 @@ public class Xls2RdfConverter {
 			boolean valid = rdfizableSheet.validateHeaders(this.propertyValidator, messageListener);
 			if(!valid) {
 				log.error("Sheet "+sheet.getSheetName()+" is invalid, skipping sheet processing");
-				return model;
+				return outputRepository;
 			}
 		}
 		
@@ -397,7 +399,7 @@ public class Xls2RdfConverter {
 					log.debug("Adding value on header object \""+value+"\" with lang "+mappingRule.getLanguage().orElse(this.lang));
 					cellProcessor.processValue(
 						model,
-						csResource,
+						graphResource,
 						value,
 						cell,
 						mappingRule.getLanguage().orElse(this.lang)
@@ -462,9 +464,10 @@ public class Xls2RdfConverter {
 					if(rowIndex % 1000 == 0) {
 						log.info("Row "+rowIndex+"...");
 					}
+
 					Resource rowResource;
 					try {
-						rowResource = handleRow(r, model, csResource, rdfizableSheet, prefixManager);
+						rowResource = handleRow(r, model, graphResource, rdfizableSheet, prefixManager);
 					} catch (Exception e) {
 						throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName()+" : "+e.getMessage(), (Object[])null);
 					}
@@ -476,27 +479,39 @@ public class Xls2RdfConverter {
 		} else {
 			log.info("Sheet has no title row, skipping data processing.");
 		}
+
 		
+		// writes the resulting Model
+		log.debug("Saving graph of "+model.size()+" statements generated from Sheet "+sheet.getSheetName());
+
+		// wraps the Model into a Repository
+		try(RepositoryConnection target = outputRepository.getConnection()) {
+			prefixManager.getOutputPrefixes().entrySet().forEach(p -> target.setNamespace(p.getKey(), p.getValue()));
+			if(graphUri == null) {
+				target.add(model);
+			} else {
+				target.add(model, target.getValueFactory().createIRI(graphUri));
+			}			
+		}
+
 		// always post-process with asList
-		AsListPostProcessor alpp = new AsListPostProcessor();
-		alpp.afterSheet(model, csResource, rowResources, mappingRules);
+		ModelDelegationPostProcessor alpp = new ModelDelegationPostProcessor(new AsListPostProcessor());
+		alpp.afterSheet(outputRepository, graphResource, rowResources, mappingRules);
 
 		if(this.postProcessors != null && this.postProcessors.size() > 0) {
 			log.info("Applying SKOS post-processings on the result");
 			for(Xls2RdfPostProcessorIfc aProcessor : this.postProcessors) {
-				aProcessor.afterSheet(model, csResource, rowResources, mappingRules);
+				aProcessor.afterSheet(outputRepository, graphResource, rowResources, mappingRules);
 			}
 		} else {
 			log.info("No post-processings to apply");
 		}
-		
-		// writes the resulting Model
-		log.debug("Saving graph of "+model.size()+" statements generated from Sheet "+sheet.getSheetName());
-		modelWriter.saveGraphModel(csUri, model, prefixManager.getOutputPrefixes(), prefixManager.getBaseUri());
+
+		modelWriter.saveRepository(outputRepository, prefixManager.getBaseUri());
 		
 		// stores the identifier of generated vocabulary
-		convertedVocabularyIdentifiers.add(csUri);
-		return model;
+		convertedVocabularyIdentifiers.add(graphUri);
+		return outputRepository;
 	}
 
 	private Resource handleRow(Row row, Model model, Resource headerResource, RdfizableSheet rdfizableSheet, PrefixManager prefixManager) {
@@ -781,6 +796,15 @@ public class Xls2RdfConverter {
 				Cell cell = row.getCell(colIndex);            
 				String value = (cell != null)?cell.getCellValue():null;
 
+				String oneHeader = rdfizableSheet.getHeaderLine().getHeaders().get(colIndex);
+
+				// find corresponding mapping rule
+				MappingRule mappingRule = rdfizableSheet.findMappingRuleByHeader(oneHeader);
+				// everything mapped cannot be the subject URI, skip it
+				if(mappingRule != null && mappingRule.getProperty() != null) {
+					continue;
+				}
+
 				// use the first non-empty cell
 				if (
 					!(
@@ -794,7 +818,6 @@ public class Xls2RdfConverter {
 					subjectColumnIndex = colIndex;
 					break;
 				}
-
 			}
 		}
 
@@ -940,7 +963,7 @@ public class Xls2RdfConverter {
 	) throws Exception {
 		OutputStreamModelWriter modelWriter = new OutputStreamModelWriter(output);
 		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter, lang);
-		converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor(false)));
+		converter.setPostProcessors(Collections.singletonList(new ModelDelegationPostProcessor(new SkosPostProcessor(false))));
 		converter.processInputStream(input);
 	}
 

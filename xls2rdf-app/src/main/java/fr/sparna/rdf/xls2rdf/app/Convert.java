@@ -1,11 +1,13 @@
 package fr.sparna.rdf.xls2rdf.app;
 
+import fr.sparna.rdf.RepositoryUtil;
 import fr.sparna.rdf.xls2rdf.WorkbookMapping;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverterBuilder;
 import fr.sparna.rdf.xls2rdf.YamlParser;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.grist.GristWorkbookFactory;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriterRegistry;
@@ -114,12 +116,8 @@ Convert implements CliCommandIfc {
 				files.sort((Comparator.comparing(File::getName)));
 				// process each file, and add resulting data in supportRepository
 				for (File f : files) {						
-						List<Model> result = builder.buildConverter().processFile(f);
-						try(RepositoryConnection connection = builder.getSupportRepository().getConnection()) {
-							for (Model m : result) {
-								connection.add(m);
-							}
-						}
+						Repository result = builder.buildConverter().processFile(f);
+						RepositoryUtil.mergeRepositories(result, builder.getSupportRepository());
 				}
 			}
 			//if it's file just process for the input file

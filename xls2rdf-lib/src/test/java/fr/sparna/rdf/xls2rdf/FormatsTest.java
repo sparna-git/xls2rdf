@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import fr.sparna.rdf.xls2rdf.listen.ListXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.postprocess.ModelDelegationPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.write.RepositoryModelWriter;
 
@@ -25,7 +26,7 @@ public class FormatsTest {
 		this.outputRepository.init();
 		
 		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository), "fr");
-		this.converter.setPostProcessors(Collections.singletonList(new SkosPostProcessor(false)));
+		this.converter.setPostProcessors(Collections.singletonList(new ModelDelegationPostProcessor(new SkosPostProcessor(false))));
 		this.messageListener = new ListXls2RdfMessageListener();
 		this.converter.setMessageListener(messageListener);
 	}

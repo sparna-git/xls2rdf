@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class SkosXlPostProcessor implements Xls2RdfPostProcessorIfc {
+public class SkosXlPostProcessor implements ModelPostProcessorIfc {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 

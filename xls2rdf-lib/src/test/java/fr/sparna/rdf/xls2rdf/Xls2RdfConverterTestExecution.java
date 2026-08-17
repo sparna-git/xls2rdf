@@ -1,5 +1,6 @@
 package fr.sparna.rdf.xls2rdf;
 
+import fr.sparna.rdf.xls2rdf.postprocess.ModelDelegationPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.QBPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
 import fr.sparna.rdf.xls2rdf.reconcile.SparqlReconcileService;
@@ -54,8 +55,8 @@ public class Xls2RdfConverterTestExecution implements Test {
 		
 		// init post processors
 		List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();
-		postProcessors.add(new QBPostProcessor());
-		postProcessors.add(new SkosPostProcessor(false));
+		postProcessors.add(new ModelDelegationPostProcessor(new QBPostProcessor()));
+		postProcessors.add(new ModelDelegationPostProcessor(new SkosPostProcessor(false)));
 		this.converter.setPostProcessors(postProcessors);
 		this.converter.setFailIfNoReconcile(false);
 		
