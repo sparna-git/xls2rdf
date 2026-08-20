@@ -60,6 +60,7 @@ public class PrefixManager {
 		prefixes.put("qb", "http://purl.org/linked-data/cube#");
 		prefixes.put("euvoc", "http://publications.europa.eu/ontology/euvoc#");
 		prefixes.put("sh", SHACL.NAMESPACE);
+		prefixes.put("shui", "http://www.w3.org/ns/shacl-ui#");
 		prefixes.put("isothes", "http://purl.org/iso25964/skos-thes#");
 		prefixes.put("skosthes", "http://purl.org/iso25964/skos-thes#");
 		prefixes.put("xls2rdf", XLS2RDF.NAMESPACE);
