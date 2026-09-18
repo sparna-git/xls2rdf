@@ -41,17 +41,19 @@ public class WorkbookMapping {
         //create the SheetMapping first, give the sheetName and the prefixManager
         SheetMapping s = new SheetMapping(sheetName, prefixManager);
         //We parse the YamlParser to retrieve clients properties and associate them to the sheetMapping with #addMappingRule
-        for(YamlParser.YamlSheet r : this.yamlParser.getSheets()){
-               if(r.getName().equals(sheetName)){
-                   for(Map.Entry<String, String> e : r.getRules().entrySet()){
-                       s.addMappingRule(e.getKey(), e.getValue());
-                   }
-               }
+        if(this.yamlParser.getOptionalSheets().isPresent()){
+            for(YamlParser.YamlSheet r : this.yamlParser.getOptionalSheets().get()){
+                if(r.getName().equals(sheetName)){
+                    for(Map.Entry<String, String> e : r.getRules().entrySet()){
+                        s.addMappingRule(e.getKey(), e.getValue());
+                    }
+                }
+            }
+            this.sheetMappingMap.put(sheetName, s);
+            return s;
         }
-        this.sheetMappingMap.put(sheetName, s);
-        return s;
+        return null;
     }
-
 
     //Must be set before using doSheetMappingFor because it requieres a prefixManager
     public void setPrefixManager(PrefixManager prefixManager){
@@ -64,7 +66,9 @@ public class WorkbookMapping {
 
     //register all given prefixes
     public void registerPrefixes(){
-        this.prefixManager.register(this.yamlParser.getPrefixes());
+        if(this.yamlParser.getOptionalPrefixes().isPresent()){
+            this.prefixManager.register(this.yamlParser.getOptionalPrefixes().get());
+        }
     }
 
     public void registerPrefix(String prefix, String uri){
@@ -72,7 +76,7 @@ public class WorkbookMapping {
     }
 
     public String getBaseIRI(){
-        return this.yamlParser.getBase();
+        return this.yamlParser.getOptionalBase().orElse(null);
     }
 
 

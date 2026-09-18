@@ -150,7 +150,6 @@ public class RdfizableSheet {
 				}
 			}
 		}
-
 		return headerRowIndex;
 	}
 

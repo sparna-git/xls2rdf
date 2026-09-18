@@ -8,6 +8,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class YamlParser {
 
@@ -18,20 +19,28 @@ public class YamlParser {
 
     public YamlParser(){}
 
-    public List<YamlSheet> getSheets() {
-        return this.sheets;
+    public Optional<List<YamlSheet>> getOptionalSheets() {
+        return Optional.ofNullable(sheets);
     }
 
-    public Map<String, String> getPrefixes() {
-        return prefixes;
+    public Optional<Map<String, String>> getOptionalPrefixes() {
+        return Optional.of(prefixes);
     }
 
-    public String getBase(){
-        return this.base;
+    public Optional<String> getOptionalBase(){
+        return Optional.ofNullable(base);
+    }
+
+    public void setPrefixes(Map<String, String> prefixes) {
+        this.prefixes = prefixes;
     }
 
     public void setBase(String base) {
         this.base = base;
+    }
+
+    public void setSheets(List<YamlSheet> sheets) {
+        this.sheets = sheets;
     }
 
     public static YamlParser getInstance(InputStream in){
@@ -40,6 +49,7 @@ public class YamlParser {
         TypeDescription description = new TypeDescription(YamlParser.class);// <-------- Ici on indique une description pour YamlParser.class
         description.addPropertyParameters("prefixes", String.class, String.class);//<------ Pour la propriété prefixes elle est de type Map<String, String>, sinon YamlSnake ne sait pas
         description.addPropertyParameters("sheets", YamlParser.YamlSheet.class);//<---------Pour la propriété sheets elle est de type List<YamlSheet>
+        description.addPropertyParameters("base", String.class);
         yaml.addTypeDescription(description);//<-------- On ajoute la description à yaml
         return yaml.load(in); //<------ On charge la configuration dans Yaml et cela nous retourne une nouvelle instance de YamlParser avec les propriétés chargées
     }

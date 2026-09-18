@@ -88,10 +88,10 @@ public class Xls2RdfConvertController {
 			@RequestParam(value="ignorePostProc", required=false) boolean ignorePostProc,
 			@RequestParam(value="gristDocumentId", required = false) String gristDocumentId,
 			@RequestParam(value="gristTokenApi", required = false) String gristTokenApi,
-			@RequestParam(value="gristMapping", required = false) MultipartFile gristMapping,
+			@RequestParam(value="mapping", required = false) MultipartFile mapping,
 			// the request
 			HttpServletRequest request
-	) {
+	) throws IOException {
 
 		/*
 		 **************
@@ -105,7 +105,10 @@ public class Xls2RdfConvertController {
 		RDFFormat theFormat = RDFWriterRegistry.getInstance().getFileFormatForMIMEType(format).orElse(RDFFormat.TURTLE);
 		//Might be unused if client does not use grist api
 		GristWorkbook gristWorkbook = null;
-		WorkbookMapping mapping = null;
+		WorkbookMapping workBookMapping = null;
+		if(!mapping.isEmpty()){
+			 workBookMapping = new WorkbookMapping(YamlParser.getInstance(mapping.getInputStream()));//<--------- On récupère le fichier de Mapping et on on crée une instance de YamlParser à passer au WorkbookMapping;
+		}
 		//The spring's resource to handle the response through EntityResponse<ByteArrayOutputStream>
 		ByteArrayOutputStream responseOutputStream = new ByteArrayOutputStream();
 		// le content type est toujours positionné à "application/zip" si on nous a demandé un zip, sinon il dépend du format de retour demandé
@@ -166,9 +169,8 @@ public class Xls2RdfConvertController {
 			if(source == SOURCE_TYPE.GRIST){
 				log.debug("*Conversion à partir d'une l'API Grist : " + "docID = " + gristDocumentId);
 				//On vérifie si un des trois champs vaut null, si c'est le cas -> exception rendu à l'utilisateur pour indiquer qu'il y a un null
-				if(gristMapping.isEmpty() || gristDocumentId.isBlank() || gristTokenApi.isBlank()) ExceptionManager.throwException(Xls2RdfConvertException.class, GRIST_NULL.getMessage());
+				if(gristDocumentId.isBlank() || gristTokenApi.isBlank()) ExceptionManager.throwException(Xls2RdfConvertException.class, GRIST_NULL.getMessage());
 				gristWorkbook = GristWorkbookFactory.open(gristDocumentId, gristTokenApi, true);
-				mapping = new WorkbookMapping(YamlParser.getInstance(gristMapping.getInputStream()));//<--------- On récupère le fichier de Mapping et on on crée une instance de YamlParser à passer au WorkbookMapping
 				//On crée le fileName
 				fileName = StringUtils.formatGristName(gristDocumentId, extension);
 			}
@@ -202,7 +204,7 @@ public class Xls2RdfConvertController {
 					false,
 					useZip,
 					gristWorkbook, //<--------- Si non null SOURCE=GRIST
-					mapping //<----------- Peut être null
+					workBookMapping //<----------- Peut être null
 			);
 
 			cvIds.stream().map(cv -> "Converted Graph: " + cv).forEach(log::info);

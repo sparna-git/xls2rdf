@@ -210,19 +210,10 @@
                               id="gristDocumentId"
                               onchange="enabledInput('grist')"
                               placeholder="Grist Document ID"/>
-
-                              <input
-                              class="form-control"
-                              type="file"
-                              name="gristMapping"
-                              id="gristMapping"
-                              onchange="enabledInput('grist')"
-                              />
-
             <!--END GRIST API-->
           </div>
+                 </div>
           <!--END PARTIES RADIO BUTTON + LABEL + INPUT-->
-        
         </fieldset>
         <!--END FIELSET = SOURCE-->
         <!--FIELDSET=LANGUAGE-->
@@ -231,10 +222,29 @@
               <i class="fa-solid fa-screwdriver-wrench" style="color: #df6919; font-size: 25px;"></i> 
               &nbsp;<fmt:message key="convert.form.advanced.legend"/>
             </h3>
+            <div class="row">
+            <!--MAPPING FILE-->
+            <div class="row mb-4">
+                                <label class="col-6 form-label" for="output">
+                                    <fmt:message key="mapping"/>
+                                  <div class="fst-italic text-break form-text">
+                                    <fmt:message key="mapping.definition"/>
+                                  </div>
+                                </label>
+
+                                <div class="col-4">
+                                  	   <input
+                                       class="form-control"
+                                       type="file"
+                                       name="mapping"
+                                       id="mapping"
+                                </div>
+                              </div>
+            </div>
           <div class="row">
             <label class="col-6" for="choice_Language">
             <fmt:message key="convert.form.language.legend"/>
-          </label>
+             </label>
             <div class="col-4 mb-4">
               <input class="form-control" list="choice_Language" name="language" placeholder="Type to search..." id="input_Language">
               <datalist id="choice_Language" name="language">
