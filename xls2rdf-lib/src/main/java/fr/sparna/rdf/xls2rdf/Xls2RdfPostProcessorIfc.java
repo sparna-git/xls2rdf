@@ -6,6 +6,8 @@ import java.util.Map;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.repository.Repository;
 
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
+
 public interface Xls2RdfPostProcessorIfc {
 	
 	/**

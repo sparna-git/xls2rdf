@@ -50,7 +50,7 @@ public class Xls2RdfConverterTestExecution implements Test {
 		this.outputRepository = new SailRepository(new MemoryStore());
 		this.outputRepository.init();
 		
-		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository), "fr");
+		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository));
 		this.converter.setSkipHidden(true);
 		
 		// init post processors

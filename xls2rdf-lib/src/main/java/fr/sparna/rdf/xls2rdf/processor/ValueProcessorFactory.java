@@ -3,12 +3,15 @@ package fr.sparna.rdf.xls2rdf.processor;
 
 import fr.sparna.rdf.xls2rdf.*;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
 import fr.sparna.rdf.xls2rdf.processor.manchester.ManchesterClassExpressionParserProcessor;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
 import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -45,18 +48,27 @@ public final class ValueProcessorFactory {
 		this.messageListener = messageListener;
 	}
 
+	public static Pair<List<Statement>, List<Statement>> toPair(List<Statement> left) {
+		return toPair(left, new ArrayList<Statement>());
+	}
+
+	public static Pair<List<Statement>, List<Statement>> toPair(List<Statement> left, List<Statement> right) {
+		return new ImmutablePair<List<Statement>,List<Statement>>(left, right);
+	}
+
 	public ValueProcessorIfc split(ValueProcessorIfc delegate, String separator) {
-		return (model, subject, value, cell, language) -> {
+		return (model, subject, value, cell) -> {
 			
 			if (StringUtils.isBlank(value)) {
 				return null;
 			}
 
-			List<Statement> result = new ArrayList<>();
+			Pair<List<Statement>, List<Statement>> result = new ImmutablePair<List<Statement>,List<Statement>>(new ArrayList<Statement>(), new ArrayList<Statement>());
 			Arrays.stream(StringUtils.split(value, separator)).forEach(aValue -> {
-				List<Statement> statements = delegate.processValue(model, subject, normalizeSpace(aValue), cell, language);
+				Pair<List<Statement>, List<Statement>> statements = delegate.processValue(model, subject, normalizeSpace(aValue), cell);
 				if(statements != null) {
-					result.addAll(statements);
+					if(statements.getLeft() != null) result.getLeft().addAll(statements.getLeft());
+					if(statements.getRight() != null) result.getRight().addAll(statements.getRight());
 				}
 			});
 			return result;
@@ -64,7 +76,7 @@ public final class ValueProcessorFactory {
 	}
 	
 	public ValueProcessorIfc resource(IRI property, PrefixManager prefixManager) {
-		return (model, subject, value, cell, language) -> {
+		return (model, subject, value, cell) -> {
 			
 			if (StringUtils.isBlank(value)) {
 				return null;
@@ -79,12 +91,12 @@ public final class ValueProcessorFactory {
 			
 			Statement s = SimpleValueFactory.getInstance().createStatement(subject, property, iri);
 			model.add(s);
-			return Collections.singletonList(s);
+			return toPair(Collections.singletonList(s));
 		};
 	}
 	
 	public ValueProcessorIfc lookup(MappingRule mappingRule, Sheet sheet, int lookupColumn, int uriColumn, PrefixManager prefixManager) {
-		return (model, subject, value, cell, language) -> {
+		return (model, subject, value, cell) -> {
 			String lookupValue = value;
 			
 			if(lookupValue.equals("")) {
@@ -95,7 +107,7 @@ public final class ValueProcessorFactory {
 			
 			if(foundRow != null) {                
 				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
-				return g.processValue(model, subject, foundRow.getColumnValue(uriColumn), cell, language);                
+				return g.processValue(model, subject, foundRow.getColumnValue(uriColumn), cell);                
 			} else {
 				// throw Exception if a reference was not found
 				log.error((cell != null ? cell.getCellExcelReference() : "?")+" Unable to find value '"+lookupValue+"' in column "+ExcelRefs.colIndexToLetters(lookupColumn)+", while trying to generate property "+mappingRule.getProperty());
@@ -107,7 +119,7 @@ public final class ValueProcessorFactory {
 	}
 	
 	public ValueProcessorIfc reconcile(MappingRule mappingRule, PrefixManager prefixManager, ReconciliableValueSetIfc reconciledValues) {
-		return (model, subject, value, cell, language) -> {
+		return (model, subject, value, cell) -> {
 			String lookupValue = normalizeSpace(value);
 			
 			if(lookupValue.equals("")) {
@@ -117,9 +129,9 @@ public final class ValueProcessorFactory {
 			IRI result = reconciledValues.getReconciledValue(value);
 			if(result != null) {
 				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
-				return g.processValue(model, subject, result.toString(), cell, language);
+				return g.processValue(model, subject, result.toString(), cell);
 			} else {
-				log.error("Unable to find value '"+lookupValue+"'@"+language+" in reconciled values");
+				log.error("Unable to find value '"+lookupValue+" in reconciled values");
 			}
 			
 //			if(filteredStatements.size() == 1) {
@@ -166,8 +178,9 @@ public final class ValueProcessorFactory {
 
 	@Deprecated
 	public ValueProcessorIfc reconcileLocal(MappingRule mappingRule, PrefixManager prefixManager, IRI reconcileOn, Repository supportRepository) {
-		return (model, subject, value, cell, language) -> {
+		return (model, subject, value, cell) -> {
 			String lookupValue = normalizeSpace(value);
+			String language = mappingRule.getLanguage().orElse(null);
 			
 			if(lookupValue.equals("")) {
 				return null;
@@ -194,7 +207,7 @@ public final class ValueProcessorFactory {
 				
 				if(filteredStatements.size() == 1) {
 					ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
-					return g.processValue(model, subject, filteredStatements.get(0).getSubject().toString(), cell, language);		
+					return g.processValue(model, subject, filteredStatements.get(0).getSubject().toString(), cell);		
 				} else if(filteredStatements.size() > 1) {
 					log.error("Found multiple values for '"+lookupValue+"' in type/scheme '"+reconcileOn+"' : "+filteredStatements.stream().map(s -> s.getSubject().toString()).collect(Collectors.joining(", ")));
 				} else {
@@ -207,65 +220,65 @@ public final class ValueProcessorFactory {
 	}
 	
 	public ValueProcessorIfc ignoreIfParenthesis(ValueProcessorIfc delegate) {
-		return (model, subject, value, cell, language) -> {
+		return (model, subject, value, cell) -> {
 			
 			String theValue = normalizeSpace(value);
 			if (theValue.startsWith("(") && theValue.endsWith(")")) {
 				return null;
 			} else {
-				return delegate.processValue(model, subject, theValue, cell, language);
+				return delegate.processValue(model, subject, theValue, cell);
 			}
 
 		};
 	}
 
 	public ValueProcessorIfc copyTo(IRI copyTo, ValueProcessorIfc delegate) {
-		return (model, subject, value, cell, language) -> {
-			List<Statement> statements = delegate.processValue(model, subject, value, cell, language);
-			List<Statement> newStatements = new ArrayList<>();
+		return (model, subject, value, cell) -> {
+			Pair<List<Statement>, List<Statement>> statements = delegate.processValue(model, subject, value, cell);
+			List<Statement> newStatements = new ArrayList<Statement>();
 			if(statements != null) {
-				statements.stream().forEach(v -> {
+				statements.getLeft().stream().forEach(v -> {
 					newStatements.add(SimpleValueFactory.getInstance().createStatement(subject, copyTo, v.getObject()));
 				});
 				model.addAll(newStatements);		
 			}
-			newStatements.addAll(statements);
-			return newStatements;
+			newStatements.addAll(statements.getLeft());
+			return toPair(newStatements);
 		};
 	}
 
 	public ValueProcessorIfc asList(MappingRule mappingRule, ValueProcessorIfc delegate) {
-		return (model, subject, value, cell, language) -> {
-			List<Statement> originalStatements = delegate.processValue(model, subject, value, cell, language);
+		return (model, subject, value, cell) -> {
+			Pair<List<Statement>, List<Statement>> originalStatements = delegate.processValue(model, subject, value, cell);
 
 			Model toAdd = new LinkedHashModel();
 
 			// get all values
-			Set<Value> values = originalStatements.stream().map(s -> s.getObject()).collect(Collectors.toSet());
+			Set<Value> values = originalStatements.getLeft().stream().map(s -> s.getObject()).collect(Collectors.toSet());
 
 			// aggregate in list
 			Resource listHead = Values.bnode();
 			RDFCollections.asRDF(values,listHead,toAdd);
 			// remove all original triples
-			model.removeAll(originalStatements);
+			model.removeAll(originalStatements.getLeft());
 			// add instead triple to the list
 			toAdd.add(subject, mappingRule.getProperty(), listHead);
 
 			model.addAll(toAdd);
 
-			return toAdd.stream().collect(Collectors.toList());
+			return toPair(toAdd.stream().collect(Collectors.toList()), originalStatements.getLeft());
 		};
 	}
 
 	public ValueProcessorIfc wrapWithShaclLogicalOperator(MappingRule mappingRule, IRI logicalOperator, ValueProcessorIfc delegate) {
-		return (model, subject, value, cell, language) -> {
-			List<Statement> originalStatements = delegate.processValue(model, subject, value, cell, language);
+		return (model, subject, value, cell) -> {
+			Pair<List<Statement>, List<Statement>> originalStatements = delegate.processValue(model, subject, value, cell);
 
 			Model toRemove = new LinkedHashModel();
 			Model toAdd = new LinkedHashModel();
 
 			// get all values
-			Set<Value> values = originalStatements.stream().map(s -> s.getObject()).collect(Collectors.toSet());
+			Set<Value> values = originalStatements.getLeft().stream().map(s -> s.getObject()).collect(Collectors.toSet());
 
 			// join with the boolean operator only if there is more than 1 value
 			if(values.size() > 1) {
@@ -291,14 +304,14 @@ public final class ValueProcessorFactory {
 				toAdd.add(subject, logicalOperator, listHead);
 
 				// remove all original triples
-				toRemove.addAll(originalStatements);
+				toRemove.addAll(originalStatements.getLeft());
 			}
 
 			// remove everything that needs to be removed
 			model.removeAll(toRemove);
 			model.addAll(toAdd);
 
-			return toAdd.stream().collect(Collectors.toList());
+			return toPair(toAdd.stream().collect(Collectors.toList()), toRemove.stream().collect(Collectors.toList()));
 		};
 	}
 	
@@ -308,9 +321,10 @@ public final class ValueProcessorFactory {
 		return g;
 	}
 
-	public ValueProcessorIfc turtleParsing(IRI property, PrefixManager prefixManager) {
+	public ValueProcessorIfc turtleParsing(MappingRule mappingRule, IRI property, PrefixManager prefixManager) {
+		String language = mappingRule.getLanguage().orElse(null);
 		String BLANK_NODE_TEMP_IRI = "http://blanknode.com";
-		return (model, subject, value, cell, language) -> {
+		return (model, subject, value, cell) -> {
 			// create a small piece of Turtle by concatenating...
 			StringBuffer turtle = new StringBuffer();
 			// ... the prefixes				
@@ -366,34 +380,34 @@ public final class ValueProcessorFactory {
 
 					// then add all the resulting statements to the final Model
 					model.addAll(processedStatements);
-					return processedStatements;
+					return toPair(processedStatements);
 				} else {
 					List<Statement> statements = new ArrayList(collector.getStatements());
 					model.addAll(statements);
-					return statements;
+					return toPair(statements);
 				}
 				
 			} catch (Exception e) {
 				// if anything goes wrong, default to creating a literal
 				log.error("Error in parsing Turtle :\n"+turtle);
 				e.printStackTrace();
-				return langOrPlainLiteral(property).processValue(model, subject, value, cell, language);
+				return langOrPlainLiteral(property, language).processValue(model, subject, value, cell);
 			}
 			
 		};
 	}
 
 	public ValueProcessorIfc plainLiteral(IRI property) {
-		return (model, subject, value, cell, language) -> {
+		return (model, subject, value, cell) -> {
 			Literal literal = SimpleValueFactory.getInstance().createLiteral(value);
 			Statement s = SimpleValueFactory.getInstance().createStatement(subject, property, literal);
 			model.add(s);
-			return Collections.singletonList(s);
+			return toPair(Collections.singletonList(s));
 		};
 	}
 	
-	public ValueProcessorIfc langOrPlainLiteral(IRI property) {
-		return (model, subject, value, cell, language) -> {
+	public ValueProcessorIfc langOrPlainLiteral(IRI property, String language) {
+		return (model, subject, value, cell) -> {
 			Literal literal;
 			if(language != null) {
 				literal = SimpleValueFactory.getInstance().createLiteral(value, language);
@@ -402,12 +416,12 @@ public final class ValueProcessorFactory {
 			}
 			Statement s = SimpleValueFactory.getInstance().createStatement(subject, property, literal);
 			model.add(s);
-			return Collections.singletonList(s);
+			return toPair(Collections.singletonList(s));
 		};
 	}
 
 	public ValueProcessorIfc skosXlLabel(IRI xlLabelProperty, PrefixManager prefixManager) {
-		return (model, subject, value, cell, language) -> {
+		return (model, subject, value, cell) -> {
 			// String labelUri = ConceptSchemeFromExcel.fixUri(value);
 			String labelUri = prefixManager.isValidURI(value, true);
 			IRI labelResource = SimpleValueFactory.getInstance().createIRI(labelUri);
@@ -417,7 +431,7 @@ public final class ValueProcessorFactory {
 			statements.add(SimpleValueFactory.getInstance().createStatement(subject, xlLabelProperty, labelResource));
 
 			model.addAll(statements);
-			return statements;
+			return toPair(statements);
 		};
 	}
 

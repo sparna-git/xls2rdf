@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRuleParser;
 import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
 import junit.framework.Assert;
 
@@ -41,40 +42,34 @@ public class ValueProcessorTest {
 	@Test
 	public void plainLiteralTest() {
 		ValueProcessorIfc vg = factory.plainLiteral(SKOS.NOTATION);		
-		vg.processValue(model, subject, "1", null, null);		
+		vg.processValue(model, subject, "1", null);		
 		Assert.assertTrue(model.contains(subject, SKOS.NOTATION, vf.createLiteral("1")));
 	}
 	
 	@Test
 	public void langOrPlainLiteralTest() {
-		ValueProcessorIfc vg = factory.langOrPlainLiteral(SKOS.PREF_LABEL);		
-		vg.processValue(model, subject, "sparna", null, null);
-		vg.processValue(model, subject, "SPARNA", null, "fr");
-		Assert.assertTrue(model.contains(subject, SKOS.PREF_LABEL, vf.createLiteral("sparna")));
+		ValueProcessorIfc vg = factory.langOrPlainLiteral(SKOS.PREF_LABEL, "fr");		
+		vg.processValue(model, subject, "sparna", null);
+		vg.processValue(model, subject, "SPARNA", null);
+		Assert.assertTrue(model.contains(subject, SKOS.PREF_LABEL, vf.createLiteral("sparna", "fr")));
 		Assert.assertTrue(model.contains(subject, SKOS.PREF_LABEL, vf.createLiteral("SPARNA", "fr")));
 	}
 	
 	@Test
 	public void resourceOrLiteralTest() {
 		ValueProcessorIfc vg = factory.resourceOrLiteral(this.parser.parse("skos:prefLabel^^xsd:string"), prefixManager);		
-		vg.processValue(model, subject, "sparna", null, "fr");
+		vg.processValue(model, subject, "sparna", null);
 		Assert.assertTrue(model.contains(subject, SKOS.PREF_LABEL, vf.createLiteral("sparna", XMLSchema.STRING)));
 	}
-	
-	@Test
-	public void overwriteLangTest() {
-		ValueProcessorIfc vg = factory.resourceOrLiteral(this.parser.parse("skos:prefLabel@en"), prefixManager);		
-		vg.processValue(model, subject, "sparna", null, "fr");
-		Assert.assertTrue(model.contains(subject, SKOS.PREF_LABEL, vf.createLiteral("sparna", "fr")));
-	}
+
 	
 	@Test
 	public void splitLangLiteralTest() {
 		ValueProcessorIfc vg = factory.split(
-				factory.resourceOrLiteral(this.parser.parse("skos:altLabel"), prefixManager),
+				factory.resourceOrLiteral(this.parser.parse("skos:altLabel@fr"), prefixManager),
 				","
 		);
-		vg.processValue(model, subject, "sparna, SPARNA", null, "fr");
+		vg.processValue(model, subject, "sparna, SPARNA", null);
 		Assert.assertTrue(model.contains(subject, SKOS.ALT_LABEL, vf.createLiteral("sparna", "fr")));
 		Assert.assertTrue(model.contains(subject, SKOS.ALT_LABEL, vf.createLiteral("SPARNA", "fr")));
 	}
@@ -85,7 +80,7 @@ public class ValueProcessorTest {
 				factory.resourceOrLiteral(this.parser.parse("skos:altLabel^^xsd:string"), prefixManager),
 				","
 		);
-		vg.processValue(model, subject, "sparna, SPARNA", null, "fr");
+		vg.processValue(model, subject, "sparna, SPARNA", null);
 		Assert.assertTrue(model.contains(subject, SKOS.ALT_LABEL, vf.createLiteral("sparna", XMLSchema.STRING)));
 		Assert.assertTrue(model.contains(subject, SKOS.ALT_LABEL, vf.createLiteral("SPARNA", XMLSchema.STRING)));
 	}
@@ -96,7 +91,7 @@ public class ValueProcessorTest {
 				factory.resourceOrLiteral(this.parser.parse("skos:exactMatch"), prefixManager),
 				","
 		);
-		vg.processValue(model, subject, "http://blog.sparna.fr, http://SPARNA.fr", null, "fr");
+		vg.processValue(model, subject, "http://blog.sparna.fr, http://SPARNA.fr", null);
 		Assert.assertTrue(model.contains(subject, SKOS.EXACT_MATCH, vf.createIRI("http://blog.sparna.fr")));
 		Assert.assertTrue(model.contains(subject, SKOS.EXACT_MATCH, vf.createIRI("http://SPARNA.fr")));
 	}
@@ -107,7 +102,7 @@ public class ValueProcessorTest {
 				factory.resourceOrLiteral(this.parser.parse("skos:exactMatch"), prefixManager),
 				","
 		);
-		vg.processValue(model, subject, "skos:notation, skos:prefLabel", null, "fr");
+		vg.processValue(model, subject, "skos:notation, skos:prefLabel", null);
 		Assert.assertTrue(model.contains(subject, SKOS.EXACT_MATCH, SKOS.PREF_LABEL));
 		Assert.assertTrue(model.contains(subject, SKOS.EXACT_MATCH, SKOS.NOTATION));
 	}

@@ -10,8 +10,8 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
-import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
 
 /**
  * Applies a ModelPostProcessorIfc on each named graph of a Repository

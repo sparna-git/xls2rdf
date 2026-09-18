@@ -17,6 +17,10 @@ import java.util.List;
 public class Xls2RdfConverterTest {
 
     public static TestSuite suite() {
+
+        // Logging configuration for tests:
+        // - logback-test.xml in src/test/resources (preferred if logback is used)
+
         TestSuite suite = new TestSuite();
         //TEST FOR EXCEL
         File xlsDir = new File("src/test/resources/excel/suite");
@@ -48,6 +52,15 @@ public class Xls2RdfConverterTest {
             }
         }
         */
+
+        //TEST FOR MAPPINGS
+        File mappingDir = new File("src/test/resources/mapping/suite");
+        List<File> sortedMapping = Arrays.asList(mappingDir.listFiles());
+        for (File aDir : sortedMapping) {
+            if(aDir.isDirectory()) {
+                suite.addTest(new Xls2RdfConverterMappingTestExecution(aDir));
+            }
+        }
 
         return suite;
     }

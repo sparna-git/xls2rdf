@@ -1,11 +1,12 @@
 package fr.sparna.rdf.xls2rdf.processor;
 
-import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -37,7 +38,7 @@ public class SparqlPathParserProcessor implements ValueProcessorIfc {
 	}
 
 	@Override
-	public List<Statement> processValue(Model model, Resource subject, String value, Cell cell, String language) {
+	public Pair<List<Statement>, List<Statement>> processValue(Model model, Resource subject, String value, Cell cell) {
 		if (StringUtils.isBlank(ValueProcessorFactory.normalizeSpace(value))) {
 			return null;
 		}
@@ -47,11 +48,10 @@ public class SparqlPathParserProcessor implements ValueProcessorIfc {
 		try {
 			SparqlPropertyPathToShaclPropertyPathConverter converter = new SparqlPropertyPathToShaclPropertyPathConverter(this.prefixManager);
 			String shaclPath = converter.convertToShaclPropertyPath(ValueProcessorFactory.normalizeSpace(value));
-			return this.delegateProcessor.processValue(model, subject, shaclPath, cell, language);
+			return this.delegateProcessor.processValue(model, subject, shaclPath, cell);
 		} catch (TokenMgrError | ParseException e) {
 			// will default to a normal parsing
-			this.delegateProcessor.processValue(model, subject, value, cell, language);
-			return null;
+			return this.delegateProcessor.processValue(model, subject, value, cell);
 		}
 	}
 

@@ -1,8 +1,8 @@
 package fr.sparna.rdf.xls2rdf.web.service;
 
-import fr.sparna.rdf.xls2rdf.WorkbookMapping;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverter;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverterBuilder;
+import fr.sparna.rdf.xls2rdf.mapping.WorkbookMapping;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.slf4j.Logger;
@@ -23,7 +23,6 @@ public class Xls2RdfConverterService {
 
 	public List<String> convert(InputStream input, //<-------- Peut etre null
 	                            OutputStream output,
-	                            String lang,
 	                            RDFFormat format,
 	                            boolean skosxl,
 	                            boolean broaderTransitive,
@@ -41,7 +40,6 @@ public class Xls2RdfConverterService {
 		 * **************************
 		 */
 		Xls2RdfConverterBuilder builder = Xls2RdfConverterBuilder.getInstance()
-				.withLanguage(lang)
 				.withGenerateXl(skosxl)
 				.withGenerateXlDefinitions(skosxl)
 				.withApplyPostProcessing(!ignorePostProc)

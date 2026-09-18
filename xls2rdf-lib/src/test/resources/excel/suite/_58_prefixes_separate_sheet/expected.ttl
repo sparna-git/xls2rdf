@@ -11,5 +11,5 @@
 days:monday a skos:Concept;
   euvoc:status concept-status:CURRENT;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
-  skos:prefLabel "Monday"@fr;
+  skos:prefLabel "Monday";
   skos:topConceptOf <http://data.sparna.fr/vocabularies/days> .

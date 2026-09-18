@@ -6,7 +6,8 @@ import java.util.Map;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import fr.sparna.rdf.xls2rdf.MappingRule;
+
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
 
 
 public class RowHeaderLinkPostProcessor implements ModelPostProcessorIfc {

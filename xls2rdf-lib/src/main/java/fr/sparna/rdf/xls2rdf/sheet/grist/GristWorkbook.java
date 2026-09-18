@@ -60,6 +60,11 @@ public class GristWorkbook implements Workbook {
         };
     }
 
+    @Override
+    public int size() {
+        return gristTables.getTablesSize();
+    }
+
     public Client getClient(){
         return this.client;
     }

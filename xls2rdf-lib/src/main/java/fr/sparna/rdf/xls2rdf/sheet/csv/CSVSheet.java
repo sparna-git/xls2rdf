@@ -14,17 +14,19 @@ public class CSVSheet implements Sheet {
 
     private final CSVWorkbook parentWorkbook;
     private final CSVDelegate delegate;
+    private final String sheetName;
 
 
-    public CSVSheet(CSVDelegate delegate, CSVWorkbook parentWorkbook){
+    public CSVSheet(CSVDelegate delegate, CSVWorkbook parentWorkbook, String sheetName){
         this.delegate = delegate;
         this.parentWorkbook = parentWorkbook;
+        this.sheetName = sheetName;
     }
 
 
     @Override
     public String getSheetName() {
-        return "Csv Sheet";
+        return this.sheetName;
     }
 
     @Override

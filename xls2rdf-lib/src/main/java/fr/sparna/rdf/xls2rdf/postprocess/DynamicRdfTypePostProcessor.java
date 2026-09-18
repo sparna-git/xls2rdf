@@ -9,7 +9,8 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import fr.sparna.rdf.xls2rdf.MappingRule;
+
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
 
 
 public class DynamicRdfTypePostProcessor implements ModelPostProcessorIfc {

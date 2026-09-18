@@ -1,5 +1,6 @@
 package fr.sparna.rdf.xls2rdf;
 
+import fr.sparna.rdf.xls2rdf.mapping.WorkbookMapping;
 import fr.sparna.rdf.xls2rdf.postprocess.ModelDelegationPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.OWLPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.QBPostProcessor;
@@ -38,8 +39,6 @@ public class Xls2RdfConverterBuilder {
     private RepositoryWriterIfc modelWriter;
 
     private RDFFormat format;
-
-    private String language;
 
     private WorkbookMapping workbookMapping;
 
@@ -151,16 +150,11 @@ public class Xls2RdfConverterBuilder {
         return this;
     }
 
-    public Xls2RdfConverterBuilder withLanguage(String language){
-         this.language = language;
-         return this;
-    }
-
     /*
     BUILD METHOD
      */
     public Xls2RdfConverter buildConverter(){
-        Xls2RdfConverter converter = new Xls2RdfConverter(this.modelWriter, this.language);
+        Xls2RdfConverter converter = new Xls2RdfConverter(this.modelWriter);
         if(this.isApplyPostProcessing()) {
             List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();
             // add QB post processor
@@ -205,10 +199,6 @@ public class Xls2RdfConverterBuilder {
 
     public RDFFormat getFormat() {
         return this.format;
-    }
-
-    public String getLanguage() {
-        return this.language;
     }
 
     public boolean isApplyPostProcessing() {

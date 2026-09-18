@@ -24,7 +24,8 @@ public class CSVWorkbookFactoryTest {
             throw new RuntimeException(e);
         }
     }
-    Reader csvAsReader;
+
+    FileInputStream csvInput;
     File csvAsFile;
     CSVFormat csvFormat;
 
@@ -34,8 +35,8 @@ public class CSVWorkbookFactoryTest {
         this.csvAsFile = new File(PATH_NAME);
         Assert.assertNotNull("csvAsFile document is null.", csvAsFile);
 
-        this.csvAsReader = new InputStreamReader(new FileInputStream(csvAsFile));
-        Assert.assertNotNull("csvAsInputStream document is null.", csvAsReader);
+        this.csvInput = new FileInputStream(csvAsFile);
+        Assert.assertNotNull("csvInput is null.", csvInput);
 
         this.csvFormat = CSVFormat.DEFAULT;
         Assert.assertNotNull("csvFormat is null.", csvFormat);
@@ -43,7 +44,7 @@ public class CSVWorkbookFactoryTest {
 
     @Test
     public void csvFactoryIn() throws Exception {
-        Workbook doc = CSVWorkbookFactory.open(this.csvFormat, this.csvAsReader);
+        Workbook doc = CSVWorkbookFactory.open(this.csvFormat, this.csvInput, this.csvAsFile.getName());
         Assert.assertNotNull("csvFactoryIn doc is null.", doc);
     }
 

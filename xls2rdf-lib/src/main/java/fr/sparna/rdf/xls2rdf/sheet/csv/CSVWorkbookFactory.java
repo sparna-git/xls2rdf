@@ -5,7 +5,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Reader;
 
 public class CSVWorkbookFactory {
 
@@ -13,8 +12,8 @@ public class CSVWorkbookFactory {
 
     private CSVWorkbookFactory(){}
 
-    public static Workbook open(CSVFormat format, Reader reader) throws Exception {
-        return new CSVWorkbook(new CSVDelegate(format, reader));
+    public static Workbook open(CSVFormat format, java.io.InputStream input, String filename) throws Exception {
+        return new CSVWorkbook(new CSVDelegate(format, input), filename);
     }
 
 }

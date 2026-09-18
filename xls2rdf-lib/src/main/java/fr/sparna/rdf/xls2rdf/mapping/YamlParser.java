@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.mapping;
 
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;

@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -33,20 +32,19 @@ public class CSVWorkbookTest {
 
     @Before
     public void initProperties() throws Exception {
-        this.cud = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new InputStreamReader(new FileInputStream(Paths.get(CSV_FILE_URI).toFile())));
+        this.cud = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new FileInputStream(Paths.get(CSV_FILE_URI).toFile()), CSV_FILE_URI.getPath());
         Assert.assertNotNull("class under test is null.", cud);
     }
 
     @Test
     public void try_get_sheet_by_name_is_not_null(){
-            Sheet sheet = this.cud.getSheet("ANY NAME");
-            Assert.assertNotNull("sheet is null.", sheet);
-
+        Sheet sheet = this.cud.getSheet(CSV_FILE_URI.getPath());
+        Assert.assertNotNull("sheet is null.", sheet);
     }
 
     @Test
     public void try_get_sheet_by_id_is_not_null(){
-            Sheet sheet = this.cud.getSheet(57);
+            Sheet sheet = this.cud.getSheet(0);
             Assert.assertNotNull("sheet is null.", sheet);
 
     }

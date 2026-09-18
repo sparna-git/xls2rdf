@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.mapping;
 
 import java.util.HashMap;
 import java.util.Map;

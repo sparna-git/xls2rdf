@@ -33,7 +33,6 @@ public class Xls2RdfRestService {
     }
 
     public ResponseEntity<ByteArrayResource> runRestConversion(
-            String language,
             Object clientObj,
             String format,
             boolean useSkosXl,
@@ -69,7 +68,6 @@ public class Xls2RdfRestService {
             List<String> cvIds = this.converterService.convert(
                     in,
                     responseOutputStream,
-                    language,
                     theFormat,
                     useSkosXl,
                     broaderTransitive,

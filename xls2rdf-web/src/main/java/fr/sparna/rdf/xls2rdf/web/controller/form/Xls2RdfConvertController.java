@@ -1,11 +1,8 @@
 package fr.sparna.rdf.xls2rdf.web.controller.form;
 
-/** SUPPRESION A VERIFIER 
-import fr.sparna.rdf.skosplay.log.LogEntry;
-*/
-
-import fr.sparna.rdf.xls2rdf.WorkbookMapping;
-import fr.sparna.rdf.xls2rdf.YamlParser;
+import fr.sparna.rdf.xls2rdf.mapping.WorkbookMapping;
+import fr.sparna.rdf.xls2rdf.mapping.WorkbookMappingFactory;
+import fr.sparna.rdf.xls2rdf.mapping.YamlParser;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.grist.GristWorkbook;
 import fr.sparna.rdf.xls2rdf.sheet.grist.GristWorkbookFactory;
@@ -78,7 +75,6 @@ public class Xls2RdfConvertController {
 		public ResponseEntity<ByteArrayResource> convertRDF(
 			@RequestParam(value="source", required=true) String sourceString,
 			@RequestParam(value="file", required=false) MultipartFile file,
-			@RequestParam(value="language", required=false) String language,
 			@RequestParam(value="url", required=false) String url,
 			@RequestParam(value="output", required=false) String format,
 			@RequestParam(value="example", required=false) String example,
@@ -98,7 +94,7 @@ public class Xls2RdfConvertController {
 		 * PROPERTIES *
 		 * ************
 		 */
-		log.debug("convert(source="+sourceString+",file="+file+"format="+format+",usexl="+useSkosXl+",broaderTransitive="+broaderTransitive+",useZip="+useZip+",language="+language+",url="+url+",ex="+example+")");
+		log.debug("convert(source="+sourceString+",file="+file+"format="+format+",usexl="+useSkosXl+",broaderTransitive="+broaderTransitive+",useZip="+useZip+",url="+url+",ex="+example+")");
 		//source, it can be: file, example, url or google
 		SOURCE_TYPE source = SOURCE_TYPE.valueOf(sourceString.toUpperCase());
 		// format
@@ -193,7 +189,6 @@ public class Xls2RdfConvertController {
 			List<String> cvIds = this.converterService.convert(
 					in,//<-------------- Si non null Source=EXAMPLE ou FILE ou URL
 					responseOutputStream, //<------ responseOutputStream qui encapsule la conversion
-					language.isEmpty() ? null : language,
 					theFormat,
 					useSkosXl,
 					broaderTransitive,

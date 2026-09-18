@@ -13,7 +13,7 @@
   <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED>
   	a dcat:Dataset;
     a qb:DataSet;
-    dct:title "statistique du nombre de locuteurs de la langue francaise - données 2019"@fr;
+    dct:title "statistique du nombre de locuteurs de la langue francaise - données 2019";
     dct:description "statistique du nombre de locuteurs de la langue francaise - données 2019 - source OIF"@fr;
     dct:created "2018-01-01"^^xsd:date;
     dct:modified "2019-05-01"^^xsd:date;
@@ -28,19 +28,19 @@
   
   <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/composant/8>
     a qb:ComponentSpecification ;
-    rdfs:label "nombre de personne ayant appris la langue à 5 ans"@fr;
+    rdfs:label "nombre de personne ayant appris la langue à 5 ans";
     qb:measure odl:nombrePersonne .
   
   <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/composant/9>
     a qb:ComponentSpecification ;
-    rdfs:label "langue apprise"@fr;
+    rdfs:label "langue apprise";
     qb:dimension odl:dimensionLangue;
     qb:order 1 ;
     .
   
   <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/composant/10>
   	a qb:ComponentSpecification ;
-    rdfs:label "Interval de naissance"@fr;
+    rdfs:label "Interval de naissance";
     qb:dimension odl:intervalNaissance;
     qb:order 2 . 
   
@@ -49,12 +49,12 @@
     qb:dataSet <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED> ;
     odl:nombrePersonne "34"^^xsd:decimal;
     odl:dimensionLangue <http://data.observatoiredeslangues.culture.gouv.fr/vocabulary/language/93>;
-    odl:intervalNaissance "interval1920-1925"@fr .
+    odl:intervalNaissance "interval1920-1925" .
   
   <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED/observation/8>
   	a qb:Observation;
     qb:dataSet <http://data.observatoiredeslangues.culture.gouv.fr/dataset/enquete-INED> ;
     odl:nombrePersonne "56"^^xsd:decimal;
     odl:dimensionLangue <http://data.observatoiredeslangues.culture.gouv.fr/vocabulary/language/93>;
-    odl:intervalNaissance "interval1926-1930"@fr .
+    odl:intervalNaissance "interval1926-1930" .
     

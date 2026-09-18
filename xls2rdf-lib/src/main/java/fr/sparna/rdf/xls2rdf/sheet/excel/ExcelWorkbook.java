@@ -46,6 +46,11 @@ public class ExcelWorkbook implements Workbook {
         };
     }
 
+    @Override
+    public int size() {
+        return this.delegate.getNumberOfSheets();
+    }
+
     public org.apache.poi.ss.usermodel.Workbook getPoiWorkbook() {
         return this.delegate;
     }

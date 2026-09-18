@@ -1,0 +1,4 @@
+sheets:
+  - name: input.csv
+    rules:
+      label: skos:prefLabel@fr

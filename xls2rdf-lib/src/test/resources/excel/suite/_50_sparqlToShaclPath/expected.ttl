@@ -27,7 +27,7 @@ test:concept_2 a skos:Concept;
 
 test:concept_3 a skos:Concept;
   skos:prefLabel "c"@fr;
-  sh:path "invalid"@fr;
+  sh:path "invalid";
   skos:inScheme <http://labs.sparna.fr/skos-play/convert/test>;
   skos:topConceptOf <http://labs.sparna.fr/skos-play/convert/test> .
 

@@ -32,13 +32,6 @@ public class ArgumentsConvert {
 	private boolean outputAsDirectory = false;
 	
 	@Parameter(
-			names = { "-l", "--lang" },
-			description = "Default language to use for literal columns when no language is specified",
-			required = false
-	)
-	private String lang;
-	
-	@Parameter(
 			names = { "-f", "--format" },
 			description = "Output RDF format mime type."
 	)
@@ -155,14 +148,6 @@ public class ArgumentsConvert {
 
 	public void setOutput(File output) {
 		this.output = output;
-	}
-
-	public String getLang() {
-		return lang;
-	}
-
-	public void setLang(String lang) {
-		this.lang = lang;
 	}
 
 	public String getRdfFormat() {

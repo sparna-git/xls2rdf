@@ -47,7 +47,6 @@ public class Xls2RdfRestController {
 			value = "/convert",
 			produces = {"text/turtle", "application/rdf+xml", "application/n-triples", "application/n-quads", "text/n3", "application/trig"})
 	public ResponseEntity<ByteArrayResource> convertRDFFromGet(
-			@RequestParam(value="lang", required=false) String language,
 			@Parameter(
 					name = "url",
 					required = true,
@@ -75,7 +74,7 @@ public class Xls2RdfRestController {
 			}catch(MalformedURLException ex){
 				ExceptionManager.throwException(Xls2RdfRestControllerException.class, ex.getMessage());
 			}
-			return this.restService.runRestConversion(language, clientURL, format, useSkosXl, skipHidden, broaderTransitive, ignorePostProc);
+			return this.restService.runRestConversion(clientURL, format, useSkosXl, skipHidden, broaderTransitive, ignorePostProc);
     }
 
 	@SwaggerRestInfo
@@ -85,7 +84,6 @@ public class Xls2RdfRestController {
 			consumes = {"multipart/form-data"},
 			produces = {"text/turtle", "application/rdf+xml", "application/n-triples", "application/n-quads", "text/n3", "application/trig"})
 	public ResponseEntity<ByteArrayResource> convertRDFFromPost(
-			@RequestParam(value="lang", required=false) String language,
 			@Parameter(
 					name = "file",
 					required = true,
@@ -101,7 +99,7 @@ public class Xls2RdfRestController {
 			}catch(Exception ex){
 				ExceptionManager.throwException(Xls2RdfRestControllerException.class, ex.getMessage());
 			}
-			return this.restService.runRestConversion(language, clientFile, format, useSkosXl, skipHidden, broaderTransitive, ignorePostProc);
+			return this.restService.runRestConversion(clientFile, format, useSkosXl, skipHidden, broaderTransitive, ignorePostProc);
 	}
 
 }

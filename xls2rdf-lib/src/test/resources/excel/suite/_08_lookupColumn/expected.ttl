@@ -4,7 +4,7 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 <http://data.sparna.fr/vocabularies/days> a skos:ConceptScheme;
-  dct:title "Week days"@fr;
+  dct:title "Week days";
   skos:hasTopConcept days:Sunday, days:WeekEnd, days:WorkingDay .
 
 days:Monday a skos:Concept;

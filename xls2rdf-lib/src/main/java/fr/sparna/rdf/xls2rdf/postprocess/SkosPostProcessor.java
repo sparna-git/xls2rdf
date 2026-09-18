@@ -25,9 +25,8 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
 
 
 public class SkosPostProcessor implements ModelPostProcessorIfc {

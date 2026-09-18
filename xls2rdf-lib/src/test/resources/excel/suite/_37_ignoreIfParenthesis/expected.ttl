@@ -15,7 +15,7 @@ test:concept_1 a skos:Concept ;
 	skos:prefLabel "Test"@fr;
 	skos:inScheme <http://labs.sparna.fr/skos-play/convert/test>;
 	skos:topConceptOf <http://labs.sparna.fr/skos-play/convert/test>;
-	skos:altLabel "test"@fr ;
+	skos:altLabel "test" ;
 	.
 
 test:concept_a a skos:Concept ;

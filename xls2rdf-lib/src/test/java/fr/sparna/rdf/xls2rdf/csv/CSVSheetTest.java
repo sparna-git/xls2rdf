@@ -31,13 +31,13 @@ public class CSVSheetTest {
         }
     }
     static final int ROW_COUNT = 12;
-    static final String SHEET_NAME = "Csv Sheet";
+    static final String SHEET_NAME = "CSV";
 
     Sheet cud;
 
     @Before
     public void initProperties() throws Exception {
-        this.cud = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new InputStreamReader(new FileInputStream(CSV_FILE_URI.getPath()))).getSheet(0);
+        this.cud = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new FileInputStream(CSV_FILE_URI.getPath()), SHEET_NAME).getSheet(0);
         Assert.assertNotNull("class under test is null.", cud);
     }
 

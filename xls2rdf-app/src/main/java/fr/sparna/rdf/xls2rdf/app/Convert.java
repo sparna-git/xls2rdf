@@ -1,9 +1,10 @@
 package fr.sparna.rdf.xls2rdf.app;
 
 import fr.sparna.rdf.RepositoryUtil;
-import fr.sparna.rdf.xls2rdf.WorkbookMapping;
 import fr.sparna.rdf.xls2rdf.Xls2RdfConverterBuilder;
-import fr.sparna.rdf.xls2rdf.YamlParser;
+import fr.sparna.rdf.xls2rdf.mapping.WorkbookMapping;
+import fr.sparna.rdf.xls2rdf.mapping.WorkbookMappingFactory;
+import fr.sparna.rdf.xls2rdf.mapping.YamlParser;
 import fr.sparna.rdf.xls2rdf.sheet.Workbook;
 import fr.sparna.rdf.xls2rdf.sheet.grist.GristWorkbookFactory;
 import org.eclipse.rdf4j.repository.Repository;

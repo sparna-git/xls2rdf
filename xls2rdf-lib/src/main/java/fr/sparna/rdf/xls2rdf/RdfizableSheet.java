@@ -1,6 +1,9 @@
 package fr.sparna.rdf.xls2rdf;
 
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRuleParser;
+import fr.sparna.rdf.xls2rdf.mapping.SheetMapping;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
 import fr.sparna.rdf.xls2rdf.sheet.Row;
@@ -40,6 +43,7 @@ public class RdfizableSheet {
 		this.prefixManager = prefixManager;
 		this.sheetMapping = sheetMapping;
 		int titleRowIndex = this.findHeaderLineIndex();
+
 		// if we found a title row somewhere...
 		if(titleRowIndex > -1) {
 			this.headerLine = new HeaderLine(sheet.getRow(titleRowIndex));
@@ -135,6 +139,11 @@ public class RdfizableSheet {
 				break;
 			}
 
+			if(numFound == 1 && rowIndex == 0) {
+				// only one found in first line, consider this is OK
+				return rowIndex;
+			}
+
 			if(numFound == 1) {
 				if(
 					sheet.getRow(rowIndex).getCell(0) != null
@@ -221,6 +230,7 @@ public class RdfizableSheet {
 	 * @return Attempt to auto-detect mapping rules in a given sheet, by looking up the title row and parsing it
 	 */
 	public static SheetMapping autoDetectMappingRules(Sheet sheet, PrefixManager prefixManager) {
+		log.debug("Auto-detecting mapping from sheet "+sheet.getSheetName()+"...");
 		SheetMapping sheetMapping = new SheetMapping(sheet.getSheetName(), prefixManager);
 
 		// first lookup the title row

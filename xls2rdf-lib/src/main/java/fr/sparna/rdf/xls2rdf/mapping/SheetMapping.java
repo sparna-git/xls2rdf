@@ -1,7 +1,9 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.mapping;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import fr.sparna.rdf.xls2rdf.PrefixManager;
 
 
 /**
@@ -14,7 +16,7 @@ public class SheetMapping {
     private PrefixManager prefixManager;
     private String sheetName;
 
-    public SheetMapping(String sheetName, PrefixManager prefixManager){
+    public SheetMapping(String sheetName, PrefixManager prefixManager) {
         this.mappingRule = new HashMap<>();
         this.sheetName = sheetName;
         this.prefixManager = prefixManager;

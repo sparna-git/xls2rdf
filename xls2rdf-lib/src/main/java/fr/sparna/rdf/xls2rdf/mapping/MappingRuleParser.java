@@ -1,9 +1,11 @@
-package fr.sparna.rdf.xls2rdf;
+package fr.sparna.rdf.xls2rdf.mapping;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.sparna.rdf.xls2rdf.PrefixManager;
 
 import java.net.URI;
 import java.security.InvalidParameterException;

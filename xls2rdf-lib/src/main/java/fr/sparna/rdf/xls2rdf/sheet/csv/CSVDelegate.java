@@ -27,10 +27,10 @@ public class CSVDelegate {
     private final Reader reader;
     private List<CSVRecord> records;
 
-    public CSVDelegate(CSVFormat format, Reader reader) throws IOException {
+    public CSVDelegate(CSVFormat format, InputStream input) throws IOException {
         this.format = format;
         this.format = this.format.builder().get();
-        this.reader = reader;
+        this.reader = new InputStreamReader(input);
         this.init();
     }
 

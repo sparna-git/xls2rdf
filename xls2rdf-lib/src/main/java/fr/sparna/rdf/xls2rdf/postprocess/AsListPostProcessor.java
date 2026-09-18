@@ -12,7 +12,8 @@ import org.eclipse.rdf4j.model.util.RDFCollections;
 import org.eclipse.rdf4j.model.util.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import fr.sparna.rdf.xls2rdf.MappingRule;
+
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
 
 
 public class AsListPostProcessor implements ModelPostProcessorIfc {

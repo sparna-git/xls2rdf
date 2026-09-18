@@ -17,7 +17,7 @@
 
 <http://data.observatoiredeslangues.culture.gouv.fr/dataset/organisation-dglflf> a
   dcat:Dataset;
-dct:title "tutu"@fr;
+dct:title "tutu";
 dct:description "toto"@fr;
 dct:created "2018-01-01"^^xsd:date;
 dct:modified "2020-05-08"^^xsd:date;

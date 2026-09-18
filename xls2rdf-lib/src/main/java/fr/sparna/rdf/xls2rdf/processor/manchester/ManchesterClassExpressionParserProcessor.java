@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -39,11 +40,11 @@ import org.semanticweb.owlapi.util.mansyntax.ManchesterOWLSyntaxParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
 import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
 import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 
@@ -66,7 +67,7 @@ public class ManchesterClassExpressionParserProcessor implements ValueProcessorI
 	}
 
 	@Override
-	public List<Statement> processValue(Model model, Resource subject, String value, Cell cell, String language) {
+	public Pair<List<Statement>, List<Statement>> processValue(Model model, Resource subject, String value, Cell cell) {
 		if (StringUtils.isBlank(ValueProcessorFactory.normalizeSpace(value))) {
 			return null;
 		}
@@ -139,7 +140,7 @@ public class ManchesterClassExpressionParserProcessor implements ValueProcessorI
 
 	        model.addAll(theInterestingTriples);  
 			
-			return theInterestingTriples.stream().collect(Collectors.toList());       
+			return ValueProcessorFactory.toPair(theInterestingTriples.stream().collect(Collectors.toList()));       
 		
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();

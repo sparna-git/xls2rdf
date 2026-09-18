@@ -1,9 +1,10 @@
 package fr.sparna.rdf.xls2rdf.postprocess;
 
 
-import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;

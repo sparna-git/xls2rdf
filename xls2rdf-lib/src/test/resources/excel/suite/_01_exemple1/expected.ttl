@@ -12,53 +12,53 @@
 <http://data.sparna.fr/vocabularies/days#monday> a skos:Concept;
   skos:definition "The day where you get back at work"@fr;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
-  skos:notation "MON"@fr;
+  skos:notation "MON";
   skos:prefLabel "Monday"@fr;
   skos:topConceptOf <http://data.sparna.fr/vocabularies/days> .
 
 <http://data.sparna.fr/vocabularies/days#tuesday> a skos:Concept;
   skos:definition "The most productive day of the week."@fr;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
-  skos:notation "TUE"@fr;
+  skos:notation "TUE";
   skos:prefLabel "Tuesday"@fr;
   skos:topConceptOf <http://data.sparna.fr/vocabularies/days> .
 
 <http://data.sparna.fr/vocabularies/days#wednesday> a skos:Concept;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
-  skos:notation "WED"@fr;
+  skos:notation "WED";
   skos:prefLabel "Wednesday"@fr;
   skos:topConceptOf <http://data.sparna.fr/vocabularies/days> .
 
 <http://data.sparna.fr/vocabularies/days#thursday> a skos:Concept;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
-  skos:notation "THU"@fr;
+  skos:notation "THU";
   skos:prefLabel "Thursday"@fr;
   skos:topConceptOf <http://data.sparna.fr/vocabularies/days> .
 
 <http://data.sparna.fr/vocabularies/days#friday> a skos:Concept;
   skos:definition "Week-end soon !"@fr;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
-  skos:notation "FRI"@fr;
+  skos:notation "FRI";
   skos:prefLabel "Friday"@fr;
   skos:topConceptOf <http://data.sparna.fr/vocabularies/days> .
 
 <http://data.sparna.fr/vocabularies/days#saturday> a skos:Concept;
   skos:broader <http://data.sparna.fr/vocabularies/days#week-end>;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
-  skos:notation "SAT"@fr;
+  skos:notation "SAT";
   skos:prefLabel "Saturday"@fr .
 
 <http://data.sparna.fr/vocabularies/days#sunday> a skos:Concept;
   skos:broader <http://data.sparna.fr/vocabularies/days#week-end>;
   skos:definition "The day you sleep."@fr;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
-  skos:notation "SUN"@fr;
+  skos:notation "SUN";
   skos:prefLabel "Sunday"@fr .
 
 <http://data.sparna.fr/vocabularies/days#week-end> a skos:Concept;
   skos:definition "Any day of the week-end"@fr;
   skos:inScheme <http://data.sparna.fr/vocabularies/days>;
   skos:narrower <http://data.sparna.fr/vocabularies/days#saturday>, <http://data.sparna.fr/vocabularies/days#sunday>;
-  skos:notation "WKND"@fr;
+  skos:notation "WKND";
   skos:prefLabel "Week-end"@fr;
   skos:topConceptOf <http://data.sparna.fr/vocabularies/days> .

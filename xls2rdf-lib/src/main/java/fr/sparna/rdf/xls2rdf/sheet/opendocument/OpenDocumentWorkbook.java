@@ -50,6 +50,11 @@ public class OpenDocumentWorkbook implements Workbook {
         };
     }
 
+    @Override
+    public int size() {
+        return delegate.getSpreadsheetTables().size();
+    }
+
     public OdfSpreadsheetDocument getSpreadsheetDocument(){
         return this.delegate;
     }

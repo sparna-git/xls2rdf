@@ -1,0 +1,33 @@
+
+prefixes:
+    skos: http://www.w3.org/2004/02/skos/core#
+    dc: http://purl.org/dc/terms/
+    rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+    xsd: http://www.w3.org/2001/XMLSchema#
+
+sheets:
+  - name: ConceptScheme
+    rules:
+      label_fr: http://www.w3.org/2004/02/skos/core#prefLabel@fr
+      label_en: http://www.w3.org/2004/02/skos/core#prefLabel@fr
+      date_creation: http://purl.org/dc/terms/created^^xsd:date
+      date_last_modification: http://purl.org/dc/terms/modified^^xsd:dateTime
+      type: http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+
+  - name: Concept
+    rules:
+      label_fr: http://www.w3.org/2004/02/skos/core#prefLabel@fr
+      synonyms_fr: http://www.w3.org/2004/02/skos/core#altLabel@fr(separator=";")
+      ConceptScheme_URI: http://www.w3.org/2004/02/skos/core#inScheme
+      type: http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+      date_creation: http://purl.org/dc/terms/created^^xsd:dateTime
+      date_last_modification: http://purl.org/dc/terms/modified^^xsd:dateTime
+      code: http://www.w3.org/2004/02/skos/core#notation
+      label_en: http://www.w3.org/2004/02/skos/core#prefLabel@en
+      synonyms_en: http://www.w3.org/2004/02/skos/core#altLabel@fr(separator=";")
+      label_de: http://www.w3.org/2004/02/skos/core#prefLabel@de
+      synonyms_de: http://www.w3.org/2004/02/skos/core#altLabel@de(separator=";")
+      label_it: http://www.w3.org/2004/02/skos/core#prefLabel@it
+      synonyms_it: http://www.w3.org/2004/02/skos/core#altLabel@it(separator=";")
+      definition_en: http://www.w3.org/2004/02/skos/core#definition@en
+      editorial_note_en: http://www.w3.org/2004/02/skos/core#editorialNote@en

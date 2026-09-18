@@ -241,23 +241,7 @@
                                 </div>
                               </div>
             </div>
-          <div class="row">
-            <label class="col-6" for="choice_Language">
-            <fmt:message key="convert.form.language.legend"/>
-             </label>
-            <div class="col-4 mb-4">
-              <input class="form-control" list="choice_Language" name="language" placeholder="Type to search..." id="input_Language">
-              <datalist id="choice_Language" name="language">
-                <option value=""></option>	
-							  <option value="de">de</option>
-							  <option value="en">en</option>
-							  <option value="es">es</option>	
-							  <option value="fr">fr</option>
-							  <option value="it">it</option>
-							  <option value="ru">ru</option>
-              </datalist>
-            </div>
-          </div>
+
               <!--START FORMAT OUTPUT-->
                   <div class="row mb-4">
                     <label class="col-6 form-label" for="output">

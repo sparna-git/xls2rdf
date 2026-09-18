@@ -1,0 +1,24 @@
+
+sheets:
+  - name: ConceptScheme
+    rules:
+      title_fr: dcterms:title@fr
+      title_en: dcterms:title@en
+      type: rdf:type
+      date_creation: dc:created^^xsd:dateTime
+      date_last_modification: dc:modified^^xsd:dateTime
+      version: owl:versionInfo
+      version_notes: adms:versionNotes
+      
+
+  - name: Concept
+    rules:
+      label_en: skos:prefLabel@en
+      synonyms_en: skos:altLabel@fr(separator=";")
+      ConceptScheme_URI: skos:inScheme
+      type: rdf:type
+      type_additionnal: rdf:type
+      ITER_activity_types: skos:notation^^align:iter_activity_type(separator=",")
+      Datasets: skos:notation^^align:dataset(separator=",")
+      date_creation: dc:created^^xsd:dateTime
+      date_last_modification: dc:modified^^xsd:dateTime

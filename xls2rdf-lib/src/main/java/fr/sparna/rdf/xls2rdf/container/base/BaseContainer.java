@@ -1,4 +1,6 @@
-package fr.sparna.rdf.xls2rdf.container;
+package fr.sparna.rdf.xls2rdf.container.base;
+
+import fr.sparna.rdf.xls2rdf.container.Container;
 
 public abstract class BaseContainer implements Container {
     

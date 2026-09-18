@@ -16,7 +16,7 @@
 
 
 <http://data.chateaudefontainebleau.fr/vocabulaires/personnes> a skos:ConceptScheme ;
-	dcterms:title "Personnes"@fr;
+	dcterms:title "Personnes";
 	skos:hasTopConcept <http://www.fontainebleau.org/concept1>;
 	.
 

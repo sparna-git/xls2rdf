@@ -25,7 +25,7 @@ public class FormatsTest {
 		this.outputRepository = new SailRepository(new MemoryStore());
 		this.outputRepository.init();
 		
-		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository), "fr");
+		this.converter = new Xls2RdfConverter(new RepositoryModelWriter(outputRepository));
 		this.converter.setPostProcessors(Collections.singletonList(new ModelDelegationPostProcessor(new SkosPostProcessor(false))));
 		this.messageListener = new ListXls2RdfMessageListener();
 		this.converter.setMessageListener(messageListener);

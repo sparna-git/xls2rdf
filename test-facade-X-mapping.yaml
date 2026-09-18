@@ -1,0 +1,227 @@
+base: "https://data.europarl.europa.eu/def/rop-core#"
+
+prefixes:
+      skos: http://www.w3.org/2004/02/skos/core#
+      dc: http://purl.org/dc/terms/
+      rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+      xsd: http://www.w3.org/2001/XMLSchema#
+
+slots:
+  - key: ConceptScheme
+    slots:
+      label_fr: skos:prefLabel@fr
+      label_en: skos:prefLabel@fr
+      date_creation: dc:created^^xsd:date
+      date_last_modification: dc:modified^^xsd:dateTime
+      type: rdf:type
+
+  - key: Concept
+    slots:
+      label_fr: skos:prefLabel@fr
+      synonyms_fr: skos:altLabel@fr(separator=";")
+      ConceptScheme_URI: skos:inScheme
+      type: rdf:type
+      date_creation: dc:created^^xsd:dateTime
+      date_last_modification: dc:modified^^xsd:dateTime
+      code: skos:notation
+      label_en: skos:prefLabel@en
+      synonyms_en: skos:altLabel@fr(separator=";")
+      label_de: skos:prefLabel@de
+      synonyms_de: skos:altLabel@de(separator=";")
+      label_it: skos:prefLabel@it
+      synonyms_it: skos:altLabel@it(separator=";")
+      definition_en: skos:definition@en
+      editorial_note_en: skos:editorialNote@en
+      
+      - key: narrower
+        mapping: skos:narrower
+        slots: 
+
+
+
+
+# Root container, seulement des slot strings
+
+{
+  "foo" : "1",
+  "bar" : "2"
+}
+
+
+slots:
+  - key: foo
+    mapping: http://foo(separator=";")
+  - key: bar
+    mapping: http://bar(separator=";")
+
+{
+  "slots": [
+    {
+      "key": "foo",
+      "mapping": "http://foo(separator=\";\")"
+    },
+    {
+      "key": "bar",
+      "mapping": "http://bar(separator=\";\")"
+    }
+  ]
+}
+
+
+## on aurait une variante simplifiée:
+
+slots:
+  - foo: http://foo(separator=";")
+  - bar: http://bar(separator=";")
+
+{
+  "slots": [
+    {
+      "foo": "http://foo(separator=\";\")"
+    },
+    {
+      "bar": "http://bar(separator=\";\")"
+    }
+  ]
+}
+
+## ou bien
+
+slots:
+  foo: http://foo(separator=";")
+  bar: http://bar(separator=";")
+
+{
+  "slots": {
+    "foo": "http://foo(separator=\";\")",
+    "bar": "http://bar(separator=\";\")"
+  }
+}
+
+# Root container, avec un enfant
+
+{
+  "foo" : "1",
+  "bar" : {
+    "toto": "titi",
+    "tata": "bouh"
+  }
+}
+
+slots:
+  - key: foo
+    mapping: http://foo(separator=";")
+
+  - key: bar
+    mapping: http://bar
+    slots:
+      - key: toto
+        mapping: http://toto
+      - key: tata
+        mapping: http://tata
+
+# Root container avec une clé qui est un tableau
+
+{
+  "foo" : "1",
+  "bar" : ["toto", "tata"]
+}
+
+slots:
+  - key: foo
+    mapping: http://foo(separator=";")
+
+  - key: bar
+    mapping: http://bar
+
+
+
+1. On donne une clé dans le mapping
+2. Si cette clé a pour valeur une Value, ca devient un literal ou IRI - cas simple
+3. Si cette clé a pour valeur un Container, alors:
+  3.1 Si ce container contient des slot numbers, alors le mapping est appliqué pour chacun des slots numbers
+  3.2 Si ce container contient des slots strings, alors le mapping est appliqué pour le résultat du mapping de chacun des slot strings (on regarde le sous-mapping)
+
+
+  <SubjectIRI + List<Statement>> mapContainer(Container, ListOfMappingObjects) {
+    // determiner URI du sujet
+    SubjectURI
+
+    // si le container n'a que des slots numbers, et pas de slots strings
+    // cela indique un tableau / une list
+    for each (containerOrValue in SlotNumbers of this container) {
+      mapContainerOrValue(containerOrValue, ListOfMappingObjects)
+    }
+
+    // s'il n'a que des slot strings et pas de slots numbers
+    // indique un objet JSON
+    // appliquer les 'mappings' sur ce ContainerOrValue
+
+    forEach(mapping<key, mappingRule>) {
+      // lire le slot avec cette clé sur l'objet
+      aContainerOrValue = read(key)
+      
+      if(aContainerOrValue type == Value) {
+        mapValue(SubjectURI, value, mappingRule)
+      } else if(aContainerOrValue type == Container) {
+        // s'il y a des sous-mappings
+        if(there is sub mappings) {
+          // rappeler mapContainer avec les sous-mappings
+          <SubjectIRI + List<Statement>> = mapContainer(subContainer, subMappings)
+        } else {
+          // don't know how to map the sub-object, so ignore the mapping
+          // log a message and ignore
+        }
+      }
+    }
+  }
+
+  List<Statement> processMappingRuleValue(Subject, Value, mapping<key, mappingRule>) {
+    // convert value to Literal or IRI
+    // apply conversion rule to it
+    // method returns a list as splitting may produce multiple statements
+  }
+
+  <PredicateObjectPair> mapNode(Node, ListOfMappingObjects) {
+    RDFNode noeudGenere;
+
+    if(Node type == value) {
+      // on ne sait pas faire : on essaie de mapper un objet alors que c'est une valeur terminale
+      // logguer et ne rien faire
+    }
+    if(Node type == container) {
+      appeler mapContainer(Container, ListOfMappingObjects)
+    }
+  }
+
+
+  List<Statement> processContainer(Subject, Container, mapping<key, mappingRule>) {
+
+    // si le container n'a que des slots numbers, et pas de slots strings
+    // cela indique un tableau / une list
+    for each (node in SlotNumbers of this container) {
+      processNode(Subject, node, mapping<key, mappingRule>)
+    }
+
+    // s'il y a des sous-mappings
+    if(there is sub mappings) {
+      // rappeler mapContainer avec les sous-mappings
+      <SubjectIRI + List<Statement>> = mapContainer(subContainer, subMappings)
+    } else {
+      // don't know how to map the sub-object, so ignore the mapping
+      // log a message and ignore
+    }
+
+  }
+
+  // traite de façon transparente le container ou la value
+  processNode(node, mapping<key, mappingRule>) {
+    if(node type == value) {
+      processValue(Subject, node, mapping<key, mappingRule>)
+    }
+    if(node type == container) {
+      processContainer(Subject, node, mapping<key, mappingRule>)
+    }
+  }
+
+

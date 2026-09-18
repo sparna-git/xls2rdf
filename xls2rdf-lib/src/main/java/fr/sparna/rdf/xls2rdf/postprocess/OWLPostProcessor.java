@@ -1,8 +1,9 @@
 package fr.sparna.rdf.xls2rdf.postprocess;
 
 
-import fr.sparna.rdf.xls2rdf.MappingRule;
 import fr.sparna.rdf.xls2rdf.Xls2RdfPostProcessorIfc;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
+
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;

@@ -43,7 +43,7 @@ public class CSVCellTest {
     @Before
     public void initProperties() throws Exception {
         this.rows = new ArrayList<>();
-        Sheet sheet = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new InputStreamReader(new FileInputStream(CSV_FILE_URI.getPath()))).getSheet(0);
+        Sheet sheet = CSVWorkbookFactory.open(CSVFormat.DEFAULT, new FileInputStream(CSV_FILE_URI.getPath()), CSV_FILE_URI.getPath()).getSheet(0);
         for(int i = 0; i < ROW_COUNT; i++){
             this.rows.add(sheet.getRow(i));
         }

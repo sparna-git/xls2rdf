@@ -4,10 +4,10 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix schema: <http://schema.org/> .
 
-<http://data.sparna.fr/vocabularies/paintings> dct:title "Paintings"@fr .
+<http://data.sparna.fr/vocabularies/paintings> dct:title "Paintings" .
 
 dbpedia-fr:La_Joconde a dbpedia-owl:Artist, dbpedia-owl:Painting;
   dbpedia-owl:author dbpedia-fr:L%C3%A9onard_de_Vinci;
-  schema:name "La Joconde"@fr .
+  schema:name "La Joconde" .
 
-dbpedia-fr:L%C3%A9onard_de_Vinci schema:name "Léonard de Vinci"@fr .
+dbpedia-fr:L%C3%A9onard_de_Vinci schema:name "Léonard de Vinci" .

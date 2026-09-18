@@ -8,11 +8,11 @@
 
 <http://labs.sparna.fr/skos-play/convert/test> a skos:ConceptScheme ;
 	skos:hasTopConcept test:concept_1;
-	test:name "CS Name"@fr ;
+	test:name "CS Name" ;
 	.
 
 test:concept_1 a skos:Concept ;
-	test:name "Test"@fr;
+	test:name "Test";
 	skos:inScheme <http://labs.sparna.fr/skos-play/convert/test>;
 	skos:topConceptOf <http://labs.sparna.fr/skos-play/convert/test>;
 	test:related test:other ;

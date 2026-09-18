@@ -19,4 +19,9 @@ public interface Workbook extends Iterable<Sheet> {
      */
     Sheet getSheet(String name);
 
+    /**
+     * @return the number of sheets in this workbook
+     */
+    int size();
+
 }

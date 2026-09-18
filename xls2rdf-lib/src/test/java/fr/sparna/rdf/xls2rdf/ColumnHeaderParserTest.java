@@ -6,6 +6,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
+import fr.sparna.rdf.xls2rdf.mapping.MappingRuleParser;
+
 public class ColumnHeaderParserTest {
 
 	private MappingRuleParser parser;

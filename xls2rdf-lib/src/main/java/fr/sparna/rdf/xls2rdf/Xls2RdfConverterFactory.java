@@ -48,8 +48,8 @@ public class Xls2RdfConverterFactory {
 		this.skipHidden = skipHidden;
 	}
 	
-	public Xls2RdfConverter newConverter(Repository outputRepository, String lang) {
-		return this.newConverter(new RepositoryModelWriter(outputRepository), lang);
+	public Xls2RdfConverter newConverter(Repository outputRepository) {
+		return this.newConverter(new RepositoryModelWriter(outputRepository));
 	}
 	
 	/**
@@ -57,8 +57,8 @@ public class Xls2RdfConverterFactory {
 	 * @param lang can be null
 	 * @return
 	 */
-	public Xls2RdfConverter newConverter(RepositoryWriterIfc modelWriter, String lang) {
-		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter, lang);
+	public Xls2RdfConverter newConverter(RepositoryWriterIfc modelWriter) {
+		Xls2RdfConverter converter = new Xls2RdfConverter(modelWriter);
 		if(this.applyPostProcessings) {
 			List<Xls2RdfPostProcessorIfc> postProcessors = new ArrayList<>();
 			// add QB post processor
