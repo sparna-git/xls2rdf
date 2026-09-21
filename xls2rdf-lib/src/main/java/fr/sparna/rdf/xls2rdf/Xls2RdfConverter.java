@@ -335,48 +335,50 @@ public class Xls2RdfConverter {
 		}
 		
 		// read the properties on the header by reading the top rows
-		MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
-		for (int rowIndex = 1; rowIndex < headerRowIndex; rowIndex++) {
-			if(sheet.getRow(rowIndex) != null) {
-				Row row = sheet.getRow(rowIndex);
-				Cell cellKey = row.getCell(0);
-				String key = (cellKey != null) ? cellKey.getCellValue() : null;
-				Cell cell = row.getCell(1);
-				String value = (cell != null) ? cell.getCellValue() : null;
-					
-				// parse the property	
-				MappingRule mappingRule = headerParser.parse(key);
+        if(graphResource != null) {
+            MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
+            for (int rowIndex = 1; rowIndex < headerRowIndex; rowIndex++) {
+                if(sheet.getRow(rowIndex) != null) {
+                    Row row = sheet.getRow(rowIndex);
+                    Cell cellKey = row.getCell(0);
+                    String key = (cellKey != null) ? cellKey.getCellValue() : null;
+                    Cell cell = row.getCell(1);
+                    String value = (cell != null) ? cell.getCellValue() : null;
+                        
+                    // parse the property	
+                    MappingRule mappingRule = headerParser.parse(key);
 
-				if(
-						mappingRule != null
-						&&
-						mappingRule.getProperty() != null
-						&&
-						StringUtils.isNotBlank(value)
-				) {				
+                    if(
+                            mappingRule != null
+                            &&
+                            mappingRule.getProperty() != null
+                            &&
+                            StringUtils.isNotBlank(value)
+                    ) {				
 
-					ValueProcessorFactory processorFactory = new ValueProcessorFactory(messageListener);
-					
-					// always use a default processor
-					ValueProcessorIfc cellProcessor = processorFactory.resourceOrLiteral(
-						mappingRule,
-						prefixManager
-					);
-					
-					// support separator option in the header
-					if(mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR) != null) {
-						cellProcessor = processorFactory.split(
-								cellProcessor,
-								mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR)
-						);
-					} 
+                        ValueProcessorFactory processorFactory = new ValueProcessorFactory(messageListener);
+                        
+                        // always use a default processor
+                        ValueProcessorIfc cellProcessor = processorFactory.resourceOrLiteral(
+                            mappingRule,
+                            prefixManager
+                        );
+                        
+                        // support separator option in the header
+                        if(mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR) != null) {
+                            cellProcessor = processorFactory.split(
+                                    cellProcessor,
+                                    mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR)
+                            );
+                        } 
 
-					log.debug("Adding value on header object \""+value+"\"");
-					ModelDelegationRepositoryValueProcessor repoValueProcessor = new ModelDelegationRepositoryValueProcessor(cellProcessor);
-					repoValueProcessor.processValue(outputRepository, graphResource, graphResource, value, cell);
-				}
-			}
-		}
+                        log.debug("Adding value on header object \""+value+"\"");
+                        ModelDelegationRepositoryValueProcessor repoValueProcessor = new ModelDelegationRepositoryValueProcessor(cellProcessor);
+                        repoValueProcessor.processValue(outputRepository, graphResource, graphResource, value, cell);
+                    }
+                }
+            }
+        }
 
 		List<Resource> rowResources = new ArrayList<>();
 		Map<String, MappingRule> mappingRules = new HashMap<>();

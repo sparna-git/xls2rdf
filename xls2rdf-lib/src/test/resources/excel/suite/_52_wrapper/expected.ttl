@@ -8,7 +8,7 @@
 @prefix test: <http://labs.sparna.fr/skos-play/convert/test/> .
 
 <http://labs.sparna.fr/skos-play/convert/test> a skos:ConceptScheme ;
-	skos:hasTopConcept test:concept_1;
+	skos:hasTopConcept test:concept_1, test:concept_2;
 	.
 
 test:concept_1 a skos:Concept ;
@@ -16,6 +16,13 @@ test:concept_1 a skos:Concept ;
 	skos:topConceptOf <http://labs.sparna.fr/skos-play/convert/test>;
 	skos:prefLabel "a"@fr;
 	sh:or _:1
+.
+
+test:concept_2 a skos:Concept ;
+	skos:inScheme <http://labs.sparna.fr/skos-play/convert/test>;
+	skos:topConceptOf <http://labs.sparna.fr/skos-play/convert/test>;
+	skos:prefLabel "b"@fr;
+	sh:class <http://exemple.fr/1>;
 .
 
 _:1 a rdf:List;
