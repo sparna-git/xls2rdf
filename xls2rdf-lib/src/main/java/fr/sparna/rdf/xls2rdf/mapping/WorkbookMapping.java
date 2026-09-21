@@ -3,9 +3,8 @@ package fr.sparna.rdf.xls2rdf.mapping;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WorkbookMapping {
 
-    
+public class WorkbookMapping {
     private String baseIRI;
     private Map<String, String> prefixes;
     private Map<String, SheetMapping> sheetMappingMap;

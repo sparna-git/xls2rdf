@@ -1,4 +1,4 @@
-package fr.sparna.rdf.xls2rdf.mapping;
+package fr.sparna.rdf.xls2rdf;
 
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
@@ -24,7 +24,7 @@ public class YamlParser {
     }
 
     public Optional<Map<String, String>> getOptionalPrefixes() {
-        return Optional.ofNullable(prefixes);
+        return Optional.of(prefixes);
     }
 
     public Optional<String> getOptionalBase(){

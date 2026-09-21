@@ -103,7 +103,8 @@ public class Xls2RdfConvertController {
 		GristWorkbook gristWorkbook = null;
 		WorkbookMapping workBookMapping = null;
 		if(!mapping.isEmpty()){
-			 workBookMapping = new WorkbookMapping(YamlParser.getInstance(mapping.getInputStream()));//<--------- On récupère le fichier de Mapping et on on crée une instance de YamlParser à passer au WorkbookMapping;
+				WorkbookMappingFactory factory = new WorkbookMappingFactory();
+				workBookMapping = factory.buildFromYamlParser(YamlParser.getInstance(mapping.getInputStream())); //<--------- On récupère le fichier de Mapping et on on crée une instance de YamlParser
 		}
 		//The spring's resource to handle the response through EntityResponse<ByteArrayOutputStream>
 		ByteArrayOutputStream responseOutputStream = new ByteArrayOutputStream();

@@ -23,142 +23,140 @@ public class
 
 Convert implements CliCommandIfc {
 
-    private final Logger log = LoggerFactory.getLogger(Convert.class.getName());
+	private final Logger log = LoggerFactory.getLogger(Convert.class.getName());
 
-    @Override
-    public void execute(Object args) throws Exception {
+	@Override
+	public void execute(Object args) throws Exception {
 
-        //Cast args to ArgumentsConvert
-        ArgumentsConvert arg = (ArgumentsConvert) args;
-        FileOutputStream out = null;
-        /*
-         **************************************
-         * IF FILE MAPPING HAS BEEN PROVIDED  *
-         * ************************************
-         */
-        WorkbookMapping workbookMapping = null;
-        if (arg.getPropertiesFile() != null) {
-            workbookMapping = new WorkbookMapping(YamlParser.getInstance(new FileInputStream(arg.getInput())));
-        }
+		//Cast args to ArgumentsConvert
+		ArgumentsConvert arg = (ArgumentsConvert)args;
+		FileOutputStream out = null;
+		/*
+		 **************************************
+		 * IF FILE MAPPING HAS BEEN PROVIDED  *
+		 * ************************************
+		 */
+		WorkbookMapping workbookMapping = null;
+		if(arg.getPropertiesFile() != null){
+			WorkbookMappingFactory factory = new WorkbookMappingFactory();
+			workbookMapping = factory.buildFromYamlParser(YamlParser.getInstance(new FileInputStream(arg.getPropertiesFile())));
+		}
 
-        //PREPARE THE Xls2RdfConvertBuilder WITH COMMONS PROPERTIES
-        Xls2RdfConverterBuilder builder = Xls2RdfConverterBuilder.getInstance()
-                .withLanguage(arg.getLang())
-                .withApplyPostProcessing(!arg.isNoPostProcessings())
-                .withGenerateXl(arg.isXlify())
-                .withGenerateXlDefinitions(arg.isXlifyDefinitions())
-                .withFailOnReconcile(arg.isNoReconcileFail())
-                .withGenerateBroaderTransitive(arg.isBroaderTransitiveify())
-                .withSkipHidden(arg.isSkipHidden())
-                .withFormat(() -> {
-                    if (arg.getRdfFormat() != null)
-                        return RDFWriterRegistry.getInstance().getFileFormatForMIMEType(arg.getRdfFormat()).orElse(RDFFormat.TURTLE);
-                    else
-                        return RDFWriterRegistry.getInstance().getFileFormatForFileName(arg.getOutput().getName()).orElse(RDFFormat.TURTLE);
-                })
-                .withWorkbookMapping(workbookMapping);
+		//PREPARE THE Xls2RdfConvertBuilder WITH COMMONS PROPERTIES
+		Xls2RdfConverterBuilder builder = Xls2RdfConverterBuilder.getInstance()
+						.withApplyPostProcessing(!arg.isNoPostProcessings())
+						.withGenerateXl(arg.isXlify())
+						.withGenerateXlDefinitions(arg.isXlifyDefinitions())
+						.withFailOnReconcile(arg.isNoReconcileFail())
+						.withGenerateBroaderTransitive(arg.isBroaderTransitiveify())
+						.withSkipHidden(arg.isSkipHidden())
+						.withFormat(() -> {
+							if(arg.getRdfFormat() != null) return RDFWriterRegistry.getInstance().getFileFormatForMIMEType(arg.getRdfFormat()).orElse(RDFFormat.TURTLE);
+							else return RDFWriterRegistry.getInstance().getFileFormatForFileName(arg.getOutput().getName()).orElse(RDFFormat.TURTLE);
+						})
+						.withWorkbookMapping(workbookMapping);
 
-        /*
-         ****************************
-         * ONLY INPUT/OUPUT PROCESS *
-         * **************************
-         */
-        //if the options -i and -o and -w are present
-        if (arg.isWatch() && arg.getOutput() != null && arg.getInput() != null) {
-            //Run the conversion from -i to -o
-            out = new FileOutputStream(arg.getOutput());
-            //add the modelWriter and the outputStream to write
-            //we first convert once from -i to -o before launching the DirectoryWatcher,
-            builder
-                    .withModelWriterFactory(false, arg.isGenerateGraphFiles(), arg.isPretty())
-                    .withOutputStream(out)
-                    .buildConverter().processInputStream(new FileInputStream(arg.getInput()));
-            flushAndClose(out);
-            //fin conversion, on lance le DirectoryWatcher
-            DirectoryWatcher watcher = new DirectoryWatcher(arg.getInput(), arg.getOutput(), builder);
-            watcher.runWatchService();
-        }
+		/*
+		****************************
+		* ONLY INPUT/OUPUT PROCESS *
+		* **************************
+		*/
+		//if the options -i and -o and -w are present
+		if(arg.isWatch() && arg.getOutput() != null && arg.getInput() != null){
+			//Run the conversion from -i to -o
+			out = new FileOutputStream(arg.getOutput());
+			//add the modelWriter and the outputStream to write
+			//we first convert once from -i to -o before launching the DirectoryWatcher,
+			builder
+					.withModelWriterFactory(false, arg.isGenerateGraphFiles(), arg.isPretty())
+					.withOutputStream(out)
+					.buildConverter().processInputStream(new FileInputStream(arg.getInput()));
+			flushAndClose(out);
+			//fin conversion, on lance le DirectoryWatcher
+			DirectoryWatcher watcher = new DirectoryWatcher(arg.getInput(), arg.getOutput(), builder);
+			watcher.runWatchService();
+		}
 
-        /*
-         *********************************
-         * ONLY FOR INPUT/OUTPUT PROCESS *
-         * *******************************
-         */
-        //verify is -i and -o are present to run conversion process
-        else if (arg.getInput() != null && arg.getOutput() != null) {
-            if (!arg.getInput().exists()) {
-                log.error("Given input file {} does not exist.", arg.getInput().getAbsolutePath());
-                return;
-            }
-            // if user asked for graph files, but without outputting in a directory or in a zip, this is an error
-            if (arg.isGenerateGraphFiles() && !(arg.getOutput().getName().endsWith("zip") || arg.isOutputAsDirectory())) {
-                log.error("If you need to generate graph files please use the option to output in a directory, or provide an output file with .zip extension.");
-                return;
-            }
+		/*
+		 *********************************
+		 * ONLY FOR INPUT/OUTPUT PROCESS *
+		 * *******************************
+		 */
+		//verify is -i and -o are present to run conversion process
+		else if(arg.getInput() != null && arg.getOutput() != null){
+			if(!arg.getInput().exists()) {
+				log.error("Given input file {} does not exist.", arg.getInput().getAbsolutePath());
+				return;
+			}
+			// if user asked for graph files, but without outputting in a directory or in a zip, this is an error
+			if(arg.isGenerateGraphFiles() && !(arg.getOutput().getName().endsWith("zip") || arg.isOutputAsDirectory())) {
+				log.error("If you need to generate graph files please use the option to output in a directory, or provide an output file with .zip extension.");
+				return;
+			}
 
-            //Add the modeWriter and the supportRepository
-            builder
-                    .withModelWriterFactory(arg.getOutput().getName().endsWith("zip"), arg.isGenerateGraphFiles(), arg.isPretty())
-                    .withSupportRepository(arg.getExternalData());
+			//Add the modeWriter and the supportRepository
+			builder
+					.withModelWriterFactory(arg.getOutput().getName().endsWith("zip"), arg.isGenerateGraphFiles(), arg.isPretty())
+					.withSupportRepository(arg.getExternalData());
 
 
-            if (arg.isOutputAsDirectory()) {
-                builder.withOutputDirectory(arg.getOutput());
-            } else {
-                out = new FileOutputStream(arg.getOutput());
-                builder.withOutputStream(out);
-            }
+			if(arg.isOutputAsDirectory()) {
+				builder.withOutputDirectory(arg.getOutput());
+			} else {
+				out = new FileOutputStream(arg.getOutput());
+				builder.withOutputStream(out);
+			}
+			
+			//Is input is a directory, look for all xls files to process
+			if(!arg.getInput().isFile()){
+				// sort files to guarantee alphabetical processing
+				List<File> files = new ArrayList<>();
+				Collections.addAll(files, arg.getInput().listFiles(this::fileFilter));
+				files.sort((Comparator.comparing(File::getName)));
+				// process each file, and add resulting data in supportRepository
+				for (File f : files) {						
+						Repository result = builder.buildConverter().processFile(f);
+						RepositoryUtil.mergeRepositories(result, builder.getSupportRepository());
+				}
+			}
+			//if it's file just process for the input file
+			else {
+				try(InputStream in = new FileInputStream(arg.getInput());){
+					log.debug("Will use ModelWriter : {}", builder.getModelWriter().getClass().getName());
+					builder.buildConverter().processInputStream(in);
+				}
+			}
+			flushAndClose(out);
+		}
 
-            //Is input is a directory, look for all xls files to process
-            if (!arg.getInput().isFile()) {
-                // sort files to guarantee alphabetical processing
-                List<File> files = new ArrayList<>();
-                Collections.addAll(files, arg.getInput().listFiles(this::fileFilter));
-                files.sort((Comparator.comparing(File::getName)));
-                // process each file, and add resulting data in supportRepository
-                for (File f : files) {
-                    Repository result = builder.buildConverter().processFile(f);
-                    RepositoryUtil.mergeRepositories(result, builder.getSupportRepository());
-                }
-            }
-            //if it's file just process for the input file
-            else {
-                try (InputStream in = new FileInputStream(arg.getInput());) {
-                    log.debug("Will use ModelWriter : {}", builder.getModelWriter().getClass().getName());
-                    builder.buildConverter().processInputStream(in);
-                }
-            }
-            flushAndClose(out);
-        }
+		/*
+		 ****************************
+		 * ONLY FOR GRIST PROCESS   *
+		 * **************************
+		 */
+		else if(arg.getApiToken() != null && arg.getDocumentId() != null && arg.getOutput() != null){
+			out = new FileOutputStream(arg.getOutput());
+			builder.withModelWriterFactory(false, arg.isGenerateGraphFiles(), arg.isPretty())
+					.withOutputStream(out);
+			Workbook workbook = GristWorkbookFactory.open(arg.getDocumentId(), arg.getApiToken(), arg.isUseCache());
+			builder.buildConverter().processWorkbook(workbook);
 
-        /*
-         ****************************
-         * ONLY FOR GRIST PROCESS   *
-         * **************************
-         */
-        else if (arg.getApiToken() != null && arg.getDocumentId() != null && arg.getOutput() != null) {
-            out = new FileOutputStream(arg.getOutput());
-            builder.withModelWriterFactory(false, arg.isGenerateGraphFiles(), arg.isPretty())
-                    .withOutputStream(out);
-            Workbook workbook = GristWorkbookFactory.open(arg.getDocumentId(), arg.getApiToken(), arg.isUseCache());
-            builder.buildConverter().processWorkbook(workbook);
+			this.flushAndClose(out);
+		}
+	}
 
-            this.flushAndClose(out);
-        }
-    }
+	private boolean fileFilter(File file){
+		String p = file.toPath().toString();
+		//si besoin rajout d'extensions
+		if(p.endsWith(".xls") || p.endsWith(".xlsx") || p.endsWith(".xlsm")) return true;
+		else if(p.endsWith(".ods")) return true;
+		else if(p.endsWith(".csv")) return true;
+		else return false;
+	}
 
-    private boolean fileFilter(File file) {
-        String p = file.toPath().toString();
-        //si besoin rajout d'extensions
-        if (p.endsWith(".xls") || p.endsWith(".xlsx") || p.endsWith(".xlsm")) return true;
-        else if (p.endsWith(".ods")) return true;
-        else if (p.endsWith(".csv")) return true;
-        else return false;
-    }
-
-    private void flushAndClose(OutputStream out) throws IOException {
-        if (out != null) out.flush();
-        if (out != null) out.close();
-    }
+	private void flushAndClose(OutputStream out) throws IOException {
+		if(out != null) out.flush();
+		if(out != null) out.close();
+	}
 
 }

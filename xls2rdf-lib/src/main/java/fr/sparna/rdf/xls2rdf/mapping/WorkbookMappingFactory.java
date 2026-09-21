@@ -1,5 +1,6 @@
 package fr.sparna.rdf.xls2rdf.mapping;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 
@@ -13,14 +14,14 @@ public class WorkbookMappingFactory {
         PrefixManager prefixManager = new PrefixManager();
 
         // register declared prefixes in the PrefixManager
-        if(yamlParser.getPrefixes() != null){
-            for(Map.Entry<String, String> e : yamlParser.getPrefixes().entrySet()){
+        if(yamlParser.getOptionalPrefixes().isPresent()){
+            for(Map.Entry<String, String> e : yamlParser.getOptionalPrefixes().get().entrySet()){
                 prefixManager.register(e.getKey(), e.getValue());
             }
         }
 
         // We read the YamlParser to retrieve clients properties and associate them to the sheetMapping with #addMappingRule
-        for(YamlParser.YamlSheet r : yamlParser.getSheets()){
+        for(YamlParser.YamlSheet r : yamlParser.getOptionalSheets().orElse(Collections.emptyList())){
             SheetMapping s = new SheetMapping(r.getName(), prefixManager);
             for(Map.Entry<String, String> e : r.getRules().entrySet()){
                 s.addMappingRule(e.getKey(), e.getValue());
@@ -30,10 +31,10 @@ public class WorkbookMappingFactory {
         }
 
         // set the prefixes
-        workbookMapping.setPrefixes(yamlParser.getPrefixes());
+        workbookMapping.setPrefixes(yamlParser.getOptionalPrefixes().orElse(Collections.emptyMap()));
 
         // set the base IRI
-        workbookMapping.setBaseIRI(yamlParser.getBase());
+        workbookMapping.setBaseIRI(yamlParser.getOptionalBase().orElse(null));
 
         return workbookMapping;
     }
