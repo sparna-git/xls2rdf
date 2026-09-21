@@ -305,13 +305,15 @@ public final class ValueProcessorFactory {
 
 				// remove all original triples
 				toRemove.addAll(originalStatements.getLeft());
+
+				// remove everything that needs to be removed
+				model.removeAll(toRemove);
+				model.addAll(toAdd);
+
+				return toPair(toAdd.stream().collect(Collectors.toList()), toRemove.stream().collect(Collectors.toList()));
+			} else {
+				return originalStatements;
 			}
-
-			// remove everything that needs to be removed
-			model.removeAll(toRemove);
-			model.addAll(toAdd);
-
-			return toPair(toAdd.stream().collect(Collectors.toList()), toRemove.stream().collect(Collectors.toList()));
 		};
 	}
 	
