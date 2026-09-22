@@ -19,18 +19,18 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import fr.sparna.rdf.xls2rdf.ExcelHelper;
 import fr.sparna.rdf.xls2rdf.PrefixManager;
-import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc.MessageCode;
 import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 
-public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
+public class ResourceOrLiteralValueProcessor extends BaseRepositoryValueProcessor {
 
     /**
      *
@@ -49,7 +49,7 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
     }
 
     @Override
-    public Pair<List<Statement>, List<Statement>> processValue(Model model, Resource subject, String value, Cell cell) {
+    public Pair<List<Statement>, List<Statement>> processValue(Resource subject, String value, Cell cell) {
 
         String theCellValue = mappingRule.isNormalizeSpace()?ValueProcessorFactory.normalizeSpace(value):value;
 
@@ -87,10 +87,16 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
             }
         } else if(headerDatatype == null && headerLanguage == null && value.startsWith("(") && value.endsWith(")")) {
             // handle rdf:List
-            return this.valueProcessorFactory.turtleParsing(mappingRule, mappingRule.getProperty(), prefixManager).processValue(model, subject, value, cell);
+            // Create a TurtleParsing processor and process the value
+            TurtleParsingValueProcessor turtleProcessor = (TurtleParsingValueProcessor) valueProcessorFactory.turtleParsing(mappingRule, mappingRule.getProperty(), prefixManager);
+            // Initialize it with the current connection and working graph
+            turtleProcessor.init(connection, workingGraph);
+            return turtleProcessor.processValue(subject, value, cell);
         } else if(headerDatatype == null && headerLanguage == null && value.startsWith("[") && value.endsWith("]")) {
             // handle blank nodes
-            return this.valueProcessorFactory.turtleParsing(mappingRule, mappingRule.getProperty(), prefixManager).processValue(model, subject, value, cell);
+            TurtleParsingValueProcessor turtleProcessor = (TurtleParsingValueProcessor) valueProcessorFactory.turtleParsing(mappingRule, mappingRule.getProperty(), prefixManager);
+            turtleProcessor.init(connection, workingGraph);
+            return turtleProcessor.processValue(subject, value, cell);
         } else if(
                 value.startsWith("\"")
                 &&
@@ -102,7 +108,9 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
         ) {
             // handle cells that explicitly indicate a datatype or a language
             // in that case it has precedence over the ones indicated in the header
-            return this.valueProcessorFactory.turtleParsing(mappingRule, mappingRule.getProperty(), prefixManager).processValue(model, subject, value, cell);
+            TurtleParsingValueProcessor turtleProcessor = (TurtleParsingValueProcessor) valueProcessorFactory.turtleParsing(mappingRule, mappingRule.getProperty(), prefixManager);
+            turtleProcessor.init(connection, workingGraph);
+            return turtleProcessor.processValue(subject, value, cell);
         } else {
             // if the value is surrounded with quotes, remove them, they were here to escape a URI to be considered as a literal
             String unescapedValue = (value.startsWith("\"") && value.endsWith("\""))?value.substring(1, value.length()-1):value;
@@ -200,15 +208,18 @@ public class ResourceOrLiteralValueProcessor implements ValueProcessorIfc {
                 Value v = SimpleValueFactory.getInstance().createIRI(prefixManager.relativeUri(value.substring(1, value.length()-1)));
                 statementToBeAdded = SimpleValueFactory.getInstance().createStatement(subject, mappingRule.getProperty(), v);
             } else {
-                return this.valueProcessorFactory.langOrPlainLiteral(mappingRule.getProperty(), mappingRule.getLanguage().orElse(null)).processValue(model, subject, theCellValue, cell);
+                // Create a LangOrPlainLiteral processor and process the value
+                LangOrPlainLiteralValueProcessor literalProcessor = new LangOrPlainLiteralValueProcessor(mappingRule.getProperty(), mappingRule.getLanguage().orElse(null));
+                literalProcessor.init(connection, workingGraph);
+                return literalProcessor.processValue(subject, theCellValue, cell);
             }
         }
 
         if(statementToBeAdded != null) {
-            model.add(statementToBeAdded);
-            return ValueProcessorFactory.toPair(Collections.singletonList(statementToBeAdded));
+            addStatements(Collections.singletonList(statementToBeAdded));
+            return toPair(Collections.singletonList(statementToBeAdded));
         }
 
         return null;
-    };
+    }
 }

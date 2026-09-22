@@ -3,6 +3,7 @@ package fr.sparna.rdf.xls2rdf.processor.manchester;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,14 +42,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.sparna.rdf.xls2rdf.PrefixManager;
-import fr.sparna.rdf.xls2rdf.ValueProcessorIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
 import fr.sparna.rdf.xls2rdf.Xls2RdfMessageListenerIfc;
 import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
+import fr.sparna.rdf.xls2rdf.processor.BaseRepositoryValueProcessor;
 import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
 import fr.sparna.rdf.xls2rdf.sheet.Cell;
 
-public class ManchesterClassExpressionParserProcessor implements ValueProcessorIfc {
+public class ManchesterClassExpressionParserProcessor extends BaseRepositoryValueProcessor {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 	
@@ -67,7 +68,7 @@ public class ManchesterClassExpressionParserProcessor implements ValueProcessorI
 	}
 
 	@Override
-	public Pair<List<Statement>, List<Statement>> processValue(Model model, Resource subject, String value, Cell cell) {
+	public Pair<List<Statement>, List<Statement>> processValue(Resource subject, String value, Cell cell) {
 		if (StringUtils.isBlank(ValueProcessorFactory.normalizeSpace(value))) {
 			return null;
 		}
@@ -138,9 +139,9 @@ public class ManchesterClassExpressionParserProcessor implements ValueProcessorI
 			// add link from subject to class expression
 	        theInterestingTriples.add(subject, mappingRule.getProperty(), (Resource)equivalentClassEntity);
 
-	        model.addAll(theInterestingTriples);  
+	        addStatements(new ArrayList<>(theInterestingTriples));
 			
-			return ValueProcessorFactory.toPair(theInterestingTriples.stream().collect(Collectors.toList()));       
+			return toPair(new ArrayList<>(theInterestingTriples));       
 		
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();

@@ -1,37 +1,23 @@
 package fr.sparna.rdf.xls2rdf.processor;
 
-
 import fr.sparna.rdf.xls2rdf.*;
 import fr.sparna.rdf.xls2rdf.listen.LogXls2RdfMessageListener;
 import fr.sparna.rdf.xls2rdf.mapping.MappingRule;
 import fr.sparna.rdf.xls2rdf.processor.manchester.ManchesterClassExpressionParserProcessor;
 import fr.sparna.rdf.xls2rdf.reconcile.ReconciliableValueSetIfc;
-import fr.sparna.rdf.xls2rdf.sheet.ExcelRefs;
-import fr.sparna.rdf.xls2rdf.sheet.Row;
 import fr.sparna.rdf.xls2rdf.sheet.Sheet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.rdf4j.common.iteration.Iterations;
-import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.util.RDFCollections;
-import org.eclipse.rdf4j.model.util.Values;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.SKOS;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.RDFParserRegistry;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.StringReader;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public final class ValueProcessorFactory {
@@ -56,388 +42,66 @@ public final class ValueProcessorFactory {
 		return new ImmutablePair<List<Statement>,List<Statement>>(left, right);
 	}
 
-	public ValueProcessorIfc split(ValueProcessorIfc delegate, String separator) {
-		return (model, subject, value, cell) -> {
-			
-			if (StringUtils.isBlank(value)) {
-				return null;
-			}
-
-			Pair<List<Statement>, List<Statement>> result = new ImmutablePair<List<Statement>,List<Statement>>(new ArrayList<Statement>(), new ArrayList<Statement>());
-			Arrays.stream(StringUtils.split(value, separator)).forEach(aValue -> {
-				Pair<List<Statement>, List<Statement>> statements = delegate.processValue(model, subject, normalizeSpace(aValue), cell);
-				if(statements != null) {
-					if(statements.getLeft() != null) result.getLeft().addAll(statements.getLeft());
-					if(statements.getRight() != null) result.getRight().addAll(statements.getRight());
-				}
-			});
-			return result;
-		};
+	public RepositoryValueProcessorIfc split(RepositoryValueProcessorIfc delegate, String separator) {
+		return new SplitValueProcessor(delegate, separator);
 	}
 	
-	public ValueProcessorIfc resource(IRI property, PrefixManager prefixManager) {
-		return (model, subject, value, cell) -> {
-			
-			if (StringUtils.isBlank(value)) {
-				return null;
-			}
-			
-			IRI iri = SimpleValueFactory.getInstance().createIRI(prefixManager.isValidURI(normalizeSpace(value), true));
-			
-			// can be null if we expected an IRI but we had a literal
-			if(iri == null) {
-				throw new Xls2RdfException("Expected a URI but got '"+normalizeSpace(value)+"'");
-			}
-			
-			Statement s = SimpleValueFactory.getInstance().createStatement(subject, property, iri);
-			model.add(s);
-			return toPair(Collections.singletonList(s));
-		};
+	public RepositoryValueProcessorIfc resource(IRI property, PrefixManager prefixManager) {
+		return new ResourceValueProcessor(property, prefixManager);
 	}
 	
-	public ValueProcessorIfc lookup(MappingRule mappingRule, Sheet sheet, int lookupColumn, int uriColumn, PrefixManager prefixManager) {
-		return (model, subject, value, cell) -> {
-			String lookupValue = value;
-			
-			if(lookupValue.equals("")) {
-				return null;
-			}
-			
-			Row foundRow = ExcelHelper.columnLookup(lookupValue, sheet, lookupColumn, true);
-			
-			if(foundRow != null) {                
-				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
-				return g.processValue(model, subject, foundRow.getColumnValue(uriColumn), cell);                
-			} else {
-				// throw Exception if a reference was not found
-				log.error((cell != null ? cell.getCellExcelReference() : "?")+" Unable to find value '"+lookupValue+"' in column "+ExcelRefs.colIndexToLetters(lookupColumn)+", while trying to generate property "+mappingRule.getProperty());
-				// keep the triple as a literal with special predicate ?				
-				// throw new Xls2SkosException("Unable to find value '"+lookupValue+"' in column of index "+lookupColumn+", while trying to generate property "+property);
-				return null;
-			}
-		};
+	public RepositoryValueProcessorIfc lookup(MappingRule mappingRule, Sheet sheet, int lookupColumn, int uriColumn, PrefixManager prefixManager) {
+		return new LookupValueProcessor(this, mappingRule, sheet, lookupColumn, uriColumn, prefixManager, messageListener);
 	}
 	
-	public ValueProcessorIfc reconcile(MappingRule mappingRule, PrefixManager prefixManager, ReconciliableValueSetIfc reconciledValues) {
-		return (model, subject, value, cell) -> {
-			String lookupValue = normalizeSpace(value);
-			
-			if(lookupValue.equals("")) {
-				return null;
-			}
-			
-			IRI result = reconciledValues.getReconciledValue(value);
-			if(result != null) {
-				ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
-				return g.processValue(model, subject, result.toString(), cell);
-			} else {
-				log.error("Unable to find value '"+lookupValue+" in reconciled values");
-			}
-			
-//			if(filteredStatements.size() == 1) {
-//			ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager);
-//			return g.addValue(model, subject, filteredStatements.get(0).getSubject().toString(), language);		
-//		} else if(filteredStatements.size() > 1) {
-//			log.error("Found multiple values for '"+lookupValue+"' in type/scheme '"+reconcileOn+"' : "+filteredStatements.stream().map(s -> s.getSubject().toString()).collect(Collectors.joining(", ")));
-//		} else {
-//			log.error("Unable to find value '"+lookupValue+"'@"+language+" in a type/scheme '"+ reconcileOn +"' in the model");
-//		}
-			
-//			try(RepositoryConnection c = supportRepository.getConnection()) {
-//				// look for every value in any predicate
-//				List<Statement> statementsWithValue = Iterations.asList(c.getStatements(null, null, SimpleValueFactory.getInstance().createLiteral(lookupValue, language)));
-//				
-//				List<Statement> filteredStatements = new ArrayList<Statement>();
-//				// filter with the reconcileOn if present
-//				if(reconcileOn != null) {
-//					for (Statement s : model) {
-//						filteredStatements.addAll(Iterations.asList(
-//								c.getStatements(s.getSubject(), RDF.TYPE, reconcileOn)
-//						));
-//						filteredStatements.addAll(Iterations.asList(
-//								c.getStatements(s.getSubject(), SKOS.IN_SCHEME, reconcileOn)
-//						));
-//					}
-//				} else {
-//					filteredStatements = statementsWithValue;
-//				}
-//				
-//				if(filteredStatements.size() == 1) {
-//					ResourceOrLiteralValueGenerator g = new ResourceOrLiteralValueGenerator(header, prefixManager);
-//					return g.addValue(model, subject, filteredStatements.get(0).getSubject().toString(), language);		
-//				} else if(filteredStatements.size() > 1) {
-//					log.error("Found multiple values for '"+lookupValue+"' in type/scheme '"+reconcileOn+"' : "+filteredStatements.stream().map(s -> s.getSubject().toString()).collect(Collectors.joining(", ")));
-//				} else {
-//					log.error("Unable to find value '"+lookupValue+"'@"+language+" in a type/scheme '"+ reconcileOn +"' in the model");
-//				}
-//			}		
-			
-			return null;
-		};
+	public RepositoryValueProcessorIfc reconcile(MappingRule mappingRule, PrefixManager prefixManager, ReconciliableValueSetIfc reconciledValues) {
+		return new ReconcileValueProcessor(this, mappingRule, prefixManager, reconciledValues, messageListener);
 	}
 
 	@Deprecated
-	public ValueProcessorIfc reconcileLocal(MappingRule mappingRule, PrefixManager prefixManager, IRI reconcileOn, Repository supportRepository) {
-		return (model, subject, value, cell) -> {
-			String lookupValue = normalizeSpace(value);
-			String language = mappingRule.getLanguage().orElse(null);
-			
-			if(lookupValue.equals("")) {
-				return null;
-			}
-			
-			try(RepositoryConnection c = supportRepository.getConnection()) {
-				// look for every value in any predicate
-				List<Statement> statementsWithValue = Iterations.asList(c.getStatements(null, null, SimpleValueFactory.getInstance().createLiteral(lookupValue, language)));
-				
-				List<Statement> filteredStatements = new ArrayList<Statement>();
-				// filter with the reconcileOn if present
-				if(reconcileOn != null) {
-					for (Statement s : model) {
-						filteredStatements.addAll(Iterations.asList(
-								c.getStatements(s.getSubject(), RDF.TYPE, reconcileOn)
-						));
-						filteredStatements.addAll(Iterations.asList(
-								c.getStatements(s.getSubject(), SKOS.IN_SCHEME, reconcileOn)
-						));
-					}
-				} else {
-					filteredStatements = statementsWithValue;
-				}
-				
-				if(filteredStatements.size() == 1) {
-					ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
-					return g.processValue(model, subject, filteredStatements.get(0).getSubject().toString(), cell);		
-				} else if(filteredStatements.size() > 1) {
-					log.error("Found multiple values for '"+lookupValue+"' in type/scheme '"+reconcileOn+"' : "+filteredStatements.stream().map(s -> s.getSubject().toString()).collect(Collectors.joining(", ")));
-				} else {
-					log.error("Unable to find value '"+lookupValue+"'@"+language+" in a type/scheme '"+ reconcileOn +"' in the model");
-				}
-			}		
-			
-			return null;
-		};
+	public RepositoryValueProcessorIfc reconcileLocal(MappingRule mappingRule, PrefixManager prefixManager, IRI reconcileOn, Repository supportRepository) {
+		return new ReconcileLocalValueProcessor(this, mappingRule, prefixManager, reconcileOn, supportRepository, messageListener);
 	}
 	
-	public ValueProcessorIfc ignoreIfParenthesis(ValueProcessorIfc delegate) {
-		return (model, subject, value, cell) -> {
-			
-			String theValue = normalizeSpace(value);
-			if (theValue.startsWith("(") && theValue.endsWith(")")) {
-				return null;
-			} else {
-				return delegate.processValue(model, subject, theValue, cell);
-			}
-
-		};
+	public RepositoryValueProcessorIfc ignoreIfParenthesis(RepositoryValueProcessorIfc delegate) {
+		return new IgnoreIfParenthesisValueProcessor(delegate);
 	}
 
-	public ValueProcessorIfc copyTo(IRI copyTo, ValueProcessorIfc delegate) {
-		return (model, subject, value, cell) -> {
-			Pair<List<Statement>, List<Statement>> statements = delegate.processValue(model, subject, value, cell);
-			List<Statement> newStatements = new ArrayList<Statement>();
-			if(statements != null) {
-				statements.getLeft().stream().forEach(v -> {
-					newStatements.add(SimpleValueFactory.getInstance().createStatement(subject, copyTo, v.getObject()));
-				});
-				model.addAll(newStatements);		
-			}
-			newStatements.addAll(statements.getLeft());
-			return toPair(newStatements);
-		};
+	public RepositoryValueProcessorIfc copyTo(IRI copyTo, RepositoryValueProcessorIfc delegate) {
+		return new CopyToValueProcessor(copyTo, delegate);
 	}
 
-	public ValueProcessorIfc asList(MappingRule mappingRule, ValueProcessorIfc delegate) {
-		return (model, subject, value, cell) -> {
-			Pair<List<Statement>, List<Statement>> originalStatements = delegate.processValue(model, subject, value, cell);
-
-			Model toAdd = new LinkedHashModel();
-
-			// get all values
-			Set<Value> values = originalStatements.getLeft().stream().map(s -> s.getObject()).collect(Collectors.toSet());
-
-			// aggregate in list
-			Resource listHead = Values.bnode();
-			RDFCollections.asRDF(values,listHead,toAdd);
-			// remove all original triples
-			model.removeAll(originalStatements.getLeft());
-			// add instead triple to the list
-			toAdd.add(subject, mappingRule.getProperty(), listHead);
-
-			model.addAll(toAdd);
-
-			return toPair(toAdd.stream().collect(Collectors.toList()), originalStatements.getLeft());
-		};
+	public RepositoryValueProcessorIfc asList(MappingRule mappingRule, RepositoryValueProcessorIfc delegate) {
+		return new AsListValueProcessor(mappingRule, delegate);
 	}
 
-	public ValueProcessorIfc wrapWithShaclLogicalOperator(MappingRule mappingRule, IRI logicalOperator, ValueProcessorIfc delegate) {
-		return (model, subject, value, cell) -> {
-			Pair<List<Statement>, List<Statement>> originalStatements = delegate.processValue(model, subject, value, cell);
-
-			Model toRemove = new LinkedHashModel();
-			Model toAdd = new LinkedHashModel();
-
-			// get all values
-			Set<Value> values = originalStatements.getLeft().stream().map(s -> s.getObject()).collect(Collectors.toSet());
-
-			// join with the boolean operator only if there is more than 1 value
-			if(values.size() > 1) {
-				// for each values...
-				List<BNode> items = new ArrayList<>();
-				for(Value v : values) {
-					BNode bnode = Values.bnode();
-					items.add(bnode);
-					toAdd.add(
-						SimpleValueFactory.getInstance().createStatement(
-							bnode,
-							mappingRule.getProperty(),
-							v
-						)
-					);
-				}
-
-				// aggregate in list
-				Resource listHead = Values.bnode();
-				// 3rd parameter is a sink
-				RDFCollections.asRDF(items,listHead,toAdd);
-
-				toAdd.add(subject, logicalOperator, listHead);
-
-				// remove all original triples
-				toRemove.addAll(originalStatements.getLeft());
-
-				// remove everything that needs to be removed
-				model.removeAll(toRemove);
-				model.addAll(toAdd);
-
-				return toPair(toAdd.stream().collect(Collectors.toList()), toRemove.stream().collect(Collectors.toList()));
-			} else {
-				return originalStatements;
-			}
-		};
+	public RepositoryValueProcessorIfc wrapWithShaclLogicalOperator(MappingRule mappingRule, IRI logicalOperator, RepositoryValueProcessorIfc delegate) {
+		return new WrapWithShaclLogicalOperatorValueProcessor(mappingRule, logicalOperator, delegate);
 	}
 	
 	
-	public ValueProcessorIfc resourceOrLiteral(MappingRule mappingRule, PrefixManager prefixManager) {
+	public RepositoryValueProcessorIfc resourceOrLiteral(MappingRule mappingRule, PrefixManager prefixManager) {
 		ResourceOrLiteralValueProcessor g = new ResourceOrLiteralValueProcessor(this, mappingRule, prefixManager, messageListener);
 		return g;
 	}
 
-	public ValueProcessorIfc turtleParsing(MappingRule mappingRule, IRI property, PrefixManager prefixManager) {
-		String language = mappingRule.getLanguage().orElse(null);
-		String BLANK_NODE_TEMP_IRI = "http://blanknode.com";
-		return (model, subject, value, cell) -> {
-			// create a small piece of Turtle by concatenating...
-			StringBuffer turtle = new StringBuffer();
-			// ... the prefixes				
-			turtle.append(prefixManager.getPrefixesTurtleHeader());
-			// ... the subject and the predicate
-			if(subject.isBNode()) {
-				// BNode
-				turtle.append("<"+BLANK_NODE_TEMP_IRI+">"+" "+"<"+property.stringValue()+"> ");				
-			} else {
-				// normal IRI
-				turtle.append("<"+subject.stringValue()+">"+" "+"<"+property.stringValue()+"> ");
-			}
-			// ... the value (blank node or list or value with datatype or language)
-			turtle.append(value);
-			// ... and a final dot if there is not one already at the end
-			if(!normalizeSpace(value).endsWith(".")) {
-				turtle.append(".");
-			}
-			
-			// to debug created turtle
-			// System.out.println(turtle);
-			
-			// now parse the Turtle String and collect the statements in a StatementCollector
-			StatementCollector collector = new StatementCollector();
-			RDFParser parser = RDFParserRegistry.getInstance().get(RDFFormat.TURTLE).get().getParser();
-			parser.setRDFHandler(collector);
-			try {
-				parser.parse(new StringReader(turtle.toString()), RDF.NS.toString());
-
-				if(subject.isBNode()) {
-					// process the content of the collector to replace the BLANK_NODE_TEMP_IRI with the
-					// actual blank node resource
-					// replace all statements where BLANK_NODE_TEMP_IRI appears as subject with a statement
-					// with the blank node itself
-					BNode actualBlankNode = (BNode) subject;
-					IRI tempIri = SimpleValueFactory.getInstance().createIRI(BLANK_NODE_TEMP_IRI);
-					List<Statement> processedStatements = new ArrayList<>();
-					
-					for (Statement stmt : collector.getStatements()) {
-						if (stmt.getSubject().equals(tempIri)) {
-							// Replace the temp IRI subject with the actual blank node
-							Statement newStmt = SimpleValueFactory.getInstance().createStatement(
-								actualBlankNode,
-								stmt.getPredicate(),
-								stmt.getObject(),
-								stmt.getContext()
-							);
-							processedStatements.add(newStmt);
-						} else {
-							processedStatements.add(stmt);
-						}
-					}
-
-					// then add all the resulting statements to the final Model
-					model.addAll(processedStatements);
-					return toPair(processedStatements);
-				} else {
-					List<Statement> statements = new ArrayList(collector.getStatements());
-					model.addAll(statements);
-					return toPair(statements);
-				}
-				
-			} catch (Exception e) {
-				// if anything goes wrong, default to creating a literal
-				log.error("Error in parsing Turtle :\n"+turtle);
-				e.printStackTrace();
-				return langOrPlainLiteral(property, language).processValue(model, subject, value, cell);
-			}
-			
-		};
+	public RepositoryValueProcessorIfc turtleParsing(MappingRule mappingRule, IRI property, PrefixManager prefixManager) {
+		return new TurtleParsingValueProcessor(this, mappingRule, property, prefixManager, messageListener);
 	}
 
-	public ValueProcessorIfc plainLiteral(IRI property) {
-		return (model, subject, value, cell) -> {
-			Literal literal = SimpleValueFactory.getInstance().createLiteral(value);
-			Statement s = SimpleValueFactory.getInstance().createStatement(subject, property, literal);
-			model.add(s);
-			return toPair(Collections.singletonList(s));
-		};
+	public RepositoryValueProcessorIfc plainLiteral(IRI property) {
+		return new PlainLiteralValueProcessor(property);
 	}
 	
-	public ValueProcessorIfc langOrPlainLiteral(IRI property, String language) {
-		return (model, subject, value, cell) -> {
-			Literal literal;
-			if(language != null) {
-				literal = SimpleValueFactory.getInstance().createLiteral(value, language);
-			} else {
-				literal = SimpleValueFactory.getInstance().createLiteral(value);
-			}
-			Statement s = SimpleValueFactory.getInstance().createStatement(subject, property, literal);
-			model.add(s);
-			return toPair(Collections.singletonList(s));
-		};
+	public RepositoryValueProcessorIfc langOrPlainLiteral(IRI property, String language) {
+		return new LangOrPlainLiteralValueProcessor(property, language);
 	}
 
-	public ValueProcessorIfc skosXlLabel(IRI xlLabelProperty, PrefixManager prefixManager) {
-		return (model, subject, value, cell) -> {
-			// String labelUri = ConceptSchemeFromExcel.fixUri(value);
-			String labelUri = prefixManager.isValidURI(value, true);
-			IRI labelResource = SimpleValueFactory.getInstance().createIRI(labelUri);
-			List<Statement> statements = new ArrayList<>();
-
-			statements.add(SimpleValueFactory.getInstance().createStatement(labelResource, RDF.TYPE, org.eclipse.rdf4j.model.vocabulary.SKOSXL.LABEL));
-			statements.add(SimpleValueFactory.getInstance().createStatement(subject, xlLabelProperty, labelResource));
-
-			model.addAll(statements);
-			return toPair(statements);
-		};
+	public RepositoryValueProcessorIfc skosXlLabel(IRI xlLabelProperty, PrefixManager prefixManager) {
+		return new SkosXlLabelValueProcessor(xlLabelProperty, prefixManager);
 	}
 
-	public ValueProcessorIfc manchesterClassExpressionParser(MappingRule mappingRule, PrefixManager prefixManager) {
+	public RepositoryValueProcessorIfc manchesterClassExpressionParser(MappingRule mappingRule, PrefixManager prefixManager) {
 		ManchesterClassExpressionParserProcessor p = new ManchesterClassExpressionParserProcessor(mappingRule, prefixManager, messageListener);
 		return p;
 	}

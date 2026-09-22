@@ -2,8 +2,6 @@ package fr.sparna.rdf.xls2rdf.write;
 
 import fr.sparna.rdf.xls2rdf.RepositoryWriterIfc;
 import fr.sparna.rdf.xls2rdf.Xls2RdfException;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -17,7 +15,6 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.Map;
 
 /**
  * @author thomas

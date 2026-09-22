@@ -9,7 +9,6 @@ import fr.sparna.rdf.xls2rdf.mapping.WorkbookMapping;
 import fr.sparna.rdf.xls2rdf.postprocess.AsListPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.ModelDelegationPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.SkosPostProcessor;
-import fr.sparna.rdf.xls2rdf.processor.ModelDelegationRepositoryValueProcessor;
 import fr.sparna.rdf.xls2rdf.processor.SparqlPathParserProcessor;
 import fr.sparna.rdf.xls2rdf.processor.ValueProcessorFactory;
 import fr.sparna.rdf.xls2rdf.reconcile.*;
@@ -179,12 +178,12 @@ public class Xls2RdfConverter {
 			
 			// read all prefixes in all sheets, so that prefixes are shared across all sheets
 			initPrefixManager(workbook);
-			
+
 			// for every sheet...
 			for (Sheet sheet : workbook) {
 				// process the sheet, possibly returning an empty result
 				Repository r = processSheet(sheet, workbook);
-				// we need both ! mrging into the global one is necessary for local reconciliation
+				// we need both ! merging into the global one is necessary for local reconciliation
 				RepositoryUtil.mergeRepositories(r, outputRepository);
 				RepositoryUtil.mergeRepositories(r, this.globalRepository);
 			}			
@@ -260,6 +259,7 @@ public class Xls2RdfConverter {
 			}
 		});
 	}	
+
 	private void autoDetectPrefixes(Sheet sheet) {
 		this.prefixManager.register(PrefixManager.readPrefixes(sheet));
 		String baseIRI = PrefixManager.readBaseIri(sheet);
@@ -322,7 +322,6 @@ public class Xls2RdfConverter {
 		} else {
 			headerRowIndex = headerLine.getRowIndex();
 		}
-
 		
 		// validate the sheet
 		if(this.propertyValidator != null) {
@@ -336,45 +335,47 @@ public class Xls2RdfConverter {
 		
 		// read the properties on the header by reading the top rows
         if(graphResource != null) {
-            MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
-            for (int rowIndex = 1; rowIndex < headerRowIndex; rowIndex++) {
-                if(sheet.getRow(rowIndex) != null) {
-                    Row row = sheet.getRow(rowIndex);
-                    Cell cellKey = row.getCell(0);
-                    String key = (cellKey != null) ? cellKey.getCellValue() : null;
-                    Cell cell = row.getCell(1);
-                    String value = (cell != null) ? cell.getCellValue() : null;
-                        
-                    // parse the property	
-                    MappingRule mappingRule = headerParser.parse(key);
+            try(RepositoryConnection conn = outputRepository.getConnection()) {
+                MappingRuleParser headerParser = new MappingRuleParser(prefixManager);
+                for (int rowIndex = 1; rowIndex < headerRowIndex; rowIndex++) {
+                    if(sheet.getRow(rowIndex) != null) {
+                        Row row = sheet.getRow(rowIndex);
+                        Cell cellKey = row.getCell(0);
+                        String key = (cellKey != null) ? cellKey.getCellValue() : null;
+                        Cell cell = row.getCell(1);
+                        String value = (cell != null) ? cell.getCellValue() : null;
+                            
+                        // parse the property	
+                        MappingRule mappingRule = headerParser.parse(key);
 
-                    if(
-                            mappingRule != null
-                            &&
-                            mappingRule.getProperty() != null
-                            &&
-                            StringUtils.isNotBlank(value)
-                    ) {				
+                        if(
+                                mappingRule != null
+                                &&
+                                mappingRule.getProperty() != null
+                                &&
+                                StringUtils.isNotBlank(value)
+                        ) {				
 
-                        ValueProcessorFactory processorFactory = new ValueProcessorFactory(messageListener);
-                        
-                        // always use a default processor
-                        ValueProcessorIfc cellProcessor = processorFactory.resourceOrLiteral(
-                            mappingRule,
-                            prefixManager
-                        );
-                        
-                        // support separator option in the header
-                        if(mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR) != null) {
-                            cellProcessor = processorFactory.split(
-                                    cellProcessor,
-                                    mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR)
+                            ValueProcessorFactory processorFactory = new ValueProcessorFactory(messageListener);
+                            
+                            // always use a default processor
+                            RepositoryValueProcessorIfc cellProcessor = processorFactory.resourceOrLiteral(
+                                mappingRule,
+                                prefixManager
                             );
-                        } 
+                            
+                            // support separator option in the header
+                            if(mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR) != null) {
+                                cellProcessor = processorFactory.split(
+                                        cellProcessor,
+                                        mappingRule.getParameters().get(MappingRule.PARAMETER_SEPARATOR)
+                                );
+                            } 
 
-                        log.debug("Adding value on header object \""+value+"\"");
-                        ModelDelegationRepositoryValueProcessor repoValueProcessor = new ModelDelegationRepositoryValueProcessor(cellProcessor);
-                        repoValueProcessor.processValue(outputRepository, graphResource, graphResource, value, cell);
+                            log.debug("Adding value on header object \""+value+"\"");
+                            cellProcessor.init(conn, graphResource);
+                            cellProcessor.processValue(graphResource, value, cell);
+                        }
                     }
                 }
             }
@@ -431,26 +432,28 @@ public class Xls2RdfConverter {
 			// read the rows after the header line and process each row
 			log.info("Converting rows...");
 			int processedRows = 0;
-			for (int rowIndex = (headerRowIndex + 1); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-				Row r = sheet.getRow(rowIndex);
-				if(r != null) {
-					if(rowIndex % 1000 == 0) {
-						log.info("Row "+rowIndex+"...");
-					}
+            try(RepositoryConnection conn = outputRepository.getConnection()) {
+                for (int rowIndex = (headerRowIndex + 1); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+                    Row r = sheet.getRow(rowIndex);
+                    if(r != null) {
+                        if(rowIndex % 1000 == 0) {
+                            log.info("Row "+rowIndex+"...");
+                        }
 
-					Resource rowResource;
-					try {
-						rowResource = handleRow(r, outputRepository, graphResource, rdfizableSheet, prefixManager);
-						processedRows++;
-					} catch (Exception e) {
-						throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName()+" : "+e.getMessage(), (Object[])null);
-					}
-					if(rowResource != null) {
-						rowResources.add(rowResource);
-					}
-				}
-			}
-			log.info("Converted "+processedRows+" rows");
+                        Resource rowResource;
+                        try {
+                            rowResource = handleRow(r, conn, graphResource, rdfizableSheet, prefixManager);
+                            processedRows++;
+                        } catch (Exception e) {
+                            throw new Xls2RdfException(e, "Exception when processing row "+r.getRowNum()+" in sheet "+r.getSheet().getSheetName()+" : "+e.getMessage(), (Object[])null);
+                        }
+                        if(rowResource != null) {
+                            rowResources.add(rowResource);
+                        }
+                    }
+                }
+            }
+            log.info("Converted "+processedRows+" rows");
 		} else {
 			log.info("Sheet has no title row, skipping data processing.");
 		}
@@ -471,6 +474,11 @@ public class Xls2RdfConverter {
 			log.info("No post-processings to apply");
 		}
 
+        // write prefixes
+        try(RepositoryConnection conn = outputRepository.getConnection()) {
+            this.prefixManager.getOutputPrefixes().entrySet().forEach(p -> conn.setNamespace(p.getKey(), p.getValue()));
+        }
+
 		modelWriter.saveRepository(outputRepository, prefixManager.getBaseUri());
 		
 		// stores the identifier of generated vocabulary
@@ -480,7 +488,7 @@ public class Xls2RdfConverter {
 
 	private Resource handleRow(
 		Row row,
-		Repository repository,
+		RepositoryConnection connection,
 		Resource headerResource,
 		RdfizableSheet rdfizableSheet,
 		PrefixManager prefixManager
@@ -493,7 +501,7 @@ public class Xls2RdfConverter {
 			log.debug("Cannot find main subject at row "+row.getRowNum()+", skip processing");
 			return null;
 		} else {
-			rowBuilder = new RowBuilder(repository, headerResource, mainSubject);
+			rowBuilder = new RowBuilder(connection, headerResource, mainSubject);
 		}
 
 		for (int colIndex = 0; colIndex < rdfizableSheet.getHeaderLine().getHeaders().size(); colIndex++) {
@@ -530,7 +538,7 @@ public class Xls2RdfConverter {
 			}
 			
 			ValueProcessorFactory processorFactory = new ValueProcessorFactory(this.messageListener);
-			ValueProcessorIfc cellProcessor = null;			
+			RepositoryValueProcessorIfc cellProcessor = null;			
 			
 			if(mappingRule.getParameters().get(MappingRule.PARAMETER_LOOKUP_COLUMN) != null) {
 				// finds the index of the column corresponding to lookupColumn reference
@@ -689,6 +697,7 @@ public class Xls2RdfConverter {
 			// if a value generator was successfully generated, then process the value
 			if(cellProcessor != null) {
 				try {
+                        cellProcessor.init(connection, headerResource);
 					    rowBuilder.processCell(
 							cellProcessor,
 							value,
@@ -795,13 +804,13 @@ public class Xls2RdfConverter {
 	}
 
 	private class RowBuilder {
-		private final Repository repository;
+		private final RepositoryConnection connection;
 		private Resource targetGraph;
 		private Resource rowMainResource;
 		private Resource currentSubject;
 		
-		public RowBuilder(Repository repository, Resource targetGraph, Resource rowMainResource) {
-			this.repository = repository;
+		public RowBuilder(RepositoryConnection connection, Resource targetGraph, Resource rowMainResource) {
+			this.connection = connection;
 			this.targetGraph = targetGraph;
 			if(rowMainResource != null) {
 				this.rowMainResource = rowMainResource;
@@ -810,12 +819,12 @@ public class Xls2RdfConverter {
 			}
 		}
 
-		public void processCell(ValueProcessorIfc valueGenerator, String value, Cell cell) {
+		public void processCell(RepositoryValueProcessorIfc valueGenerator, String value, Cell cell) {
 			// if the column is unknown, ignore it
 			// if no current subject was found, cannot add any value
 			if(valueGenerator != null && this.currentSubject != null) {     
-				ModelDelegationRepositoryValueProcessor repoValueProcessor = new ModelDelegationRepositoryValueProcessor(valueGenerator);
-				repoValueProcessor.processValue(this.repository, this.targetGraph, currentSubject, value, cell);           
+                valueGenerator.init(connection, targetGraph);
+				valueGenerator.processValue(currentSubject, value, cell);           
 			}
 		}
 
