@@ -90,12 +90,11 @@ public class Xls2RdfConverterMappingTestExecution implements Test {
 			throw new IllegalArgumentException("Problem reading mapping.yaml file in "+this.testFolder.getName(), e);
 		}
 
-		this.converter.setWorkbookMapping(workbookMapping);
 		try {
 			Workbook wb = WorkbookFactory.createWorkbook(input);
 			System.out.println("Converting workbook:\n"+WorkbookPrinter.print(wb));		
 			// convert
-			this.converter.processWorkbook(wb);
+			this.converter.processWorkbook(wb, workbookMapping);
 		} catch (Exception e) {
 			result.addError(this, e);
 			throw new IllegalArgumentException("Cannot init workbook", e);

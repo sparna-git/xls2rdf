@@ -53,8 +53,7 @@ Convert implements CliCommandIfc {
 						.withFormat(() -> {
 							if(arg.getRdfFormat() != null) return RDFWriterRegistry.getInstance().getFileFormatForMIMEType(arg.getRdfFormat()).orElse(RDFFormat.TURTLE);
 							else return RDFWriterRegistry.getInstance().getFileFormatForFileName(arg.getOutput().getName()).orElse(RDFFormat.TURTLE);
-						})
-						.withWorkbookMapping(workbookMapping);
+						});
 
 		/*
 		****************************
@@ -115,7 +114,7 @@ Convert implements CliCommandIfc {
 				files.sort((Comparator.comparing(File::getName)));
 				// process each file, and add resulting data in supportRepository
 				for (File f : files) {						
-						Repository result = builder.buildConverter().processFile(f);
+						Repository result = builder.buildConverter().processFile(f, workbookMapping);
 						RepositoryUtil.mergeRepositories(result, builder.getSupportRepository());
 				}
 			}
@@ -123,7 +122,7 @@ Convert implements CliCommandIfc {
 			else {
 				try(InputStream in = new FileInputStream(arg.getInput());){
 					log.debug("Will use ModelWriter : {}", builder.getModelWriter().getClass().getName());
-					builder.buildConverter().processInputStream(in);
+					builder.buildConverter().processInputStream(in, workbookMapping);
 				}
 			}
 			flushAndClose(out);

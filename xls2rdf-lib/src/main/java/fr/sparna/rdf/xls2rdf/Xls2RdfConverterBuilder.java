@@ -1,6 +1,5 @@
 package fr.sparna.rdf.xls2rdf;
 
-import fr.sparna.rdf.xls2rdf.mapping.WorkbookMapping;
 import fr.sparna.rdf.xls2rdf.postprocess.ModelDelegationPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.OWLPostProcessor;
 import fr.sparna.rdf.xls2rdf.postprocess.QBPostProcessor;
@@ -40,8 +39,6 @@ public class Xls2RdfConverterBuilder {
 
     private RDFFormat format;
 
-    private WorkbookMapping workbookMapping;
-
     private boolean applyPostProcessing;
 
     private boolean generateXl;
@@ -78,11 +75,6 @@ public class Xls2RdfConverterBuilder {
     public Xls2RdfConverterBuilder withModelWriterFactory(boolean useZip, boolean useGraph, boolean isPretty){
         this.modelWriterFactory = new ModelWriterFactory(useZip, this.format, useGraph);
         this.modelWriterFactory.setGrouping(isPretty);
-        return this;
-    }
-
-    public Xls2RdfConverterBuilder withWorkbookMapping(WorkbookMapping workbookMapping){
-        this.workbookMapping = workbookMapping;
         return this;
     }
 
@@ -177,7 +169,6 @@ public class Xls2RdfConverterBuilder {
 
         converter.setFailIfNoReconcile(!this.failOnReconcile);
         converter.setSkipHidden(this.skipHidden);
-        converter.setWorkbookMapping(this.workbookMapping);
 
         return converter;
     }
@@ -224,8 +215,5 @@ public class Xls2RdfConverterBuilder {
     public boolean isSkipHidden() {
         return this.skipHidden;
     }
-
-    public WorkbookMapping getWorkbookMapping() {return this.workbookMapping;}
-
 
 }

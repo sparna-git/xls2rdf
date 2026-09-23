@@ -48,8 +48,7 @@ public class Xls2RdfConverterService {
 				.withSkipHidden(skipHidden)
 				.withFormat(format.getDefaultMIMEType())
 				.withModelWriterFactory(zip, false, false)
-				.withOutputStream(output)
-				.withWorkbookMapping(mapping);
+				.withOutputStream(output);
 
 		//Generate builder instance
 		Xls2RdfConverter converter = builder.buildConverter();
@@ -60,10 +59,10 @@ public class Xls2RdfConverterService {
 		 * *********************************************
 		 */
 		if(workbook != null){
-			converter.processWorkbook(workbook);
+			converter.processWorkbook(workbook, mapping);
 		}
 		else if(input != null){
-			converter.processInputStream(input);
+			converter.processInputStream(input, mapping);
 		}
 		return converter.getConvertedVocabularyIdentifiers();
 	}

@@ -20,9 +20,7 @@ import fr.sparna.rdf.xls2rdf.write.OutputStreamModelWriter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.impl.LinkedHashModelFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.SHACL;
 import org.eclipse.rdf4j.repository.Repository;
@@ -103,30 +101,25 @@ public class Xls2RdfConverter {
 	 */
 	private boolean skipHidden = false;
 
-	private WorkbookMapping workbookMapping;
-
 	public Xls2RdfConverter(RepositoryWriterIfc modelWriter) {		
 		this.globalRepository.init();
 		this.modelWriter = modelWriter;
 	}
-
-
-	/*
-	 *****************************
-	 * PROCESS PART START        *
-	 * ***************************
-	 */
 
 	/*
 	 *****************************
 	 * PROCESS FROM FILE         *
 	 *****************************
 	 */
-	public Repository processFile(File input) {
+    public Repository processFile(File input) {
+        return this.processFile(input, null);
+    }
+
+	public Repository processFile(File input, WorkbookMapping workbookMapping) {
 		try {
 			log.info("Converting file " + input.getAbsolutePath() + "...");
 			Workbook workbook = WorkbookFactory.createWorkbook(input);
-			return this.processWorkbook(workbook);
+			return this.processWorkbook(workbook, workbookMapping);
 		} catch (Exception e) {
 			throw Xls2RdfException.rethrow(e);
 		}			
@@ -137,7 +130,11 @@ public class Xls2RdfConverter {
 	 * PROCESS FROM INPUTSTREAM  *
 	 * ***************************
 	 */
-	public Repository processInputStream(InputStream input) {
+    public Repository processInputStream(InputStream input) {
+        return this.processInputStream(input, null);
+    }
+
+	public Repository processInputStream(InputStream input, WorkbookMapping workbookMapping) {
 		Workbook workbook;
 		//On garde le contenu de l'input stream car sinon le stream une fois fermé ne peut pas être réutilisé.
 		byte[] buffer = null;
@@ -146,7 +143,6 @@ public class Xls2RdfConverter {
 		//si une erreur on passe au prochain, jusqu'à ce qu'un workbook soit chargé
 		try {
 			buffer = input.readAllBytes();
-
 			workbook = ExcelWorkbookFactory.open(new ByteArrayInputStream(buffer));
 		} catch (Exception e) {
             try {
@@ -160,7 +156,7 @@ public class Xls2RdfConverter {
                 }
             }
         }
-		return processWorkbook(workbook);
+		return processWorkbook(workbook, workbookMapping);
 	}
 	
 	/*
@@ -168,7 +164,11 @@ public class Xls2RdfConverter {
 	 * PROCESS FROM WORKBOOK     *
 	 * ***************************
 	 */
-	public Repository processWorkbook(Workbook workbook) {
+    public Repository processWorkbook(Workbook workbook) {
+        return this.processWorkbook(workbook, null);
+    }
+
+	public Repository processWorkbook(Workbook workbook, WorkbookMapping workbookMapping) {
 
 		Repository outputRepository = new SailRepository(new MemoryStore());		
 
@@ -177,12 +177,12 @@ public class Xls2RdfConverter {
 			modelWriter.beginWorkbook();
 			
 			// read all prefixes in all sheets, so that prefixes are shared across all sheets
-			initPrefixManager(workbook);
+			initPrefixManager(workbook, workbookMapping);
 
 			// for every sheet...
 			for (Sheet sheet : workbook) {
 				// process the sheet, possibly returning an empty result
-				Repository r = processSheet(sheet, workbook);
+				Repository r = processSheet(sheet, workbook, workbookMapping);
 				// we need both ! merging into the global one is necessary for local reconciliation
 				RepositoryUtil.mergeRepositories(r, outputRepository);
 				RepositoryUtil.mergeRepositories(r, this.globalRepository);
@@ -210,12 +210,12 @@ public class Xls2RdfConverter {
 	 * INIT PREFIX REGISTRATION  *
 	 * ***************************
 	 */
-	private void initPrefixManager(Workbook workbook) {
+	private void initPrefixManager(Workbook workbook, WorkbookMapping workbookMapping) {
 		String baseIRI = null;
 
 		// register prefixes from the workbookMapping if any, and set the baseIRI if any
-		if(this.workbookMapping != null){
-			baseIRI = this.workbookMapping.getBaseIRI();//<------------- Try get the baseIRI if not null
+		if(workbookMapping != null){
+			baseIRI = workbookMapping.getBaseIRI();//<------------- Try get the baseIRI if not null
 			if(baseIRI != null) this.prefixManager.setBaseUri(baseIRI);
 		}
 
@@ -272,17 +272,14 @@ public class Xls2RdfConverter {
 	 * PROCESS A SINGLE SHEET    *
 	 ****************************
 	 */
-	private Repository processSheet(Sheet sheet, Workbook workbook) {
+	private Repository processSheet(Sheet sheet, Workbook workbook, WorkbookMapping workbookMapping) {
 
 		Repository outputRepository = new SailRepository(new MemoryStore());
-		SimpleValueFactory svf = SimpleValueFactory.getInstance();
-		RdfizableSheet rdfizableSheet;
-		SheetMapping sheetMapping = null;
-
-
+		
+        RdfizableSheet rdfizableSheet;
 		// We check if a workbookMapping has been sent to treat it
-		if(this.workbookMapping != null){
-			sheetMapping = workbookMapping.getSheetMappingFor(sheet.getSheetName());
+		if(workbookMapping != null){
+			SheetMapping sheetMapping = workbookMapping.getSheetMappingFor(sheet.getSheetName());
 			if(sheetMapping == null) {
 				// no mapping found by name, try with a unique sheet mapping if we have only one sheet
 				if(workbook.size() == 1) {
@@ -302,7 +299,7 @@ public class Xls2RdfConverter {
 		String graphUri = rdfizableSheet.b1ContainsUri() ? prefixManager.isValidURI(rdfizableSheet.getSchemeOrGraph(), true) : null;
 		Resource graphResource = null;
 		if(graphUri != null) {
-			graphResource = svf.createIRI(graphUri);
+			graphResource = SimpleValueFactory.getInstance().createIRI(graphUri);
 		}
 
 		// if the URI was already processed, output a warning (this is a possible case)
@@ -892,10 +889,6 @@ public class Xls2RdfConverter {
 
 	public void setSkipHidden(boolean skipHidden) {
 		this.skipHidden = skipHidden;
-	}
-
-	public void setWorkbookMapping(WorkbookMapping workbookMapping) {
-		this.workbookMapping = workbookMapping;
 	}
 
 
