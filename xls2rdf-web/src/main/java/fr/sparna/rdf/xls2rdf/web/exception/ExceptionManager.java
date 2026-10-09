@@ -39,12 +39,10 @@ public enum ExceptionManager {
     public static void throwException(Class<? extends Exception> klass, String msg){
 			if(Xls2RdfConvertException.class == klass) {
                 Xls2RdfConvertException e = new Xls2RdfConvertException(msg);
-                e.printStackTrace();
                 throw e;
             }
             if(Xls2RdfRestControllerException.class == klass) {
                 Xls2RdfRestControllerException e = new Xls2RdfRestControllerException(msg);
-                e.printStackTrace();
                 throw e;
             }
             //Add other exceptions here ...

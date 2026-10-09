@@ -59,6 +59,7 @@ public class Xls2RdfControllerAdvice {
 	@ExceptionHandler(exception = {Xls2RdfConvertException.class}, produces = {"text/html"})
 	public String xls2RdfConvertExceptionHandler(Xls2RdfConvertException ex, Model model){
 		this.requestData.setErrorMessage(ex.getMessage());
+		ex.printStackTrace();
 		model.addAllAttributes(convertFormData());
 		return "convert";
 	}
