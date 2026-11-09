@@ -1,0 +1,13 @@
+.idea
+.smarttomcat
+.vscode
+src
+documentation
+.vs
+watch.ttl
+deploy.sh
+test-facade-X-mapping.yaml
+test.yaml
+test2.yaml
+test.ttl
+analyse.md
