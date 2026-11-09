@@ -7,15 +7,15 @@ import java.util.Map;
 public class WorkbookMapping {
     private String baseIRI;
     private Map<String, String> prefixes;
-    private Map<String, SheetMapping> sheetMappingMap;
+    private Map<String, SheetMapping> sheetMappings;
     
 
     public WorkbookMapping(){
-        this.sheetMappingMap = new HashMap<>();
+        this.sheetMappings = new HashMap<>();
     }  
 
-    public Map<String, SheetMapping> getSheetMappingMap() {
-        return sheetMappingMap;
+    public Map<String, SheetMapping> getSheetMappings() {
+        return sheetMappings;
     }
 
     public Map<String, String> getPrefixes() {
@@ -35,15 +35,15 @@ public class WorkbookMapping {
     }
 
     public SheetMapping getSheetMappingFor(String sheetName){
-        return this.sheetMappingMap.get(sheetName);
+        return this.sheetMappings.get(sheetName);
     }
 
     public SheetMapping getUniqueSheetMapping() {
-        if(this.sheetMappingMap.size() > 1) {
+        if(this.sheetMappings.size() > 1) {
             throw new IllegalArgumentException("Mapping has more than one sheet specified, cannot provide unique sheet mapping");
         }
 
-        return this.sheetMappingMap.get(this.sheetMappingMap.keySet().iterator().next());
+        return this.sheetMappings.get(this.sheetMappings.keySet().iterator().next());
     }
 
 }

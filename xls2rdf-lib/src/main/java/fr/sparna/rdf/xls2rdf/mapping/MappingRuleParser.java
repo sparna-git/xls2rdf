@@ -29,6 +29,13 @@ public class MappingRuleParser {
 		if(value == null || value.equals("")) {
 			return null;
 		}
+
+		// test if this is a real property, otherwise stop
+		if(parseProperty(parseDeclaredProperty(value)) == null) {
+			return null;
+		}
+
+
 		MappingRule h = new MappingRule(value);
 		h.setDeclaredProperty(parseDeclaredProperty(value));
 		h.setProperty(parseProperty(h.getDeclaredProperty()));

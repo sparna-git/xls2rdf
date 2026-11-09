@@ -27,7 +27,7 @@ public class WorkbookMappingFactory {
                 s.addMappingRule(e.getKey(), e.getValue());
             }
 
-            workbookMapping.getSheetMappingMap().put(r.getName(), s);
+            workbookMapping.getSheetMappings().put(r.getName(), s);
         }
 
         // set the prefixes
@@ -54,12 +54,12 @@ public class WorkbookMappingFactory {
             String mappingRule = value;
 
             
-            if(!workbookMapping.getSheetMappingMap().containsKey(sheetName)){
+            if(!workbookMapping.getSheetMappings().containsKey(sheetName)){
                 SheetMapping s = new SheetMapping(sheetName, prefixManager);
                 s.addMappingRule(columnName, mappingRule);
-                workbookMapping.getSheetMappingMap().put(sheetName, s);
+                workbookMapping.getSheetMappings().put(sheetName, s);
             } else {
-                SheetMapping s = workbookMapping.getSheetMappingMap().get(sheetName);
+                SheetMapping s = workbookMapping.getSheetMappings().get(sheetName);
                 s.addMappingRule(columnName, mappingRule);
             }
         }

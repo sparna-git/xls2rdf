@@ -217,6 +217,9 @@ public class Xls2RdfConverter {
 		if(workbookMapping != null){
 			baseIRI = workbookMapping.getBaseIRI();//<------------- Try get the baseIRI if not null
 			if(baseIRI != null) this.prefixManager.setBaseUri(baseIRI);
+            // register all prefixes from the mapping into the prefix manager
+            log.info("Registering "+workbookMapping.getPrefixes().size()+" prefixes from the mapping");
+            this.prefixManager.register(workbookMapping.getPrefixes()); 
 		}
 
 		// auto-detect prefixes with PREFIX keyword in the first column
@@ -233,16 +236,29 @@ public class Xls2RdfConverter {
 			if(sheet != null) {
 				// look if there is a prefix column
 				Row firstRow = sheet.getRow(0);
-				if(firstRow != null) {
+
+				if(
+					firstRow != null
+					&&
+					// so as to not confuse with a traditional prefix declaration
+					firstRow.getColumnValue(2) == null
+				) {
 					int prefixColumnIndex = -1;
-					if(firstRow.getColumnValue(0) != null && PREFIX_HEADERS.contains(firstRow.getColumnValue(0))) {
+					if(
+						firstRow.getColumnValue(0) != null
+						&&
+						PREFIX_HEADERS.contains(firstRow.getColumnValue(0))
+					) {
 						prefixColumnIndex = 0;
-					} else if(firstRow.getColumnValue(1) != null && PREFIX_HEADERS.contains(firstRow.getColumnValue(1))) {
+					} else if(
+						firstRow.getColumnValue(1) != null
+						&&
+						PREFIX_HEADERS.contains(firstRow.getColumnValue(1))
+					) {
 						prefixColumnIndex = 1;
 					}
 
 					if(prefixColumnIndex != -1) {
-
 						for (int rowIndex = 0; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 							if(sheet.getRow(rowIndex) != null) {
 								Row row = sheet.getRow(rowIndex);
@@ -277,8 +293,8 @@ public class Xls2RdfConverter {
 		Repository outputRepository = new SailRepository(new MemoryStore());
 		
         RdfizableSheet rdfizableSheet;
-		// We check if a workbookMapping has been sent to treat it
-		if(workbookMapping != null){
+		// We check if a workbookMapping has been sent to treat it, and it contains mappings (not only prefixes)
+		if(workbookMapping != null && workbookMapping.getSheetMappings() != null && !workbookMapping.getSheetMappings().isEmpty()) {
 			SheetMapping sheetMapping = workbookMapping.getSheetMappingFor(sheet.getSheetName());
 			if(sheetMapping == null) {
 				// no mapping found by name, try with a unique sheet mapping if we have only one sheet

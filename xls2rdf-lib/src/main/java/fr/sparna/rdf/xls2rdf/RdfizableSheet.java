@@ -181,7 +181,7 @@ public class RdfizableSheet {
 					Cell c = r.getCell(colIndex);
 					String cellValue = c.getCellValue();
 					MappingRule rule = headerParser.parse(cellValue);
-					if(rule.getProperty() != null) {
+					if(rule != null && rule.getProperty() != null) {
 						log.debug("Found proper property in header : "+rule.getProperty().toString());
 						numFound++;
 					}
@@ -304,7 +304,7 @@ public class RdfizableSheet {
 		// validate also header headers
 		for(Map.Entry<Integer, MappingRule> oneMapping : this.parseHeaderMappingRules().entrySet()) {
 			MappingRule mappingRule = oneMapping.getValue();
-			if(mappingRule.getProperty() != null) {
+			if(mappingRule != null &&mappingRule.getProperty() != null) {
 				log.debug("Validating header property "+mappingRule.getProperty()+" (originally declared as "+mappingRule.getDeclaredProperty()+")");
 				boolean valid = propertyValidator.test(mappingRule.getProperty());
 				if(!valid) {
@@ -326,7 +326,7 @@ public class RdfizableSheet {
 		if(this.sheetMapping != null) {
 			for(Map.Entry<String, MappingRule> oneMapping : this.sheetMapping.getMappingRule().entrySet()) {
 				MappingRule mappingRule = oneMapping.getValue();
-				if(oneMapping.getValue().getProperty() != null) {
+				if(mappingRule != null && mappingRule.getProperty() != null) {
 					log.debug("Validating header property "+mappingRule.getProperty()+" (originally declared as "+mappingRule.getDeclaredProperty()+")");
 					boolean valid = propertyValidator.test(mappingRule.getProperty());
 					if(!valid) {

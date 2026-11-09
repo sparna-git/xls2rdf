@@ -30,7 +30,7 @@ public class AsListPostProcessor implements ModelPostProcessorIfc {
 		if(mainResource != null){
 			log.debug("Postprocessing : "+this.getClass().getSimpleName());
 			for (MappingRule aMappingRule : columnMapping.values()) {
-				if(aMappingRule.isAsList()) {
+				if(aMappingRule != null && aMappingRule.isAsList()) {
 					Model toRemove = new LinkedHashModel();
 					Model toAdd = new LinkedHashModel();
 					// fetch all subject that have this predicate
