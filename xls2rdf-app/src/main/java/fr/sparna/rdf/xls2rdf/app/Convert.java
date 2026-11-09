@@ -31,6 +31,7 @@ Convert implements CliCommandIfc {
 		//Cast args to ArgumentsConvert
 		ArgumentsConvert arg = (ArgumentsConvert)args;
 		FileOutputStream out = null;
+		
 		/*
 		 **************************************
 		 * IF FILE MAPPING HAS BEEN PROVIDED  *
@@ -110,12 +111,12 @@ Convert implements CliCommandIfc {
 			if(!arg.getInput().isFile()){
 				// sort files to guarantee alphabetical processing
 				List<File> files = new ArrayList<>();
-				Collections.addAll(files, arg.getInput().listFiles(this::fileFilter));
+				collectInputFiles(arg.getInput(), files);
 				files.sort((Comparator.comparing(File::getName)));
 				// process each file, and add resulting data in supportRepository
 				for (File f : files) {						
-						Repository result = builder.buildConverter().processFile(f, workbookMapping);
-						RepositoryUtil.mergeRepositories(result, builder.getSupportRepository());
+					Repository result = builder.buildConverter().processFile(f, workbookMapping);
+					RepositoryUtil.mergeRepositories(result, builder.getSupportRepository());
 				}
 			}
 			//if it's file just process for the input file
@@ -156,6 +157,18 @@ Convert implements CliCommandIfc {
 	private void flushAndClose(OutputStream out) throws IOException {
 		if(out != null) out.flush();
 		if(out != null) out.close();
+	}
+
+	private void collectInputFiles(File directory, List<File> files) {
+		File[] children = directory.listFiles();
+		if(children == null) return;
+		for(File child : children) {
+			if(child.isDirectory()) {
+				collectInputFiles(child, files);
+			} else if(fileFilter(child)) {
+				files.add(child);
+			}
+		}
 	}
 
 }
